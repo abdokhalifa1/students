@@ -18,7 +18,7 @@ header{position:relative;padding:calc(env(safe-area-inset-top,0px) + 18px) 72px 
 .gear.on{background:rgba(255,255,255,.34)}
 nav{position:fixed;left:0;right:0;bottom:0;z-index:9;display:flex;background:var(--card);border-top:1px solid var(--bd);padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px)}
 nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border:0;background:none;color:var(--mu);font:inherit;font-size:12px;font-weight:600}
-nav button i{font-style:normal;font-size:20px;line-height:1.2;width:56px;border-radius:14px;padding:3px 0;text-align:center}
+nav button i{font-style:normal;font-size:20px;line-height:1.2;width:100%;max-width:52px;border-radius:14px;padding:3px 0;text-align:center}
 nav button.on{color:var(--pr)}
 nav button.on i{background:color-mix(in srgb,var(--pr) 18%,transparent)}
 main{padding:16px 14px 120px}
@@ -204,7 +204,7 @@ function setv(){return acct()+themeCard()+'<div class="card"><div class="nm">'+t
 +'<div class="card"><div class="nm">'+t("rt")+'</div><div class="mu">'+t("rd")+'</div><textarea id="rx" '+TA+'></textarea><div class="row" style="margin-top:8px"><button class="btn pr" onclick="restoreB()">'+t("rb")+'</button></div></div>'}
 function setL(l){S.lang=l;save();draw()}
 function showB(){var x=document.getElementById("bx");x.value=JSON.stringify(S);x.focus();x.select();try{document.execCommand("copy")}catch(e){}}
-function restoreB(){try{var o=JSON.parse(document.getElementById("rx").value.trim());if(!o||!Array.isArray(o.students))throw 1;S={students:o.students,rec:o.rec||{},price:o.price||50,lang:S.lang,hw:S.hw||[]};save();tab="att";draw()}catch(e){var x=document.getElementById("rx");x.value="";x.placeholder=t("bad")}}
+function restoreB(){try{var o=JSON.parse(document.getElementById("rx").value.trim());if(!o||!Array.isArray(o.students))throw 1;S={students:o.students,rec:o.rec||{},price:o.price||50,lang:S.lang,hw:S.hw||[],notices:S.notices||[]};save();tab="att";draw()}catch(e){var x=document.getElementById("rx");x.value="";x.placeholder=t("bad")}}
 
 Object.assign(D.ar,{lg:"تسجيل الدخول",su:"إنشاء حساب",em:"الإيميل",pw:"كلمة السر",lo:"تسجيل الخروج",acc:"الحساب",ldg:"جارٍ التحميل...",sv:"جارٍ الحفظ...",sd:"✓ تم الحفظ",se:"⚠ لم يتم الحفظ",
 e_cred:"الإيميل أو كلمة السر غير صحيحة.",e_mail:"الإيميل غير صحيح.",e_used:"الإيميل ده مسجل قبل كده، دوس تسجيل الدخول.",e_weak:"كلمة السر ضعيفة، اكتب 6 حروف أو أرقام على الأقل.",e_net:"مفيش اتصال بالنت.",e_many:"محاولات كتير، استنى شوية وجرب تاني.",e_op:"تسجيل الدخول بالإيميل مش مفعّل في Firebase (Authentication ← Sign-in method).",e_perm:"قواعد الأمان في Firestore لسه متضافتش.",e_dom:"الدومين ده مش مضاف في Authorized domains في Firebase.",e_key:"مفتاح Firebase (apiKey) غلط، راجع الإعدادات.",e_empty:"اكتب الإيميل وكلمة السر.",e_gen:"حصل خطأ: "});
@@ -214,7 +214,7 @@ e_cred:"Wrong email or password.",e_mail:"Invalid email.",e_used:"This email is 
 Object.assign(D.ar,{theme:"المظهر",day:"نهاري",night:"ليلي",hw:"الواجبات",code:"الكود",newc:"كود جديد",sendc:"ابعت الكود",tch:"مدرس",stdn:"طالب",phone:"رقم التليفون",pcode:"الكود السري",enter:"دخول",e_pc:"الرقم أو الكود غير صحيح.",e_pce:"اكتب رقم التليفون والكود.",me:"بياناتي",mine:"الواجبات",addhw:"رفع واجب جديد",hwt:"عنوان الواجب (اختياري)",pick:"صوّر أو اختار صور أو ملف PDF",send:"إرسال",sent:"تم الإرسال",tgr:"الصف",nohw:"لا توجد واجبات.",nsub:"لا توجد حلول.",solv:"حلول الطلاب",mysol:"حلّي",upl:"ارفع حلك (صور أو PDF)",sub:"تم التسليم",nosub:"لم يسلّم",paid:"دفع",unp:"لم يدفع",pres:"حضر",abs:"غاب",hello:"أهلًا",delhw:"حذف الواجب",busy:"جارٍ الرفع...",e_img:"تعذّر قراءة الصورة.",e_big:"الصورة كبيرة جدًا.",nostud:"أضف طلابًا للصف ده الأول.",nophone:"لازم تسجل رقم تليفون الطالب عشان يدخل.",dup:"الرقم ده مسجل لطالب تاني.",cinfo:"الطالب يدخل برقم تليفونه والكود ده.",codeMsg:function(n,ph,c){return "السلام عليكم، "+n+": للدخول على تطبيق المتابعة افتح الرابط وادخل برقم تليفونك "+ph+" والكود "+c+" \n"+location.href.split("#")[0]},sdel:"حذف",back:"رجوع",refresh:"تحديث",nostd:"لا توجد بيانات.",ttl:"العنوان"});
 Object.assign(D.en,{theme:"Appearance",day:"Day",night:"Night",hw:"Homework",code:"Code",newc:"New code",sendc:"Send code",tch:"Teacher",stdn:"Student",phone:"Phone number",pcode:"Secret code",enter:"Enter",e_pc:"Wrong phone number or code.",e_pce:"Enter phone number and code.",me:"My info",mine:"Homework",addhw:"Upload new homework",hwt:"Title (optional)",pick:"Take or choose photos or a PDF",send:"Send",sent:"Sent",tgr:"Grade",nohw:"No homework.",nsub:"No solutions.",solv:"Student solutions",mysol:"My solution",upl:"Upload your solution (photos or PDF)",sub:"Submitted",nosub:"Not submitted",paid:"Paid",unp:"Not paid",pres:"Attended",abs:"Absent",hello:"Hello",delhw:"Delete homework",busy:"Uploading...",e_img:"Could not read the image.",e_big:"Image too large.",nostud:"Add students to this grade first.",nophone:"Add the student's phone number so they can log in.",dup:"This number belongs to another student.",cinfo:"The student logs in with their phone number and this code.",codeMsg:function(n,ph,c){return "Hello, "+n+": open the link and log in with your phone "+ph+" and code "+c+" \n"+location.href.split("#")[0]},sdel:"Delete",back:"Back",refresh:"Refresh",nostd:"No data.",ttl:"Title"});
 
-var HWF={g:"",title:"",imgs:[],busy:false},HWS={};
+var HWF={g:"",title:"",hours:"",imgs:[],busy:false},HWS={},NF={g:"",k:"n",text:"",ok:false};
 function shrink(file,cb){var fr=new FileReader();fr.onerror=function(){cb(null)};fr.onload=function(){var im=new Image();im.onerror=function(){cb(null)};im.onload=function(){var m=1000,w=im.width,h=im.height,k=Math.min(1,m/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);var c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);var q=.7,u=c.toDataURL("image/jpeg",q);while(u.length>130000&&q>.3){q-=.1;u=c.toDataURL("image/jpeg",q)}cb(u.length>170000?null:u)};im.src=fr.result};fr.readAsDataURL(file)}
 function loadPdfJs(cb){if(window.pdfjsLib){cb(window.pdfjsLib);return}var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";sc.onload=function(){try{pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";cb(pdfjsLib)}catch(e){cb(null)}};sc.onerror=function(){cb(null)};document.head.appendChild(sc)}
 function pdfToImgs(file,cb){loadPdfJs(function(lib){if(!lib){cb([]);return}var fr=new FileReader();fr.onerror=function(){cb([])};fr.onload=function(){lib.getDocument({data:new Uint8Array(fr.result)}).promise.then(function(pdf){var n=Math.min(pdf.numPages,6),out=[],i=1;function nx(){if(i>n){cb(out);return}pdf.getPage(i++).then(function(pg){var v0=pg.getViewport({scale:1}),k=1000/Math.max(v0.width,v0.height)*1.0,v=pg.getViewport({scale:Math.max(k,.8)}),c=document.createElement("canvas");c.width=Math.round(v.width);c.height=Math.round(v.height);var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);pg.render({canvasContext:x,viewport:v}).promise.then(function(){var q=.7,u=c.toDataURL("image/jpeg",q);while(u.length>130000&&q>.3){q-=.1;u=c.toDataURL("image/jpeg",q)}if(u.length<=170000)out.push(u);nx()}).catch(function(){nx()})}).catch(function(){nx()})}nx()}).catch(function(){cb([])})};fr.readAsArrayBuffer(file)})}
@@ -224,8 +224,9 @@ function rmHwImg(i){HWF.imgs.splice(i,1);draw()}
 function sendHw(){if(!HWF.imgs||!HWF.imgs.length||!HWF.g||HWF.busy)return;
  var g=HWF.g;if(!S.students.some(function(s){return s.grade==g})){alert(t("nostud"));return}
  var id=String(Date.now()),tot=0;HWF.imgs.forEach(function(u){tot+=u.length});if(tot>800000){alert(t("e_big"));return}
- S.hw=S.hw||[];S.hw.push({id:id,grade:g,title:(document.getElementById("hw_t")||{}).value||"",imgs:HWF.imgs,date:new Date().toISOString().slice(0,10)});
- HWF.imgs=[];HWF.title="";save();draw()}
+ var hrs=parseFloat((document.getElementById("hw_h")||{}).value)||0,due=hrs>0?Date.now()+Math.round(hrs*3600000):0;
+ S.hw=S.hw||[];S.hw.push({id:id,grade:g,title:(document.getElementById("hw_t")||{}).value||"",imgs:HWF.imgs,date:new Date().toISOString().slice(0,10),hours:hrs>0?hrs:0,due:due});
+ HWF.imgs=[];HWF.title="";HWF.hours="";save();draw()}
 function delHw(id){if(HWS["d"+id]!==1){HWS["d"+id]=1;draw();return}HWS={};S.hw=(S.hw||[]).filter(function(h){return h.id!=id});if(window.cloudDelHw)cloudDelHw(id);save();draw()}
 function loadSolv(id){if(window.cloudLoadSolv)cloudLoadSolv(id)}
 function hwView(){
@@ -234,6 +235,7 @@ function hwView(){
  GR.forEach(function(g){h+='<option value="'+g+'"'+(g==HWF.g?' selected':'')+'>'+gn(g)+'</option>'});
  h+='</select>';
  h+='<span class="lbl">'+t("hwt")+'</span><input id="hw_t" value="'+esc(HWF.title)+'" oninput="HWF.title=this.value">';
+ h+='<span class="lbl">'+t("hh")+'</span><input id="hw_h" type="number" min="0" step="any" inputmode="decimal" value="'+esc(HWF.hours)+'" oninput="HWF.hours=this.value">';
  h+='<span class="lbl">'+t("pick")+'</span><input type="file" accept="image/*,application/pdf" multiple onchange="pickHw(this)">';
  if(HWF.busy)h+='<div class="mu" style="margin-top:8px">'+t("busy")+'</div>';
  (HWF.imgs||[]).forEach(function(u,i){h+='<div style="position:relative"><img class="hwimg" src="'+u+'"><button class="btn no" style="margin-top:6px;min-height:36px" onclick="rmHwImg('+i+')">'+t("sdel")+'</button></div>'});
@@ -244,7 +246,7 @@ function hwView(){
  L.forEach(function(w){
   var open=HWS.o==w.id,sols=(window.SOLV&&SOLV[w.id])||null;
   var q="'"+w.id+"'";
-  h+='<div class="card"><div class="nm">'+esc(w.title||t("hw"))+' <span class="pill">'+gn(w.grade)+'</span><span class="pill">'+esc(w.date)+'</span></div>'+gal(w);
+  h+='<div class="card"><div class="nm">'+esc(w.title||t("hw"))+' <span class="pill">'+gn(w.grade)+'</span><span class="pill">'+esc(w.date)+'</span>'+(w.due?'<span class="pill">'+dueTxt(w)+'</span>':'')+'</div>'+gal(w);
   h+='<div class="row" style="margin-top:8px"><button class="btn" onclick="toggleSolv('+q+')">'+t("solv")+'</button>';
   h+='<button class="btn no" onclick="delHw('+q+')">'+(HWS["d"+w.id]===1?t("conf"):t("delhw"))+'</button></div>';
   if(open){
@@ -260,7 +262,22 @@ function hwView(){
  return h}
 function gal(o){var L=o.imgs||(o.img?[o.img]:[]);return L.map(function(u){return '<img class="hwimg" src="'+u+'">'}).join("")}
 function toggleSolv(id){if(HWS.o==id){HWS.o=null}else{HWS.o=id;loadSolv(id)}draw()}
-var ST={mode:"t",ph:"",pc:"",err:"",busy:false,data:null,hw:[],sol:{},tab:"me",up:null};
+function dueTxt(w){if(!w.due)return "";var l=w.due-Date.now();if(l<=0)return "\u{1F512} "+t("hwend");var m=Math.ceil(l/60000),hh=Math.floor(m/60),mm=m%60;return "⏳ "+(S.lang=="en"?(hh?hh+" h ":"")+mm+" min left":"متبقي "+(hh?hh+" ساعة ":"")+(mm?mm+" دقيقة":""))}
+function hwEnded(id){var w=(ST.hw||[]).filter(function(h){return h.id==id})[0];return !!(w&&w.due&&Date.now()>w.due)}
+function ntCard(n,showG,del){var w=n.kind=="w";return '<div class="card" style="border-inline-start:6px solid '+(w?'var(--am)':'var(--pr)')+'"><div class="nm">'+(w?'⚠️ '+t("ntwarn"):'ℹ️ '+t("ntnorm"))+(showG?' <span class="pill">'+gn(n.grade)+'</span>':'')+'<span class="pill"><bdi>'+ld(new Date(n.at))+'</bdi></span></div><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div>'+(del?'<div class="row" style="margin-top:8px"><button class="btn no" style="min-height:36px" onclick="delNt(\''+n.id+'\')">'+(HWS["n"+n.id]===1?t("conf"):t("del"))+'</button></div>':'')+'</div>'}
+function ntView(){var h='<div class="card"><div class="nm">'+t("ntnew")+'</div>'
++'<span class="lbl">'+t("tgr")+'</span><select onchange="NF.g=this.value;NF.ok=false;draw()"><option value=""></option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==NF.g?' selected':'')+'>'+gn(g)+'</option>'}).join("")+'</select>'
++'<span class="lbl">'+t("ntkind")+'</span><div class="row"><button class="btn '+(NF.k=="n"?"pr":"")+'" onclick="NF.k=\'n\';draw()">ℹ️ '+t("ntnorm")+'</button><button class="btn '+(NF.k=="w"?"pay":"")+'" onclick="NF.k=\'w\';draw()">⚠️ '+t("ntwarn")+'</button></div>'
++'<span class="lbl">'+t("ntmsg")+'</span><textarea rows="4" oninput="NF.text=this.value;NF.ok=false">'+esc(NF.text)+'</textarea>'
++(NF.ok?'<div class="mu" style="margin-top:8px">✓ '+t("ntsent")+'</div>':'')
++'<div class="row" style="margin-top:12px"><button class="btn pr"'+(NF.g&&NF.text.trim()?'':' disabled')+' onclick="sendNt()">'+t("ntsend")+'</button></div></div>';
+var L=(S.notices||[]).slice().sort(function(a,b){return b.at-a.at});
+if(L.length)h+='<div class="mu" style="margin:10px 4px 4px">'+t("ntlist")+'</div>';
+L.forEach(function(n){h+=ntCard(n,true,true)});return h}
+function sendNt(){var g=NF.g,tx=NF.text.trim();if(!g||!tx)return;if(!S.students.some(function(s){return s.grade==g})){alert(t("nostud"));return}
+var n={id:String(Date.now()),grade:g,kind:NF.k,text:tx,at:Date.now()};S.notices=S.notices||[];S.notices.push(n);NF.text="";NF.ok=true;if(window.cloudSendNt)cloudSendNt(n);draw()}
+function delNt(id){if(HWS["n"+id]!==1){HWS["n"+id]=1;draw();return}HWS={};S.notices=(S.notices||[]).filter(function(n){return n.id!=id});if(window.cloudDelNt)cloudDelNt(id);draw()}
+var ST={mode:"t",ph:"",pc:"",err:"",busy:false,data:null,hw:[],sol:{},tab:"me",up:null,notes:[],set:false,newN:false};
 function setMode(m){ST.mode=m;AU.err="";ST.err="";draw()}
 function gateView(){return '<div class="gate"><button class="btn '+(ST.mode=="t"?"pr":"")+'" onclick="setMode(\'t\')">'+t("tch")+'</button><button class="btn '+(ST.mode=="s"?"pr":"")+'" onclick="setMode(\'s\')">'+t("stdn")+'</button></div>'}
 function studentLoginView(){return '<div class="card"><div class="nm">'+t("stdn")+'</div>'
@@ -272,22 +289,35 @@ function studentGo(){var p=pn(document.getElementById("sl_p").value),c=document.
  if(!p||!c){ST.err=t("e_pce");draw();return}
  if(!window.FB){ST.err=t("e_net");draw();return}
  ST.busy=true;ST.err="";draw();
- FB.studentLogin(p,c).then(function(r){ST.busy=false;if(!r){ST.err=t("e_pc");draw();return}ST.data=r.data;ST.hw=r.hw;ST.sol=r.sol;ST.pc=c;ST.tab="me";draw()}).catch(function(x){ST.busy=false;ST.err=errMsg(x);draw()})}
-function studentOut(){ST.data=null;ST.hw=[];ST.sol={};ST.pc="";if(window.FB)FB.studentLogout();draw()}
-function studentRefresh(){if(!window.FB||!ST.data)return;FB.studentLogin(pn(ST.data.phone),ST.pc).then(function(r){if(r){ST.data=r.data;ST.hw=r.hw;ST.sol=r.sol;draw()}})}
-function pickSol(id,inp){var f=inp.files;if(!f||!f.length)return;ST.up=id;draw();shrinkMany(f,function(L){if(!L.length){ST.up=null;alert(t("e_img"));draw();return}
+ FB.studentLogin(p,c).then(function(r){ST.busy=false;if(!r){ST.err=t("e_pc");draw();return}ST.data=r.data;ST.hw=r.hw;ST.sol=r.sol;ST.notes=r.notes||[];ST.pc=c;ST.set=false;ST.newN=hasNew();ST.tab=ST.newN?"nt":"me";draw()}).catch(function(x){ST.busy=false;ST.err=errMsg(x);draw()})}
+function studentOut(){ST.data=null;ST.hw=[];ST.sol={};ST.notes=[];ST.set=false;ST.newN=false;ST.pc="";if(window.FB)FB.studentLogout();draw()}
+function studentRefresh(){if(!window.FB||!ST.data)return;FB.studentLogin(pn(ST.data.phone),ST.pc).then(function(r){if(r){ST.data=r.data;ST.hw=r.hw;ST.sol=r.sol;ST.notes=r.notes||[];ST.newN=hasNew();draw()}})}
+function pickSol(id,inp){var f=inp.files;if(!f||!f.length)return;if(hwEnded(id)){inp.value="";alert(t("hwend"));draw();return}ST.up=id;draw();shrinkMany(f,function(L){if(!L.length){ST.up=null;alert(t("e_img"));draw();return}
  var old=(ST.sol[id]&&ST.sol[id].imgs)||[],all=old.concat(L).slice(0,6),tot=0;all.forEach(function(u){tot+=u.length});if(tot>800000){ST.up=null;alert(t("e_big"));draw();return}
- FB.submitSol(ST.data.phone,ST.pc,id,all).then(function(){ST.sol[id]={imgs:all};ST.up=null;draw()}).catch(function(x){ST.up=null;alert(errMsg(x));draw()})})}
-function clearSol(id){FB.submitSol(ST.data.phone,ST.pc,id,[]).then(function(){delete ST.sol[id];draw()}).catch(function(x){alert(errMsg(x))})}
-function studentView(){var d=ST.data,h='<div class="card"><div class="nm">'+t("hello")+' '+esc(d.name)+'</div><div class="mu">'+gn(d.grade)+'</div></div>'
-+'<div class="tabs2"><button class="btn '+(ST.tab=="me"?"pr":"")+'" onclick="ST.tab=\'me\';draw()">'+t("me")+'</button><button class="btn '+(ST.tab=="hw"?"pr":"")+'" onclick="ST.tab=\'hw\';draw()">'+t("mine")+'</button></div>';
+ FB.submitSol(ST.data.phone,ST.pc,id,all).then(function(){ST.sol[id]={imgs:all};ST.up=null;draw()}).catch(function(x){ST.up=null;alert(x&&x.code=="permission-denied"?t("hwend"):errMsg(x));draw()})})}
+function clearSol(id){if(hwEnded(id)){alert(t("hwend"));draw();return}FB.submitSol(ST.data.phone,ST.pc,id,[]).then(function(){delete ST.sol[id];draw()}).catch(function(x){alert(errMsg(x))})}
+function seenKey(){return "sn_"+pn(ST.data.phone)}
+function getSeen(){try{return +localStorage.getItem(seenKey())||0}catch(e){return 0}}
+function hasNew(){var sn=getSeen();return (ST.notes||[]).some(function(n){return n.at>sn})}
+function markSeen(){var m=0;(ST.notes||[]).forEach(function(n){if(n.at>m)m=n.at});try{localStorage.setItem(seenKey(),String(m))}catch(e){}}
+function stSet(){ST.set=!ST.set;draw()}
+function studentView(){var d=ST.data;
+ if(ST.set)return langCard()+themeCard();
+ if(ST.tab=="nt"&&ST.newN){markSeen();ST.newN=false}
+ var h='<div class="card"><div class="nm">'+t("hello")+' '+esc(d.name)+'</div><div class="mu">'+gn(d.grade)+'</div></div>'
++'<div class="tabs2"><button class="btn '+(ST.tab=="me"?"pr":"")+'" onclick="ST.tab=\'me\';draw()">'+t("me")+'</button><button class="btn '+(ST.tab=="hw"?"pr":"")+'" onclick="ST.tab=\'hw\';draw()">'+t("mine")+'</button><button class="btn '+(ST.tab=="nt"?"pr":"")+'" onclick="ST.tab=\'nt\';draw()">'+t("nt")+(ST.newN?' \u{1F534}':'')+'</button></div>';
  if(ST.tab=="me"){h+='<div class="card"><div class="stat"><div><b>'+d.a+'</b>'+t("pres")+'</div><div><b class="'+(d.b?"owe":"")+'">'+d.b+'</b>'+t("abs")+'</div><div><b>'+d.p+'</b>'+t("paid")+'</div><div><b class="'+(d.u?"owe":"")+'">'+d.u+'</b>'+t("unp")+'</div></div></div>'}
+ else if(ST.tab=="nt"){var N=(ST.notes||[]).slice().sort(function(a,b){return b.at-a.at});if(!N.length)h+='<div class="card mu">'+t("ntnone")+'</div>';N.forEach(function(n){h+=ntCard(n,false,false)})}
  else{if(!ST.hw.length)h+='<div class="card mu">'+t("nohw")+'</div>';
-  ST.hw.forEach(function(w){var so=ST.sol[w.id];
-   h+='<div class="card"><div class="nm">'+esc(w.title||t("hw"))+' <span class="pill">'+esc(w.date)+'</span></div>'+gal(w)
-   +'<span class="lbl">'+(so&&so.imgs&&so.imgs.length?t("mysol")+" ✓":t("upl"))+'</span>'+(so?gal(so):'')
-   +(ST.up==w.id?'<div class="mu">'+t("busy")+'</div>':'<input type="file" accept="image/*,application/pdf" multiple onchange="pickSol(\''+w.id+'\',this)">'+(so&&so.imgs&&so.imgs.length?'<div class="row" style="margin-top:8px"><button class="btn no" onclick="clearSol(\''+w.id+'\')">'+t("sdel")+'</button></div>':''))+'</div>'})}
- h+=langCard()+themeCard();h+='<div class="row"><button class="btn" onclick="studentRefresh()">'+t("refresh")+'</button><button class="btn no" onclick="studentOut()">'+t("lo")+'</button></div>';return h}
+  ST.hw.forEach(function(w){var so=ST.sol[w.id],ended=!!(w.due&&Date.now()>w.due),has=!!(so&&so.imgs&&so.imgs.length);
+   h+='<div class="card"><div class="nm">'+esc(w.title||t("hw"))+' <span class="pill">'+esc(w.date)+'</span>'+(w.due?'<span class="pill'+(ended?'':' ok')+'">'+dueTxt(w)+'</span>':'')+'</div>'+gal(w)
+   +'<span class="lbl">'+(has?t("mysol")+" ✓":ended?t("hwend"):t("upl"))+'</span>'+(so?gal(so):'')
+   +(ended?'':(ST.up==w.id?'<div class="mu">'+t("busy")+'</div>':'<input type="file" accept="image/*,application/pdf" multiple onchange="pickSol(\''+w.id+'\',this)">'+(has?'<div class="row" style="margin-top:8px"><button class="btn no" onclick="clearSol(\''+w.id+'\')">'+t("sdel")+'</button></div>':'')))+'</div>'})}
+ h+='<div class="row"><button class="btn" onclick="studentRefresh()">'+t("refresh")+'</button><button class="btn no" onclick="studentOut()">'+t("lo")+'</button></div>';
+ if(window._dt)clearTimeout(window._dt);
+ var nx=0;(ST.hw||[]).forEach(function(w){var l=w.due-Date.now();if(w.due&&l>0&&(!nx||l<nx))nx=l});
+ if(nx)window._dt=setTimeout(function(){if(ST.data&&!ST.up&&!ST.set)draw()},Math.min(nx,2147000000)+500);
+ return h}
 
 function getTheme(){try{return localStorage.getItem("thm")||"auto"}catch(e){return "auto"}}
 function applyTheme(){var m=getTheme(),r=document.documentElement;if(m=="auto")r.removeAttribute("data-theme");else r.setAttribute("data-theme",m)}
@@ -296,7 +326,7 @@ function themeCard(){var m=getTheme();return '<div class="card"><div class="nm">
 function langCard(){return '<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'}
 applyTheme();
 var AU={ready:false,user:null,err:"",busy:false,sync:"",email:""};
-function setData(o){S={students:o.students||[],rec:o.rec||{},price:o.price==null?50:o.price,lang:o.lang||"ar",hw:o.hw||[]};tab="att";edit=null;pd=null;dt=null}
+function setData(o){S={students:o.students||[],rec:o.rec||{},price:o.price==null?50:o.price,lang:o.lang||"ar",hw:o.hw||[],notices:o.notices||[]};tab="att";edit=null;pd=null;dt=null}
 function errMsg(x){var c=(x&&x.code)||"",m={"auth/invalid-credential":"e_cred","auth/wrong-password":"e_cred","auth/user-not-found":"e_cred","auth/invalid-email":"e_mail","auth/email-already-in-use":"e_used","auth/weak-password":"e_weak","auth/network-request-failed":"e_net","unavailable":"e_net","auth/too-many-requests":"e_many","auth/operation-not-allowed":"e_op","permission-denied":"e_perm","auth/unauthorized-domain":"e_dom","auth/invalid-api-key":"e_key","auth/api-key-not-valid.-please-pass-a-valid-api-key.":"e_key"};
 return m[c]?t(m[c]):t("e_gen")+(c||(x&&x.message)||"")}
 function loginView(){return '<div class="card"><div class="nm">'+t("lg")+'</div>'
@@ -311,13 +341,13 @@ AU.busy=true;AU.err="";draw();
 FB.login(e,p).catch(function(x){AU.err=errMsg(x);AU.busy=false;draw()})}
 function acct(){return AU.user?'<div class="card"><div class="nm">'+t("acc")+'</div><div class="mu" dir="ltr" style="text-align:start">'+esc(AU.user.email)+'</div><div class="row" style="margin-top:8px"><button class="btn no" onclick="FB.logout()">'+t("lo")+'</button></div></div>':''}
 function syncUI(){var e=document.getElementById("sy");if(e)e.textContent=AU.sync=="saving"?t("sv"):AU.sync=="ok"?t("sd"):AU.sync=="err"?t("se"):""}
-var IC={att:"📝",stu:"👥",sum:"∑",an:"📊",hw:"📚"};
+var IC={att:"📝",stu:"👥",sum:"∑",an:"📊",hw:"📚",nt:"🔔"};
 function draw(){var l=S.lang,on=AU.ready&&AU.user,sv=AU.ready&&ST.data;document.documentElement.lang=l;document.documentElement.dir=l=="ar"?"rtl":"ltr";document.title=t("title");
-document.getElementById("hd").innerHTML='<div class="hn">ahmed khalifa</div><div class="ht">'+t("title")+' <span id="sy"></span></div>'+(on?'<button class="gear'+(tab=="set"?" on":"")+'" onclick="go(\'set\')" aria-label="'+t("set")+'">⚙️</button>':'');
-document.getElementById("nav").innerHTML=on?["att","hw","sum","an","stu"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" onclick="go(\''+k+'\')"><i>'+IC[k]+'</i><span>'+t(k)+'</span></button>'}).join(""):"";
+document.getElementById("hd").innerHTML='<div class="hn">ahmed khalifa</div><div class="ht">'+t("title")+' <span id="sy"></span></div>'+((on||sv)?'<button class="gear'+((on?tab=="set":ST.set)?" on":"")+'" onclick="'+(on?"go(\'set\')":"stSet()")+'" aria-label="'+t("set")+'">⚙️</button>':'');
+document.getElementById("nav").innerHTML=on?["att","hw","nt","sum","an","stu"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" onclick="go(\''+k+'\')"><i>'+IC[k]+'</i><span>'+t(k)+'</span></button>'}).join(""):"";
 var body;
 if(!AU.ready)body='<div class="card mu">'+t("ldg")+'</div>';
-else if(on)body=tab=="att"?att():tab=="stu"?stu():tab=="sum"?sum():tab=="an"?an():tab=="hw"?hwView():setv();
+else if(on)body=tab=="att"?att():tab=="stu"?stu():tab=="sum"?sum():tab=="an"?an():tab=="hw"?hwView():tab=="nt"?ntView():setv();
 else if(sv)body=studentView();
 else body=gateView()+(ST.mode=="s"?studentLoginView():loginView())+langCard()+themeCard();
 document.getElementById("app").innerHTML=body;
@@ -329,6 +359,8 @@ Object.assign(D.ar,{pday:"اليوم السابق",nday:"اليوم التالي
 Object.assign(D.ar,{mnote:"الأرقام هنا للشهر المختار، ونفس الأرقام بتظهر في تبويب المتابعة لنفس الشهر.",cmon:"عدّاد الطلاب تحت الأسماء لشهر"});Object.assign(D.en,{mnote:"Numbers are for the selected month and match the Follow-up tab for the same month.",cmon:"Student counters below are for month"});
 Object.assign(D.ar,{anno:"لم يحضر",anna:"لم يغب",ansd:"مسدّد",anall:"من البداية",anmon:"شهر معيّن",anowed:"إجمالي المبالغ المتبقية على كل الطلبة",anunp:"حصة لم تُدفع",anpres:"حضور",anabs:"غياب",antap:"دوس على أي عدّاد لتفصيله حسب المرحلة والمجموعة.",antot:"الإجمالي",anof:"طالب من",anday:"يوم",anstu:"طلاب",anpct:"النسبة",anshow:"أسماء الطلاب",anhide:"إخفاء"});
 Object.assign(D.en,{anno:"Did not attend",anna:"Not absent",ansd:"Settled",anall:"All time",anmon:"Specific month",anowed:"Total owed by all students",anunp:"unpaid classes",anpres:"Present",anabs:"Absent",antap:"Tap any counter for a breakdown by grade and group.",antot:"Total",anof:"students of",anday:"days",anstu:"Students",anpct:"Rate",anshow:"Student names",anhide:"Hide"});
+Object.assign(D.ar,{hh:"مدة التسليم بالساعات (اتركه فاضي لو مفيش حد)",hwend:"انتهى وقت التسليم",nt:"التنبيهات",ntnew:"إرسال إخطار جديد",ntkind:"النوع",ntnorm:"إخطار",ntwarn:"تنبيه",ntmsg:"الرسالة",ntsend:"إرسال للمرحلة كلها",ntnone:"لا توجد إخطارات.",ntsent:"تم الإرسال للمرحلة كلها",ntlist:"الإخطارات المرسلة"});
+Object.assign(D.en,{hh:"Submission time in hours (leave empty for no limit)",hwend:"Submission time is over",nt:"Notices",ntnew:"Send a new notice",ntkind:"Type",ntnorm:"Notice",ntwarn:"Alert",ntmsg:"Message",ntsend:"Send to the whole grade",ntnone:"No notices.",ntsent:"Sent to the whole grade",ntlist:"Sent notices"});
 (function(){
 
 /* ===== AUTO TODAY: jump to the real date when app opens, is revisited, or midnight passes ===== */
@@ -395,7 +427,9 @@ window.FB={
     const sol={};
     const ss=await getDocs(collection(db,"portal",pid,"sol"));
     ss.forEach(x=>{sol[x.id]=x.data()});
-    return {data:d,hw,sol};
+    let notes=[];
+    try{const ns=await getDocs(query(collection(db,"notices"),where("uid","==",d.uid),where("grade","==",d.grade)));ns.forEach(x=>notes.push(x.data()))}catch(e){console.error(e)}
+    return {data:d,hw,sol,notes};
   },
   async studentLogout(){try{await signOut(auth)}catch(e){}},
   async submitSol(phone,code,hwId,imgs){
@@ -416,6 +450,7 @@ async function loadFor(u){
     lastMain=JSON.stringify({students:o.students,price:o.price,lang:o.lang})}
   snap.forEach(m=>{const r=(m.data().rec)||{};Object.assign(o.rec,r);lastM[m.id]=JSON.stringify(r)});
   hs.forEach(h=>{const d=h.data();o.hw.push(d);lastHw[d.id]=1});
+  o.notices=[];try{const ns=await getDocs(query(collection(db,"notices"),where("uid","==",u.uid)));ns.forEach(x=>o.notices.push(x.data()))}catch(e){console.error(e)}
   setData(o);
 }
 
@@ -447,6 +482,15 @@ window.cloudDelHw=async function(id){
   try{await deleteDoc(doc(db,"teachers",u.uid,"hw",id));delete lastHw[id];
     for(const k of Object.keys(lastPortal)){if(k.indexOf("|")<0){try{await deleteDoc(doc(db,"portal",k,"hw",id))}catch(e){}}}
   }catch(e){console.error(e)}
+};
+window.cloudSendNt=async function(n){
+  const u=auth.currentUser;if(!u||u.isAnonymous)return;
+  try{await setDoc(doc(db,"notices",n.id),{...n,uid:u.uid})}
+  catch(e){console.error(e);S.notices=(S.notices||[]).filter(x=>x.id!=n.id);NF.ok=false;alert(errMsg(e));draw()}
+};
+window.cloudDelNt=async function(id){
+  const u=auth.currentUser;if(!u||u.isAnonymous)return;
+  try{await deleteDoc(doc(db,"notices",id))}catch(e){console.error(e)}
 };
 window.cloudLoadSolv=async function(hwId){
   const u=auth.currentUser;if(!u||u.isAnonymous)return;
