@@ -214,7 +214,7 @@ e_cred:"Wrong email or password.",e_mail:"Invalid email.",e_used:"This email is 
 Object.assign(D.ar,{theme:"المظهر",day:"نهاري",night:"ليلي",hw:"الواجبات",code:"الكود",newc:"كود جديد",sendc:"ابعت الكود",tch:"مدرس",stdn:"طالب",phone:"رقم التليفون",pcode:"الكود السري",enter:"دخول",e_pc:"الرقم أو الكود غير صحيح.",e_pce:"اكتب رقم التليفون والكود.",me:"بياناتي",mine:"الواجبات",addhw:"رفع واجب جديد",hwt:"عنوان الواجب (اختياري)",pick:"صوّر أو اختار صور أو ملف PDF",send:"إرسال",sent:"تم الإرسال",tgr:"الصف",nohw:"لا توجد واجبات.",nsub:"لا توجد حلول.",solv:"حلول الطلاب",mysol:"حلّي",upl:"ارفع حلك (صور أو PDF)",sub:"تم التسليم",nosub:"لم يسلّم",paid:"دفع",unp:"لم يدفع",pres:"حضر",abs:"غاب",hello:"أهلًا",delhw:"حذف الواجب",busy:"جارٍ الرفع...",e_img:"تعذّر قراءة الصورة.",e_big:"الصورة كبيرة جدًا.",nostud:"أضف طلابًا للصف ده الأول.",nophone:"لازم تسجل رقم تليفون الطالب عشان يدخل.",dup:"الرقم ده مسجل لطالب تاني.",cinfo:"الطالب يدخل برقم تليفونه والكود ده.",codeMsg:function(n,ph,c){return "السلام عليكم، "+n+": للدخول على تطبيق المتابعة افتح الرابط وادخل برقم تليفونك "+ph+" والكود "+c+" \n"+location.href.split("#")[0]},sdel:"حذف",back:"رجوع",refresh:"تحديث",nostd:"لا توجد بيانات.",ttl:"العنوان"});
 Object.assign(D.en,{theme:"Appearance",day:"Day",night:"Night",hw:"Homework",code:"Code",newc:"New code",sendc:"Send code",tch:"Teacher",stdn:"Student",phone:"Phone number",pcode:"Secret code",enter:"Enter",e_pc:"Wrong phone number or code.",e_pce:"Enter phone number and code.",me:"My info",mine:"Homework",addhw:"Upload new homework",hwt:"Title (optional)",pick:"Take or choose photos or a PDF",send:"Send",sent:"Sent",tgr:"Grade",nohw:"No homework.",nsub:"No solutions.",solv:"Student solutions",mysol:"My solution",upl:"Upload your solution (photos or PDF)",sub:"Submitted",nosub:"Not submitted",paid:"Paid",unp:"Not paid",pres:"Attended",abs:"Absent",hello:"Hello",delhw:"Delete homework",busy:"Uploading...",e_img:"Could not read the image.",e_big:"Image too large.",nostud:"Add students to this grade first.",nophone:"Add the student's phone number so they can log in.",dup:"This number belongs to another student.",cinfo:"The student logs in with their phone number and this code.",codeMsg:function(n,ph,c){return "Hello, "+n+": open the link and log in with your phone "+ph+" and code "+c+" \n"+location.href.split("#")[0]},sdel:"Delete",back:"Back",refresh:"Refresh",nostd:"No data.",ttl:"Title"});
 
-var HWF={g:"",title:"",hours:"",imgs:[],busy:false},HWS={},NF={g:"",k:"n",text:"",ok:false};
+var HWF={g:"",title:"",dt:"",imgs:[],busy:false},HWS={},NF={g:"",k:"n",text:"",ok:false};
 function shrink(file,cb){var fr=new FileReader();fr.onerror=function(){cb(null)};fr.onload=function(){var im=new Image();im.onerror=function(){cb(null)};im.onload=function(){var m=1000,w=im.width,h=im.height,k=Math.min(1,m/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);var c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);var q=.7,u=c.toDataURL("image/jpeg",q);while(u.length>130000&&q>.3){q-=.1;u=c.toDataURL("image/jpeg",q)}cb(u.length>170000?null:u)};im.src=fr.result};fr.readAsDataURL(file)}
 function loadPdfJs(cb){if(window.pdfjsLib){cb(window.pdfjsLib);return}var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";sc.onload=function(){try{pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";cb(pdfjsLib)}catch(e){cb(null)}};sc.onerror=function(){cb(null)};document.head.appendChild(sc)}
 function pdfToImgs(file,cb){loadPdfJs(function(lib){if(!lib){cb([]);return}var fr=new FileReader();fr.onerror=function(){cb([])};fr.onload=function(){lib.getDocument({data:new Uint8Array(fr.result)}).promise.then(function(pdf){var n=Math.min(pdf.numPages,6),out=[],i=1;function nx(){if(i>n){cb(out);return}pdf.getPage(i++).then(function(pg){var v0=pg.getViewport({scale:1}),k=1000/Math.max(v0.width,v0.height)*1.0,v=pg.getViewport({scale:Math.max(k,.8)}),c=document.createElement("canvas");c.width=Math.round(v.width);c.height=Math.round(v.height);var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);pg.render({canvasContext:x,viewport:v}).promise.then(function(){var q=.7,u=c.toDataURL("image/jpeg",q);while(u.length>130000&&q>.3){q-=.1;u=c.toDataURL("image/jpeg",q)}if(u.length<=170000)out.push(u);nx()}).catch(function(){nx()})}).catch(function(){nx()})}nx()}).catch(function(){cb([])})};fr.readAsArrayBuffer(file)})}
@@ -224,9 +224,9 @@ function rmHwImg(i){HWF.imgs.splice(i,1);draw()}
 function sendHw(){if(!HWF.imgs||!HWF.imgs.length||!HWF.g||HWF.busy)return;
  var g=HWF.g;if(!S.students.some(function(s){return s.grade==g})){alert(t("nostud"));return}
  var id=String(Date.now()),tot=0;HWF.imgs.forEach(function(u){tot+=u.length});if(tot>800000){alert(t("e_big"));return}
- var hrs=parseFloat((document.getElementById("hw_h")||{}).value)||0,due=hrs>0?Date.now()+Math.round(hrs*3600000):0;
- S.hw=S.hw||[];S.hw.push({id:id,grade:g,title:(document.getElementById("hw_t")||{}).value||"",imgs:HWF.imgs,date:new Date().toISOString().slice(0,10),hours:hrs>0?hrs:0,due:due});
- HWF.imgs=[];HWF.title="";HWF.hours="";save();draw()}
+ var dv=(document.getElementById("hw_h")||{}).value||HWF.dt||"",due=dv?new Date(dv).getTime():0;if(due&&(isNaN(due)||due<=Date.now())){alert(t("hwpast"));return}
+ S.hw=S.hw||[];S.hw.push({id:id,grade:g,title:(document.getElementById("hw_t")||{}).value||"",imgs:HWF.imgs,date:new Date().toISOString().slice(0,10),due:due||0});
+ HWF.imgs=[];HWF.title="";HWF.dt="";save();draw()}
 function delHw(id){if(HWS["d"+id]!==1){HWS["d"+id]=1;draw();return}HWS={};S.hw=(S.hw||[]).filter(function(h){return h.id!=id});if(window.cloudDelHw)cloudDelHw(id);save();draw()}
 function loadSolv(id){if(window.cloudLoadSolv)cloudLoadSolv(id)}
 function hwView(){
@@ -235,7 +235,7 @@ function hwView(){
  GR.forEach(function(g){h+='<option value="'+g+'"'+(g==HWF.g?' selected':'')+'>'+gn(g)+'</option>'});
  h+='</select>';
  h+='<span class="lbl">'+t("hwt")+'</span><input id="hw_t" value="'+esc(HWF.title)+'" oninput="HWF.title=this.value">';
- h+='<span class="lbl">'+t("hh")+'</span><input id="hw_h" type="number" min="0" step="any" inputmode="decimal" value="'+esc(HWF.hours)+'" oninput="HWF.hours=this.value">';
+ h+='<span class="lbl">'+t("hh")+'</span><input id="hw_h" type="datetime-local" value="'+esc(HWF.dt)+'" oninput="HWF.dt=this.value" onchange="HWF.dt=this.value">'+(HWF.dt?'<div class="row" style="margin-top:8px"><button class="btn" style="min-height:36px" onclick="HWF.dt=\'\';draw()">'+t("hwclr")+'</button></div>':'');
  h+='<span class="lbl">'+t("pick")+'</span><input type="file" accept="image/*,application/pdf" multiple onchange="pickHw(this)">';
  if(HWF.busy)h+='<div class="mu" style="margin-top:8px">'+t("busy")+'</div>';
  (HWF.imgs||[]).forEach(function(u,i){h+='<div style="position:relative"><img class="hwimg" src="'+u+'"><button class="btn no" style="margin-top:6px;min-height:36px" onclick="rmHwImg('+i+')">'+t("sdel")+'</button></div>'});
@@ -262,7 +262,14 @@ function hwView(){
  return h}
 function gal(o){var L=o.imgs||(o.img?[o.img]:[]);return L.map(function(u){return '<img class="hwimg" src="'+u+'">'}).join("")}
 function toggleSolv(id){if(HWS.o==id){HWS.o=null}else{HWS.o=id;loadSolv(id)}draw()}
-function dueTxt(w){if(!w.due)return "";var l=w.due-Date.now();if(l<=0)return "\u{1F512} "+t("hwend");var m=Math.ceil(l/60000),hh=Math.floor(m/60),mm=m%60;return "⏳ "+(S.lang=="en"?(hh?hh+" h ":"")+mm+" min left":"متبقي "+(hh?hh+" ساعة ":"")+(mm?mm+" دقيقة":""))}
+function dueTxt(w){if(!w.due)return "";var l=w.due-Date.now();if(l<=0)return "\u{1F512} "+t("hwend");
+var m=Math.ceil(l/60000),d=Math.floor(m/1440),hh=Math.floor(m%1440/60),mm=m%60,en=S.lang=="en",P=[];
+function U(n,a,e){return en?n+" "+e+(n==1||e=="min"?"":"s"):(n==1?a[0]:n==2?a[1]:n+" "+(n<=10?a[2]:a[3]))}
+if(d)P.push(U(d,["يوم","يومين","أيام","يوم"],"day"));
+if(hh)P.push(U(hh,["ساعة","ساعتين","ساعات","ساعة"],"hour"));
+if(mm&&!d)P.push(U(mm,["دقيقة","دقيقتين","دقائق","دقيقة"],"min"));
+var dd=new Date(w.due);
+return "⏳ "+(en?P.join(" ")+" left":"متبقي "+P.join(" و"))+" <bdi>("+ld(dd)+" "+("0"+dd.getHours()).slice(-2)+":"+("0"+dd.getMinutes()).slice(-2)+")</bdi>"}
 function hwEnded(id){var w=(ST.hw||[]).filter(function(h){return h.id==id})[0];return !!(w&&w.due&&Date.now()>w.due)}
 function ntCard(n,showG,del){var w=n.kind=="w";return '<div class="card" style="border-inline-start:6px solid '+(w?'var(--am)':'var(--pr)')+'"><div class="nm">'+(w?'⚠️ '+t("ntwarn"):'ℹ️ '+t("ntnorm"))+(showG?' <span class="pill">'+gn(n.grade)+'</span>':'')+'<span class="pill"><bdi>'+ld(new Date(n.at))+'</bdi></span></div><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div>'+(del?'<div class="row" style="margin-top:8px"><button class="btn no" style="min-height:36px" onclick="delNt(\''+n.id+'\')">'+(HWS["n"+n.id]===1?t("conf"):t("del"))+'</button></div>':'')+'</div>'}
 function ntView(){var h='<div class="card"><div class="nm">'+t("ntnew")+'</div>'
@@ -270,11 +277,11 @@ function ntView(){var h='<div class="card"><div class="nm">'+t("ntnew")+'</div>'
 +'<span class="lbl">'+t("ntkind")+'</span><div class="row"><button class="btn '+(NF.k=="n"?"pr":"")+'" onclick="NF.k=\'n\';draw()">ℹ️ '+t("ntnorm")+'</button><button class="btn '+(NF.k=="w"?"pay":"")+'" onclick="NF.k=\'w\';draw()">⚠️ '+t("ntwarn")+'</button></div>'
 +'<span class="lbl">'+t("ntmsg")+'</span><textarea rows="4" oninput="NF.text=this.value;NF.ok=false">'+esc(NF.text)+'</textarea>'
 +(NF.ok?'<div class="mu" style="margin-top:8px">✓ '+t("ntsent")+'</div>':'')
-+'<div class="row" style="margin-top:12px"><button class="btn pr"'+(NF.g&&NF.text.trim()?'':' disabled')+' onclick="sendNt()">'+t("ntsend")+'</button></div></div>';
++'<div class="row" style="margin-top:12px"><button class="btn pr" onclick="sendNt()">'+t("ntsend")+'</button></div></div>';
 var L=(S.notices||[]).slice().sort(function(a,b){return b.at-a.at});
 if(L.length)h+='<div class="mu" style="margin:10px 4px 4px">'+t("ntlist")+'</div>';
 L.forEach(function(n){h+=ntCard(n,true,true)});return h}
-function sendNt(){var g=NF.g,tx=NF.text.trim();if(!g||!tx)return;if(!S.students.some(function(s){return s.grade==g})){alert(t("nostud"));return}
+function sendNt(){var g=NF.g,tx=NF.text.trim();if(!g||!tx){alert(t("ntneed"));return}if(!S.students.some(function(s){return s.grade==g})){alert(t("nostud"));return}
 var n={id:String(Date.now()),grade:g,kind:NF.k,text:tx,at:Date.now()};S.notices=S.notices||[];S.notices.push(n);NF.text="";NF.ok=true;if(window.cloudSendNt)cloudSendNt(n);draw()}
 function delNt(id){if(HWS["n"+id]!==1){HWS["n"+id]=1;draw();return}HWS={};S.notices=(S.notices||[]).filter(function(n){return n.id!=id});if(window.cloudDelNt)cloudDelNt(id);draw()}
 var ST={mode:"t",ph:"",pc:"",err:"",busy:false,data:null,hw:[],sol:{},tab:"me",up:null,notes:[],set:false,newN:false};
@@ -359,8 +366,8 @@ Object.assign(D.ar,{pday:"اليوم السابق",nday:"اليوم التالي
 Object.assign(D.ar,{mnote:"الأرقام هنا للشهر المختار، ونفس الأرقام بتظهر في تبويب المتابعة لنفس الشهر.",cmon:"عدّاد الطلاب تحت الأسماء لشهر"});Object.assign(D.en,{mnote:"Numbers are for the selected month and match the Follow-up tab for the same month.",cmon:"Student counters below are for month"});
 Object.assign(D.ar,{anno:"لم يحضر",anna:"لم يغب",ansd:"مسدّد",anall:"من البداية",anmon:"شهر معيّن",anowed:"إجمالي المبالغ المتبقية على كل الطلبة",anunp:"حصة لم تُدفع",anpres:"حضور",anabs:"غياب",antap:"دوس على أي عدّاد لتفصيله حسب المرحلة والمجموعة.",antot:"الإجمالي",anof:"طالب من",anday:"يوم",anstu:"طلاب",anpct:"النسبة",anshow:"أسماء الطلاب",anhide:"إخفاء"});
 Object.assign(D.en,{anno:"Did not attend",anna:"Not absent",ansd:"Settled",anall:"All time",anmon:"Specific month",anowed:"Total owed by all students",anunp:"unpaid classes",anpres:"Present",anabs:"Absent",antap:"Tap any counter for a breakdown by grade and group.",antot:"Total",anof:"students of",anday:"days",anstu:"Students",anpct:"Rate",anshow:"Student names",anhide:"Hide"});
-Object.assign(D.ar,{hh:"مدة التسليم بالساعات (اتركه فاضي لو مفيش حد)",hwend:"انتهى وقت التسليم",nt:"التنبيهات",ntnew:"إرسال إخطار جديد",ntkind:"النوع",ntnorm:"إخطار",ntwarn:"تنبيه",ntmsg:"الرسالة",ntsend:"إرسال للمرحلة كلها",ntnone:"لا توجد إخطارات.",ntsent:"تم الإرسال للمرحلة كلها",ntlist:"الإخطارات المرسلة"});
-Object.assign(D.en,{hh:"Submission time in hours (leave empty for no limit)",hwend:"Submission time is over",nt:"Notices",ntnew:"Send a new notice",ntkind:"Type",ntnorm:"Notice",ntwarn:"Alert",ntmsg:"Message",ntsend:"Send to the whole grade",ntnone:"No notices.",ntsent:"Sent to the whole grade",ntlist:"Sent notices"});
+Object.assign(D.ar,{hh:"آخر موعد لتسليم الواجب (اتركه فاضي لو مفيش موعد)",hwpast:"الموعد لازم يكون في المستقبل",hwclr:"إلغاء الموعد",ntneed:"اختار الصف واكتب الرسالة الأول.",hwend:"انتهى وقت التسليم",nt:"التنبيهات",ntnew:"إرسال إخطار جديد",ntkind:"النوع",ntnorm:"إخطار",ntwarn:"تنبيه",ntmsg:"الرسالة",ntsend:"إرسال للمرحلة كلها",ntnone:"لا توجد إخطارات.",ntsent:"تم الإرسال للمرحلة كلها",ntlist:"الإخطارات المرسلة"});
+Object.assign(D.en,{hh:"Submission deadline (leave empty for none)",hwpast:"The deadline must be in the future",hwclr:"Clear deadline",ntneed:"Choose the grade and write the message first.",hwend:"Submission time is over",nt:"Notices",ntnew:"Send a new notice",ntkind:"Type",ntnorm:"Notice",ntwarn:"Alert",ntmsg:"Message",ntsend:"Send to the whole grade",ntnone:"No notices.",ntsent:"Sent to the whole grade",ntlist:"Sent notices"});
 (function(){
 
 /* ===== AUTO TODAY: jump to the real date when app opens, is revisited, or midnight passes ===== */
