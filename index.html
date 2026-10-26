@@ -58,9 +58,8 @@ en:{title:"Student Tracker",grp:"Group",gender:"Gender",boy:"Boy",girl:"Girl",bo
 Object.assign(D.ar,{an:"تحليل",days:"المجموعة",grp:"مجموعة",allgr:"كل الصفوف",allsx:"ولاد وبنات",boys:"ولاد",girls:"بنات",boy:"ولد",girl:"بنت",sex:"النوع",search:"ابحث بالاسم",det:"تفاصيل الطالب",ana:"تفصيل تحليلي",settle:"سدّد كل الحصص",howm:"عدد الحصص",setn:"سدّد",np:"لم يدفع",total:"الطلبة",unrec:"لم يُسجَّل",sm:function(n,a,b,u){return "السلام عليكم، الطالب "+n+": حضر "+a+" حصة، غاب "+b+" حصة، لم يدفع "+u+" حصة."}});
 Object.assign(D.en,{an:"Analysis",days:"Group",grp:"Group",allgr:"All grades",allsx:"Boys & girls",boys:"Boys",girls:"Girls",boy:"Boy",girl:"Girl",sex:"Gender",search:"Search by name",det:"Student details",ana:"Analytical detail",settle:"Settle all classes",howm:"Classes",setn:"Settle",np:"Not paid",total:"Students",unrec:"Not recorded",sm:function(n,a,b,u){return "Hello, student "+n+": attended "+a+" classes, absent "+b+", not paid "+u+" classes."}});
 var KEY="mathTeacherApp1",S={students:[],rec:{},price:50,lang:"ar"},tab="att",fg="",fgr="",fdate=new Date().toISOString().slice(0,10),fmon=fdate.slice(0,7),edit=null,pd=null,fgen="",sg="",sgr="",sgen="";
-try{var r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
 if(!S.lang)S.lang="ar";
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){if(window.cloudSave)window.cloudSave()}
 function t(k){return D[S.lang][k]}
 function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function gn(g){var i=GR.indexOf(g);return S.lang=="en"&&i>=0?GE[i]:g}
@@ -129,18 +128,115 @@ function nm(M){return M.map(function(s){return esc(s.name)}).join("، ")||"-"}
 h+='<div class="card"><div class="stat"><div><b>'+L.length+'</b>'+t("total")+'</div><div><b>'+P.length+'</b>'+t("pr")+'</div><div><b class="owe">'+A.length+'</b>'+t("ab")+'</div><div><b>'+N.length+'</b>'+t("unrec")+'</div><div><b class="owe">'+U.length+'</b>'+t("np")+'</div></div></div>';
 h+='<div class="card"><div class="nm">'+t("ab")+' ('+A.length+')</div><div class="mu">'+nm(A)+'</div></div><div class="card"><div class="nm">'+t("np")+' ('+U.length+')</div><div class="mu">'+nm(U)+'</div></div>';return h}
 var TA='rows="5" style="margin-top:8px"';
-function setv(){return '<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'
+function setv(){return acct()+'<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'
 +'<div class="card"><div class="nm">'+t("bt")+'</div><div class="mu">'+t("bd")+'</div><div class="row" style="margin-top:8px"><button class="btn pr" onclick="showB()">'+t("show")+'</button></div><textarea id="bx" '+TA+'></textarea></div>'
 +'<div class="card"><div class="nm">'+t("rt")+'</div><div class="mu">'+t("rd")+'</div><textarea id="rx" '+TA+'></textarea><div class="row" style="margin-top:8px"><button class="btn pr" onclick="restoreB()">'+t("rb")+'</button></div></div>'}
 function setL(l){S.lang=l;save();draw()}
 function showB(){var x=document.getElementById("bx");x.value=JSON.stringify(S);x.focus();x.select();try{document.execCommand("copy")}catch(e){}}
 function restoreB(){try{var o=JSON.parse(document.getElementById("rx").value.trim());if(!o||!Array.isArray(o.students))throw 1;S={students:o.students,rec:o.rec||{},price:o.price||50,lang:S.lang};save();tab="att";draw()}catch(e){var x=document.getElementById("rx");x.value="";x.placeholder=t("bad")}}
+
+Object.assign(D.ar,{lg:"تسجيل الدخول",su:"إنشاء حساب",em:"الإيميل",pw:"كلمة السر",lo:"تسجيل الخروج",acc:"الحساب",ldg:"جارٍ التحميل...",sv:"جارٍ الحفظ...",sd:"✓ تم الحفظ",se:"⚠ لم يتم الحفظ",
+e_cred:"الإيميل أو كلمة السر غير صحيحة.",e_mail:"الإيميل غير صحيح.",e_used:"الإيميل ده مسجل قبل كده، دوس تسجيل الدخول.",e_weak:"كلمة السر ضعيفة، اكتب 6 حروف أو أرقام على الأقل.",e_net:"مفيش اتصال بالنت.",e_many:"محاولات كتير، استنى شوية وجرب تاني.",e_op:"تسجيل الدخول بالإيميل مش مفعّل في Firebase (Authentication ← Sign-in method).",e_perm:"قواعد الأمان في Firestore لسه متضافتش.",e_dom:"الدومين ده مش مضاف في Authorized domains في Firebase.",e_key:"مفتاح Firebase (apiKey) غلط، راجع الإعدادات.",e_empty:"اكتب الإيميل وكلمة السر.",e_gen:"حصل خطأ: "});
+Object.assign(D.en,{lg:"Log in",su:"Create account",em:"Email",pw:"Password",lo:"Log out",acc:"Account",ldg:"Loading...",sv:"Saving...",sd:"✓ Saved",se:"⚠ Not saved",
+e_cred:"Wrong email or password.",e_mail:"Invalid email.",e_used:"This email is already registered, tap Log in.",e_weak:"Weak password, use at least 6 characters.",e_net:"No internet connection.",e_many:"Too many attempts, wait a bit and try again.",e_op:"Email sign-in is not enabled in Firebase (Authentication > Sign-in method).",e_perm:"Firestore security rules are not set yet.",e_dom:"This domain is not in Firebase Authorized domains.",e_key:"Invalid Firebase apiKey, check the config.",e_empty:"Enter your email and password.",e_gen:"Error: "});
+var AU={ready:false,user:null,err:"",busy:false,sync:"",email:""};
+function setData(o){S={students:o.students||[],rec:o.rec||{},price:o.price==null?50:o.price,lang:o.lang||"ar"};tab="att";edit=null;pd=null;dt=null}
+function errMsg(x){var c=(x&&x.code)||"",m={"auth/invalid-credential":"e_cred","auth/wrong-password":"e_cred","auth/user-not-found":"e_cred","auth/invalid-email":"e_mail","auth/email-already-in-use":"e_used","auth/weak-password":"e_weak","auth/network-request-failed":"e_net","unavailable":"e_net","auth/too-many-requests":"e_many","auth/operation-not-allowed":"e_op","permission-denied":"e_perm","auth/unauthorized-domain":"e_dom","auth/invalid-api-key":"e_key","auth/api-key-not-valid.-please-pass-a-valid-api-key.":"e_key"};
+return m[c]?t(m[c]):t("e_gen")+(c||(x&&x.message)||"")}
+function loginView(){return '<div class="card"><div class="nm">'+t("lg")+'</div>'
++'<span class="lbl">'+t("em")+'</span><input id="lg_e" type="email" dir="ltr" autocomplete="username" inputmode="email" value="'+esc(AU.email)+'">'
++'<span class="lbl">'+t("pw")+'</span><input id="lg_p" type="password" dir="ltr" autocomplete="current-password" onkeydown="if(event.key==\'Enter\')doAuth(0)">'
++(AU.err?'<div class="owe" style="margin-top:10px;font-size:14px">'+esc(AU.err)+'</div>':'')
++'<div class="row" style="margin-top:12px"><button class="btn pr"'+(AU.busy?' disabled':'')+' onclick="doAuth(0)">'+t("lg")+'</button><button class="btn"'+(AU.busy?' disabled':'')+' onclick="doAuth(1)">'+t("su")+'</button></div></div>'}
+function doAuth(mode){var e=document.getElementById("lg_e").value.trim(),p=document.getElementById("lg_p").value;AU.email=e;
+if(!e||!p){AU.err=t("e_empty");draw();return}
+if(!window.FB){AU.err=t("e_net");draw();return}
+AU.busy=true;AU.err="";draw();
+(mode?FB.signup(e,p):FB.login(e,p)).catch(function(x){AU.err=errMsg(x);AU.busy=false;draw()})}
+function acct(){return AU.user?'<div class="card"><div class="nm">'+t("acc")+'</div><div class="mu" dir="ltr" style="text-align:start">'+esc(AU.user.email)+'</div><div class="row" style="margin-top:8px"><button class="btn no" onclick="FB.logout()">'+t("lo")+'</button></div></div>':''}
+function syncUI(){var e=document.getElementById("sy");if(e)e.textContent=AU.sync=="saving"?t("sv"):AU.sync=="ok"?t("sd"):AU.sync=="err"?t("se"):""}
 var IC={att:"📝",stu:"👥",sum:"∑",an:"📊"};
-function draw(){var l=S.lang;document.documentElement.lang=l;document.documentElement.dir=l=="ar"?"rtl":"ltr";document.title=t("title");
-document.getElementById("hd").innerHTML='<div class="hn">ahmed khalifa</div><div class="ht">'+t("title")+'</div><button class="gear'+(tab=="set"?" on":"")+'" onclick="go(\'set\')" aria-label="'+t("set")+'">⚙️</button>';
-document.getElementById("nav").innerHTML=["att","stu","sum","an"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" onclick="go(\''+k+'\')"><i>'+IC[k]+'</i><span>'+t(k)+'</span></button>'}).join("");
-document.getElementById("app").innerHTML=tab=="att"?att():tab=="stu"?stu():tab=="sum"?sum():tab=="an"?an():setv()}
+function draw(){var l=S.lang,on=AU.ready&&AU.user;document.documentElement.lang=l;document.documentElement.dir=l=="ar"?"rtl":"ltr";document.title=t("title");
+document.getElementById("hd").innerHTML='<div class="hn">ahmed khalifa</div><div class="ht">'+t("title")+' <span id="sy"></span></div>'+(on?'<button class="gear'+(tab=="set"?" on":"")+'" onclick="go(\'set\')" aria-label="'+t("set")+'">⚙️</button>':'');
+document.getElementById("nav").innerHTML=on?["att","stu","sum","an"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" onclick="go(\''+k+'\')"><i>'+IC[k]+'</i><span>'+t(k)+'</span></button>'}).join(""):"";
+document.getElementById("app").innerHTML=!AU.ready?'<div class="card mu">'+t("ldg")+'</div>':!AU.user?loginView():tab=="att"?att():tab=="stu"?stu():tab=="sum"?sum():tab=="an"?an():setv();
+syncUI()}
 draw();
+</script>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {initializeFirestore,getFirestore,persistentLocalCache,persistentMultipleTabManager,doc,getDoc,setDoc,deleteDoc,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyCar3idR0O-_ZeRGa66GWVAQd7YfJs9YU8",
+  authDomain:"ak11-bf6eb.firebaseapp.com",
+  projectId:"ak11-bf6eb",
+  storageBucket:"ak11-bf6eb.firebasestorage.app",
+  messagingSenderId:"749008446014",
+  appId:"1:749008446014:web:183b5877874e9f0cd4a76f"
+};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+let db;
+try{db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){db=getFirestore(app)}
+
+let lastMain="",lastM={},timer=null;
+window.FB={
+  login:(e,p)=>signInWithEmailAndPassword(auth,e,p),
+  signup:(e,p)=>createUserWithEmailAndPassword(auth,e,p),
+  logout:()=>signOut(auth)
+};
+
+async function loadFor(u){
+  const main=await getDoc(doc(db,"teachers",u.uid));
+  const snap=await getDocs(collection(db,"teachers",u.uid,"months"));
+  const o={students:[],rec:{},price:50,lang:S.lang||"ar"};
+  lastMain="";lastM={};
+  if(main.exists()){const d=main.data();o.students=d.students||[];if(d.price!=null)o.price=d.price;if(d.lang)o.lang=d.lang;
+    lastMain=JSON.stringify({students:o.students,price:o.price,lang:o.lang})}
+  snap.forEach(m=>{const r=(m.data().rec)||{};Object.assign(o.rec,r);lastM[m.id]=JSON.stringify(r)});
+  setData(o);
+}
+
+onAuthStateChanged(auth,async u=>{
+  AU.err="";
+  if(u){
+    AU.ready=false;AU.user=null;draw();
+    try{await loadFor(u);AU.user=u;AU.sync=""}
+    catch(e){AU.err=errMsg(e);AU.user=null;signOut(auth).catch(()=>{})}
+  }else{
+    AU.user=null;AU.sync="";
+    setData({students:[],rec:{},price:50,lang:S.lang});
+  }
+  AU.busy=false;AU.ready=true;draw();
+});
+
+window.cloudSave=function(){
+  if(!auth.currentUser)return;
+  clearTimeout(timer);AU.sync="saving";syncUI();
+  timer=setTimeout(flush,500);
+};
+
+async function flush(){
+  const u=auth.currentUser;if(!u)return;
+  const data=JSON.parse(JSON.stringify(S));
+  const main={students:data.students,price:data.price,lang:data.lang};
+  const mj=JSON.stringify(main),ps=[];
+  try{
+    if(mj!==lastMain){lastMain=mj;ps.push(setDoc(doc(db,"teachers",u.uid),main))}
+    const by={};
+    for(const k in data.rec){const m=k.slice(0,7);(by[m]=by[m]||{})[k]=data.rec[k]}
+    for(const m in by){const j=JSON.stringify(by[m]);if(lastM[m]!==j){lastM[m]=j;ps.push(setDoc(doc(db,"teachers",u.uid,"months",m),{rec:by[m]}))}}
+    for(const m of Object.keys(lastM)){if(!by[m]){delete lastM[m];ps.push(deleteDoc(doc(db,"teachers",u.uid,"months",m)))}}
+    await Promise.all(ps);
+    AU.sync="ok";
+  }catch(e){
+    lastMain="";lastM={};AU.sync="err";console.error(e);
+  }
+  syncUI();
+}
 </script>
 </body>
 </html>
