@@ -644,9 +644,9 @@ function hasNew(){var sn=getSeen();return (ST.notes||[]).some(function(n){return
 function markSeen(){var m=0;(ST.notes||[]).forEach(function(n){if(n.at>m)m=n.at});try{localStorage.setItem(seenKey(),String(m))}catch(e){}}
 var IC_RP='<svg viewBox="0 0 24 24"><g class="lf"><circle cx="12" cy="12" r="9.5"/><circle class="ey" cx="8.7" cy="10" r="1" fill="currentColor" stroke="none"/><circle class="ey" cx="15.3" cy="10" r="1" fill="currentColor" stroke="none"/><path class="mo" pathLength="1" d="M7.8 14.2q4.2 4 8.4 0"/></g><path class="sp" pathLength="1" d="M22 1.5v3 M20.5 3h3" stroke="#F59E42" stroke-width="1.6" style="--sx:2px;--sy:-1px"/><path class="sp" pathLength="1" d="M1.5 18v3 M0 19.5h3" stroke="#F59E42" stroke-width="1.6" style="--sx:-2px;--sy:1px"/></svg>';
 var IC_LB='<svg viewBox="0 0 24 24"><path pathLength="1" d="M7 4h10v5a5 5 0 0 1-10 0z"/><path pathLength="1" d="M7 6H4v1a3 3 0 0 0 3 3"/><path pathLength="1" d="M17 6h3v1a3 3 0 0 1-3 3"/><path pathLength="1" d="M12 14v4"/><path pathLength="1" d="M8 21h8"/></svg>';
-function stGo(k){ST.set=false;ST.tab=k;if(k=="lb"){ST.lb={};lbLoad(ST.lbc||"t")}draw();studentRefresh()}
+function stGo(k){ST.set=false;ST.tab=k;draw();studentRefresh()}
 function studentNav(){var NN=ST.tab=="nt"&&!ST.set?[]:newNts(),NH=ST.tab=="hw"&&!ST.set?0:newHw();
- var T=[["home",IC.home,t("home"),""],["me",IC.stu,t("me"),""],["rp",IC_RP,L2("الحصة","Lesson"),""],["hw",IC.hw,t("mine"),bdg(NH,false)],["nt",IC.com,t("nt"),bdg(NN.length,NN.some(function(n){return n.kind=="w"}))],["lb",IC_LB,L2("المتصدرين","Leaders"),""]];
+ var T=[["home",IC.home,t("home"),""],["me",IC.stu,t("me"),""],["rp",IC_RP,L2("الحصة","Lesson"),""],["hw",IC.hw,t("mine"),bdg(NH,false)],["nt",IC.com,t("nt"),bdg(NN.length,NN.some(function(n){return n.kind=="w"}))]];
  return T.map(function(x){return '<button class="'+(!ST.set&&ST.tab==x[0]?"on":"")+'" data-k="'+x[0]+'" onclick="stGo(\''+x[0]+'\')"><i>'+x[1]+x[3]+'</i><span>'+x[2]+'</span></button>'}).join("")}
 function stSet(){ST.set=!ST.set;draw()}
 var SI_T=null;
@@ -660,7 +660,6 @@ function studentView(){var d=ST.data;
  if(ST.tab=="home"){h+='<div class="card sgreet" onclick="stuInfo()"><div class="nm">'+t("hello")+' '+esc(d.name)+'</div><div class="mu">'+gn(d.grade)+'</div><div class="sinfo" id="sinfo"><span><small>'+L2("الطالب","Student")+'</small>'+esc(fmtP(d.phone))+'</span><span><small>'+L2("ولي الأمر","Parent")+'</small>'+esc(fmtP(d.parentPhone))+'</span></div></div>'+gameCard()}
  else if(ST.tab=="me"){h+='<div class="card"><div class="stat"><div><b>'+d.a+'</b>'+t("pres")+'</div><div><b class="'+(d.b?"owe":"")+'">'+d.b+'</b>'+t("abs")+'</div><div><b class="'+(d.u?"owe":"")+'">'+d.u+'</b>'+t("unp")+'</div></div></div>'}
  else if(ST.tab=="rp"){h+=repBox()}
- else if(ST.tab=="lb"){h+=lbView()}
  else if(ST.tab=="nt"){var N=(ST.notes||[]).slice().sort(function(a,b){return b.at-a.at});if(!N.length)h+='<div class="card mu">'+t("ntnone")+'</div>';N.forEach(function(n){h+=ntCard(n,false,false)})}
  else{if(!ST.hw.length)h+='<div class="card mu">'+t("nohw")+'</div>';
   ST.hw.forEach(function(w){var so=ST.sol[w.id],ended=!!(w.due&&Date.now()>w.due),has=!!(so&&so.imgs&&so.imgs.length);
