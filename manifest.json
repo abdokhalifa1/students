@@ -1,16 +1,13 @@
 {
-  "name": "ahmed",
-  "short_name": "AK1",
-  "description": "تطبيق متابعة الطلبة والحضور والواجبات",
+  "name": "Student Tracker",
+  "short_name": "AK",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
-  "id": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#48426D",
-  "theme_color": "#48426D",
+  "background_color": "#312D52",
+  "theme_color": "#312D52",
   "icons": [
     {
       "src": "icon-192.png",
@@ -25,7 +22,7 @@
       "purpose": "any"
     },
     {
-      "src": "icon-maskable-512.png",
+      "src": "icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
