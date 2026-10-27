@@ -643,9 +643,10 @@ function newNts(){var sn=getSeen();return (ST.notes||[]).filter(function(n){retu
 function hasNew(){var sn=getSeen();return (ST.notes||[]).some(function(n){return n.at>sn})}
 function markSeen(){var m=0;(ST.notes||[]).forEach(function(n){if(n.at>m)m=n.at});try{localStorage.setItem(seenKey(),String(m))}catch(e){}}
 var IC_RP='<svg viewBox="0 0 24 24"><g class="lf"><circle cx="12" cy="12" r="9.5"/><circle class="ey" cx="8.7" cy="10" r="1" fill="currentColor" stroke="none"/><circle class="ey" cx="15.3" cy="10" r="1" fill="currentColor" stroke="none"/><path class="mo" pathLength="1" d="M7.8 14.2q4.2 4 8.4 0"/></g><path class="sp" pathLength="1" d="M22 1.5v3 M20.5 3h3" stroke="#F59E42" stroke-width="1.6" style="--sx:2px;--sy:-1px"/><path class="sp" pathLength="1" d="M1.5 18v3 M0 19.5h3" stroke="#F59E42" stroke-width="1.6" style="--sx:-2px;--sy:1px"/></svg>';
-function stGo(k){ST.set=false;ST.tab=k;draw();studentRefresh()}
+var IC_LB='<svg viewBox="0 0 24 24"><path pathLength="1" d="M7 4h10v5a5 5 0 0 1-10 0z"/><path pathLength="1" d="M7 6H4v1a3 3 0 0 0 3 3"/><path pathLength="1" d="M17 6h3v1a3 3 0 0 1-3 3"/><path pathLength="1" d="M12 14v4"/><path pathLength="1" d="M8 21h8"/></svg>';
+function stGo(k){ST.set=false;ST.tab=k;if(k=="lb"){ST.lb={};lbLoad(ST.lbc||"t")}draw();studentRefresh()}
 function studentNav(){var NN=ST.tab=="nt"&&!ST.set?[]:newNts(),NH=ST.tab=="hw"&&!ST.set?0:newHw();
- var T=[["home",IC.home,t("home"),""],["me",IC.stu,t("me"),""],["rp",IC_RP,L2("الحصة","Lesson"),""],["hw",IC.hw,t("mine"),bdg(NH,false)],["nt",IC.com,t("nt"),bdg(NN.length,NN.some(function(n){return n.kind=="w"}))]];
+ var T=[["home",IC.home,t("home"),""],["me",IC.stu,t("me"),""],["rp",IC_RP,L2("الحصة","Lesson"),""],["hw",IC.hw,t("mine"),bdg(NH,false)],["nt",IC.com,t("nt"),bdg(NN.length,NN.some(function(n){return n.kind=="w"}))],["lb",IC_LB,L2("المتصدرين","Leaders"),""]];
  return T.map(function(x){return '<button class="'+(!ST.set&&ST.tab==x[0]?"on":"")+'" data-k="'+x[0]+'" onclick="stGo(\''+x[0]+'\')"><i>'+x[1]+x[3]+'</i><span>'+x[2]+'</span></button>'}).join("")}
 function stSet(){ST.set=!ST.set;draw()}
 var SI_T=null;
@@ -659,6 +660,7 @@ function studentView(){var d=ST.data;
  if(ST.tab=="home"){h+='<div class="card sgreet" onclick="stuInfo()"><div class="nm">'+t("hello")+' '+esc(d.name)+'</div><div class="mu">'+gn(d.grade)+'</div><div class="sinfo" id="sinfo"><span><small>'+L2("الطالب","Student")+'</small>'+esc(fmtP(d.phone))+'</span><span><small>'+L2("ولي الأمر","Parent")+'</small>'+esc(fmtP(d.parentPhone))+'</span></div></div>'+gameCard()}
  else if(ST.tab=="me"){h+='<div class="card"><div class="stat"><div><b>'+d.a+'</b>'+t("pres")+'</div><div><b class="'+(d.b?"owe":"")+'">'+d.b+'</b>'+t("abs")+'</div><div><b class="'+(d.u?"owe":"")+'">'+d.u+'</b>'+t("unp")+'</div></div></div>'}
  else if(ST.tab=="rp"){h+=repBox()}
+ else if(ST.tab=="lb"){h+=lbView()}
  else if(ST.tab=="nt"){var N=(ST.notes||[]).slice().sort(function(a,b){return b.at-a.at});if(!N.length)h+='<div class="card mu">'+t("ntnone")+'</div>';N.forEach(function(n){h+=ntCard(n,false,false)})}
  else{if(!ST.hw.length)h+='<div class="card mu">'+t("nohw")+'</div>';
   ST.hw.forEach(function(w){var so=ST.sol[w.id],ended=!!(w.due&&Date.now()>w.due),has=!!(so&&so.imgs&&so.imgs.length);
@@ -706,7 +708,7 @@ function markTS(){var m=window.cloudSubMax?cloudSubMax():0;if(m>getTS()){try{loc
 function hwTab(){return hwView()}
 function comView(){var o=solView()+(window.cloudMsgs&&cloudMsgs().length?msgView():"")+ntView();markTS();return o}
 function comViewOld(){var ns=newSubs();if(ctab=="hw")markTS();return '<div class="tabs2"><button class="btn '+(ctab=="hw"?"pr":"")+'" onclick="ctab=\'hw\';draw()">'+t("hw")+bdg(ns,false)+'</button><button class="btn '+(ctab=="nt"?"pr":"")+'" onclick="ctab=\'nt\';draw()">'+t("nt")+'</button></div>'+(ctab=="hw"?hwView():ntView())}
-function repView(){return '<div class="tabs2"><button class="btn '+(rtab=="sum"?"pr":"")+'" onclick="rtab=\'sum\';draw()">'+L2("ملخص شهري","Monthly")+'</button><button class="btn '+(rtab=="an"?"pr":"")+'" onclick="rtab=\'an\';draw()">'+L2("تحليل","Analysis")+'</button><button class="btn '+(rtab=="ls"?"pr":"")+'" onclick="rtab=\'ls\';draw()">'+L2("الحصص","Lessons")+'</button></div>'+(rtab=="sum"?sum():rtab=="ls"?lsView():an())}
+function repView(){return '<div class="tabs2"><button class="btn '+(rtab=="sum"?"pr":"")+'" onclick="rtab=\'sum\';draw()">'+L2("ملخص شهري","Monthly")+'</button><button class="btn '+(rtab=="an"?"pr":"")+'" onclick="rtab=\'an\';draw()">'+L2("تحليل","Analysis")+'</button><button class="btn '+(rtab=="ls"?"pr":"")+'" onclick="rtab=\'ls\';draw()">'+L2("الحصص","Lessons")+'</button><button class="btn '+(rtab=="lb"?"pr":"")+'" onclick="rtab=\'lb\';draw()">'+L2("المتصدرين","Leaders")+'</button></div>'+(rtab=="lb"?tlView():rtab=="sum"?sum():rtab=="ls"?lsView():an())}
 function homeView(){var td=ld(new Date()),a=0,b=0,n=0,owe=0,O=[];
 S.students.forEach(function(s){var r=rc(s.id,td);if(r.a===1)a++;else if(r.a===0)b++;else n++;var x=st(s);owe+=x.o||0;if(x.o>0)O.push({s:s,o:x.o})});
 O.sort(function(p,q){return q.o-p.o});
@@ -962,6 +964,36 @@ function gmBar(c){var C=CT[c],an=GM.anim,op=GM.open==c,N=C.n,
  h+=lf===0?'<div class="hint" style="margin:12px 0;font-size:15px">'+L2("خلّصت محاولاتك النهاردة. ارجع بكرة وكمّل مذاكرتك.","You've used today's attempts. Come back tomorrow.")+'</div>':'<button class="gstart" onclick="gmStart(\''+c+'\')">'+L2("بدء","Start")+'</button>'+(lf!=null?'<div class="hint">'+L2("المحاولات المتبقية النهاردة: ","Attempts left today: ")+lf+'</div>':'');
  return h+gmBoard(c)+'</div>'}
 function gameCard(){return gmBar("t")+gmBar("k")}
+
+/* ===== لوحة المتصدرين: المدرس + الطالب ===== */
+var TL={open:"",anim:"",tc:"",busy:0,g:"",bd:{}};
+function lbRowH(r,rk,me,nm,gr){return '<div class="gbr'+(me?' me':'')+'"><span class="rk">'+(rk<4?["🥇","🥈","🥉"][rk-1]:rk)+'</span><b>'+esc(nm)+(me?' ('+L2("أنت","you")+')':'')+(gr?' <small style="direction:rtl">'+esc(gn(gr))+'</small>':'')+'</b>'+(r.w?'<small>✕'+r.w+'</small>':'')+'<span>'+gmSec(r.ms)+'</span></div>'}
+function tlBoardH(c){var R=TL.bd[c];if(!R)return '<div class="mu" style="text-align:center">…</div>';
+ var F=R.filter(function(r){return !TL.g||r.grade==TL.g});
+ if(!F.length)return '<div class="mu" style="text-align:center">'+L2("لسه محدش خلّص التحدّي.","No one has finished yet.")+'</div>';
+ return F.slice(0,50).map(function(r,i){return lbRowH(r,i+1,false,r.name,TL.g?"":r.grade)}).join("")}
+function tlFill(c){var e=document.getElementById("tl_b");if(e&&TL.open==c)e.innerHTML=tlBoardH(c)}
+function tlLoad(c){TL.bd[c]=null;if(!window.FB||!FB.teacherBoard)return;FB.teacherBoard(c).then(function(r){TL.bd[c]=r;tlFill(c)}).catch(function(e){console.error(e);TL.bd[c]=[];tlFill(c)})}
+function tlTog(c){if(TL.busy)return;TL.tc=c;
+ if(TL.open!=c){TL.open=c;TL.anim="in";tlLoad(c);draw();setTimeout(function(){TL.anim=""},1000)}
+ else{TL.anim="out";TL.busy=1;draw();setTimeout(function(){TL.open="";TL.anim="";TL.busy=0;draw()},400)}}
+function tlGrade(v){TL.g=v;if(TL.open)tlFill(TL.open)}
+function tlBar(c){var C=CT[c],an=TL.anim,op=TL.open==c,
+ h='<div class="gb2'+(an&&TL.tc==c?' jl':'')+'" onclick="tlTog(\''+c+'\')"><span class="gsym">'+C.sy+'</span><b>'+L2(C.nm[0],C.nm[1])+'</b><span class="gchev'+(op&&an!="out"?' up':'')+'">⌄</span></div>';
+ if(!op)return h;
+ return h+'<div class="gx'+(an?' '+an:'')+'"><div class="card"><div class="row"><select onchange="tlGrade(this.value)"><option value="">'+t("allgr")+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==TL.g?' selected':'')+'>'+gn(g)+'</option>'}).join("")+'</select></div><div id="tl_b">'+tlBoardH(c)+'</div></div></div>'}
+function tlView(){return tlBar("t")+tlBar("k")}
+function lbLoad(c){if(!ST.data||!window.FB||!FB.getBoard)return;FB.getBoard(ST.data.phone,ST.pc,c).then(function(r){ST.lb=ST.lb||{};ST.lb[c]=r;if(ST.tab=="lb"&&ST.lbc==c){var e=document.getElementById("stlb");if(e)e.innerHTML=lbHtml(c)}}).catch(function(e){console.error(e)})}
+function lbHtml(c){var B=ST.lb&&ST.lb[c];if(!B)return '<div class="mu" style="text-align:center">…</div>';
+ var R=B.rows,h='<span class="lbl" style="text-align:center">'+L2("المتصدرين في صفك: ","Leaders in your grade: ")+esc(gn(ST.data.grade))+'</span>';
+ if(!R.length)return h+'<div class="mu" style="text-align:center">'+L2("لسه محدش خلّص التحدّي. كن أول واحد!","No one has finished yet. Be the first!")+'</div>';
+ R.slice(0,10).forEach(function(r){h+=lbRowH(r,r.rank,r.sid==B.sid,r.name,"")});
+ var me=R.filter(function(r){return r.sid==B.sid})[0];if(me&&me.rank>10)h+='<div class="mu" style="text-align:center">⋮</div>'+lbRowH(me,me.rank,true,me.name,"");
+ return h}
+function lbPick(c){ST.lbc=c;ST.lb=ST.lb||{};ST.lb[c]=null;lbLoad(c);draw()}
+function lbView(){var c=ST.lbc||"t";
+ return '<div class="tabs2">'+["t","k"].map(function(k){return '<button class="btn '+(c==k?"pr":"")+'" onclick="lbPick(\''+k+'\')">'+L2(CT[k].nm[0],CT[k].nm[1])+'</button>'}).join("")+'</div><div class="card" id="stlb">'+lbHtml(c)+'</div>'}
+
 </script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -1120,6 +1152,15 @@ window.FB={
       let i=0;qs.forEach(d=>{i++;const g=d.data();rows.push({sid:g.sid,name:String(g.name||"").split(" ")[0],ms:g.ms,w:g.w||0,rank:i})});
     }catch(e){console.error(e)}
     return {sid:p.sid,left,rows};
+  },
+
+  async teacherBoard(c){
+    const u=auth.currentUser;if(!u||u.isAnonymous)throw {code:"auth"};
+    const qs=await getDocs(query(collection(db,"games"),where("uid","==",u.uid),where("c","==",c)));
+    const rows=[];
+    qs.forEach(d=>{const g=d.data();rows.push({sid:g.sid,name:String(g.name||""),grade:g.grade,ms:g.ms||0,w:g.w||0})});
+    rows.sort((a,b)=>a.ms-b.ms);
+    return rows;
   }
 };
 
