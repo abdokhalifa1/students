@@ -6425,13 +6425,13 @@ function xaRead(A){var M={},hi=-1,i,r,a;
  if(hi<0)return{err:L2("الملف مش بتاع التطبيق — نزّل الملف الفاضي من الزر.","Not an app sheet — download the blank sheet from the button.")};
  var g=GR.filter(function(x){return x==M.gr||gn(x)==M.gr})[0]||xaG();
  var ci=function(n){return M.h.indexOf(n)},cN=ci("الاسم"),cX=ci("النوع"),cG=ci("المجموعة"),cP=ci("هاتف الطالب"),cQ=ci("هاتف ولي الأمر"),cR=ci("سعر الحصة");
- var dg=xlNum(M.grp),dp=xlNum(M.pr),used={},seen={},P={grade:g,ok:[],err:[]};
+ var dg=xlNum(M.grp),dp=xlNum(M.pr),used={},seen={},P={grade:g,ok:[],err:[],h:M.h,dg:M.grp,dp:M.pr};
  S.students.forEach(function(s){used[s.phone]=1});
  var cell=function(r,c){return c>-1&&r[c]!=null?r[c]:""};
  for(i=hi+1;i<A.length;i++){r=A[i]||[];
   var nm=String(cell(r,cN)).trim(),pv=cell(r,cP),qv=cell(r,cQ),xv=cell(r,cX),gv=cell(r,cG),rv=cell(r,cR);
   if(!nm&&!xaPhone(pv)&&!xaPhone(qv)&&String(gv).trim()===""&&String(rv).trim()==="")continue;
-  var rn=i+1,bad=function(m){P.err.push({r:rn,n:nm,m:m})};
+  var rn=i+1,bad=function(m){P.err.push({r:rn,n:nm,m:m,raw:r})};
   if(!nm){bad(L2("الاسم ناقص","Missing name"));continue}
   var p=xaPhone(pv);
   if(!p){bad(L2("هاتف الطالب ناقص","Missing student phone"));continue}
@@ -6462,7 +6462,7 @@ window.xaFile=function(inp){var f=inp.files&&inp.files[0];if(!f)return;XA.msg=""
   try{var wb=XLSX.read(fr.result,{type:"array"}),ws=wb.Sheets[wb.SheetNames[0]];p=xaRead(XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""}))}
   catch(e){XA.msg=L2("الملف مش مقروء","Could not read the file")}
   inp.value="";
-  if(p&&p.err)XA.msg=p.err;else if(p){XA.p=p;XA.g=p.grade}
+  if(p&&typeof p.err=="string")XA.msg=p.err;else if(p){XA.p=p;XA.g=p.grade}
   draw()};fr.readAsArrayBuffer(f)})};
 window.xaAdd=function(){var P=XA.p;if(!P||!P.ok.length)return;
  var ph={},ex={},ids=[],id=Date.now();
@@ -6470,7 +6470,18 @@ window.xaAdd=function(){var P=XA.p;if(!P||!P.ok.length)return;
  P.ok.forEach(function(o){if(ph[o.phone])return;ph[o.phone]=1;while(ex[id])id++;ex[id]=1;
   var s={id:id,name:o.name,sex:o.sex,grade:o.grade,group:o.group,phone:o.phone,parentPhone:o.parentPhone,price:o.price,code:genCode()};
   S.students.push(s);ids.push(id)});
- fg=P.grade;XA.done={ids:ids,g:P.grade};XA.p=null;XA.msg="";save();draw()};
+ fg=P.grade;XA.done={ids:ids,g:P.grade,grade:P.grade,err:P.err,h:P.h,dg:P.dg,dp:P.dp};XA.p=null;XA.msg="";save();draw()};
+window.xaErr=function(d){var P=d?XA.done:XA.p;if(!P||!P.err||!P.err.length)return;
+ xlLib(function(){var h=P.h||[],ix=function(n){return h.indexOf(n)},g=P.grade;
+  var A=[["نوع الملف","طلاب جدد"],["المرحلة",gn(g)],["المجموعة الافتراضية",P.dg==null?"":P.dg],["سعر الحصة الافتراضي",P.dp==null?"":P.dp],["* الصفوف دي فيها مشاكل (الشرح في عمود «المشكلة»). صلّح الخانات وارفع الملف تاني. عمود «المشكلة» تقدر تسيبه. ما تغيّرش العناوين."],[],["م","الاسم","النوع","المجموعة","هاتف الطالب","هاتف ولي الأمر","سعر الحصة","المشكلة"]];
+  var tx=function(v){if(v==null)return "";if(typeof v=="number")return String(Math.round(v));return String(v).trim()};
+  P.err.forEach(function(e,i){var r=e.raw||[],c=function(n){var k=ix(n);return k>-1&&r[k]!=null?r[k]:""};
+   A.push([i+1,tx(c("الاسم")),tx(c("النوع")),c("المجموعة"),tx(c("هاتف الطالب")),tx(c("هاتف ولي الأمر")),c("سعر الحصة"),e.m])});
+  var ws=XLSX.utils.aoa_to_sheet(A),wb=XLSX.utils.book_new();
+  for(var r=7;r<A.length;r++)[4,5].forEach(function(c){var v=A[r][c];ws[XLSX.utils.encode_cell({r:r,c:c})]={t:"s",v:v==null?"":String(v),z:"@"}});
+  ws["!cols"]=[{wch:6},{wch:28},{wch:8},{wch:10},{wch:16},{wch:16},{wch:10},{wch:26}];
+  XLSX.utils.book_append_sheet(wb,ws,"طلاب جدد");wb.Workbook={Views:[{RTL:true}]};
+  XLSX.writeFile(wb,"صفوف-فيها-مشاكل-"+gn(g)+".xlsx")})};
 window.xaCodes=function(fresh){xlLib(function(){var g=fresh&&XA.done?XA.done.g:xaG();
  var L=S.students.filter(function(s){return fresh?(XA.done&&XA.done.ids.indexOf(s.id)>-1):s.grade==g})
   .sort(function(a,b){return (+a.group-+b.group)||String(a.name).localeCompare(String(b.name),"ar")});
@@ -6492,9 +6503,10 @@ window.xaHtml=function(){var g=xaG(),P=XA.p,D_=XA.done,
   +'<div class="row"><span class="pill ok">'+P.ok.length+' '+L2("طالب جاهز للإضافة","ready to add")+'</span>'+(P.err.length?'<span class="pill" style="color:var(--no)">'+P.err.length+' '+L2("صف فيه مشكلة (مش هيتضاف)","rows with problems (skipped)")+'</span>':'')+'</div>';
   P.err.slice(0,10).forEach(function(e){h+='<div class="mu" style="margin-top:6px">'+L2("صف ","Row ")+e.r+(e.n?' · '+esc(e.n):'')+' — '+e.m+'</div>'});
   if(P.err.length>10)h+='<div class="mu" style="margin-top:6px">… +'+(P.err.length-10)+'</div>';
+  if(P.err.length)h+='<div class="row" style="margin-top:10px"><button class="btn" onclick="xaErr(0)">'+L2("تنزيل الصفوف اللي فيها مشاكل (","Download rows with problems (")+P.err.length+')</button></div>';
   if(P.ok.length)h+='<div class="row" style="margin-top:10px"><button class="btn pr" onclick="xaAdd()">'+L2("إضافة ","Add ")+P.ok.length+L2(" طالب"," students")+'</button></div>';
   h+='</div>'}
- if(D_){h+='<div class="card" style="margin:10px 0 0;box-shadow:none;border:1px solid var(--bd)"><div class="nm">✓ '+L2("تمت إضافة ","Added ")+D_.ids.length+L2(" طالب"," students")+'</div><div class="mu">'+L2("الأكواد اتولّدت. نزّلها في ملف فيه رسالة الدعوة جاهزة لكل طالب.","Codes were generated. Download them with a ready invitation message for each student.")+'</div><div class="row" style="margin-top:8px"><button class="btn pr" onclick="xaCodes(1)">'+L2("تنزيل أكواد الطلاب الجدد","Download new students' codes")+'</button></div></div>'}
+ if(D_){h+='<div class="card" style="margin:10px 0 0;box-shadow:none;border:1px solid var(--bd)"><div class="nm">✓ '+L2("تمت إضافة ","Added ")+D_.ids.length+L2(" طالب"," students")+'</div><div class="mu">'+L2("الأكواد اتولّدت. نزّلها في ملف فيه رسالة الدعوة جاهزة لكل طالب.","Codes were generated. Download them with a ready invitation message for each student.")+'</div><div class="row" style="margin-top:8px"><button class="btn pr" onclick="xaCodes(1)">'+L2("تنزيل أكواد الطلاب الجدد","Download new students' codes")+'</button>'+(D_.err&&D_.err.length?'<button class="btn" onclick="xaErr(1)">'+L2("تنزيل الصفوف اللي فيها مشاكل (","Download rows with problems (")+D_.err.length+')</button>':'')+'</div></div>'}
  return h+'</div>'};
 
 window.t3time=function(i,v){D.times=D.times||{};if(v)D.times[GR[i]]=v;else delete D.times[GR[i]];persist()};
