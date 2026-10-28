@@ -410,17 +410,17 @@ try{
    var svg=K[Math.floor(Math.random()*K.length)],L="";
    for(var d=0;d<3;d++)L+='<svg viewBox="0 0 100 100" style="transform:translateZ('+(-d*9)+'px);opacity:'+(1-d*.3)+';stroke:'+col+'">'+svg+'</svg>';
    e.innerHTML=L;box.appendChild(e);
-   var dx=R(-90,90),dy=R(-110,110),op=R(.22,.4),rx=R(-220,220),ry=R(-220,220),rz=R(-50,50),sc=R(.8,1.25),dur=R(3800,4800);
+   var dx=R(-90,90),dy=R(-110,110),op=R(.22,.4),rx=R(-220,220),ry=R(-220,220),rz=R(-50,50),sc=R(.8,1.25),dur=R(2400,3000);
    e.animate([
     {opacity:0,transform:"translate3d(0,0,-160px) rotateX(0) rotateY(0) rotateZ(0) scale("+(sc*.7)+")"},
     {opacity:op,offset:.35},
     {opacity:op*.8,offset:.7},
     {opacity:0,transform:"translate3d("+dx+"px,"+dy+"px,60px) rotateX("+rx+"deg) rotateY("+ry+"deg) rotateZ("+rz+"deg) scale("+sc+")"}
-   ],{duration:dur,delay:R(0,900),easing:"ease-in-out",fill:"both"});
+   ],{duration:dur,delay:R(0,500),easing:"ease-in-out",fill:"both"});
   }
  }
 }catch(x){}
-setTimeout(function(){s.classList.add("hide");setTimeout(function(){s.remove()},600)},5000)})()</script>
+setTimeout(function(){s.classList.add("hide");setTimeout(function(){s.remove()},600)},3500)})()</script>
 <header id="hd"></header>
 <nav id="nav"></nav>
 <main id="app"></main>
@@ -1114,7 +1114,7 @@ var body;
 if(!AU.ready||ST.rs)body='<div class="card mu">'+t("ldg")+'</div>';
 else if(on)body=tab=="home"?homeView():tab=="att"?att():tab=="stu"?stu():tab=="tasks"?tasksView():tab=="rep"?repView():setv();
 else if(sv)body=studentView();
-else body=gateView()+(ST.mode=="s"?studentLoginView():loginView())+langCard()+themeCard();
+else body=gateView()+(ST.mode=="s"?studentLoginView():loginView());
 var bk=((on&&(tab=="set"||(tab=="stu"&&edit&&edit.id)))||(sv&&ST.set))?'<div class="row" style="margin-bottom:12px"><button class="btn" style="flex:0 0 auto;padding:8px 22px" onclick="goBack()">'+(l=="ar"?"→ رجوع":"← Back")+'</button></div>':'';
 var appE=document.getElementById("app"),appH=bk+body;if(sv&&!on){if(window._apph!==appH){window._apph=appH;appE.innerHTML=appH}}else{window._apph=null;appE.innerHTML=appH}
 syncUI();if(adj)setTimeout(rlInit,0)}
