@@ -5615,6 +5615,13 @@ window.FB={
     return {data:d,hw,sol,notes,msgs,reps};
   },
   async studentLogout(){try{await signOut(auth)}catch(e){}},
+  watchStudent(phone,code,uid,grade,cb){
+    const pid=pidOf(phone,code),un=[],er=e=>console.error(e);
+    un.push(onSnapshot(doc(db,"portal",pid),x=>{if(x.exists())cb({k:"p",d:x.data()})},er));
+    un.push(onSnapshot(collection(db,"portal",pid,"hw"),x=>{const L=[];x.forEach(y=>L.push(y.data()));L.sort((a,b)=>String(b.id).localeCompare(String(a.id)));cb({k:"h",L})},er));
+    un.push(onSnapshot(query(collection(db,"notices"),where("uid","==",uid),where("grade","==",grade)),x=>{const L=[];x.forEach(y=>L.push(y.data()));cb({k:"n",L})},er));
+    return ()=>un.forEach(f=>f());
+  },
 
   async submitSol(phone,code,hwId,imgs){
     const pid=pidOf(phone,code);
@@ -5922,5 +5929,107 @@ async function flush(){
 }
 </script>
 <script>if("serviceWorker"in navigator&&(location.protocol=="https:"||location.hostname=="localhost")){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+<style id="ntfCss">
+.bdg{border-radius:999px!important;min-width:20px;height:20px;padding:0 5px;background:var(--no)!important;color:var(--onn)!important;border:2px solid var(--card)!important;box-shadow:none!important;font-size:12px}
+.bdg.w{background:var(--no)!important}
+nav .bdg{min-width:18px;height:18px;font-size:11px;padding:0 4px}
+</style>
+<script>
+/* ===== الإشعارات + دوائر العدّاد ===== */
+(function(){
+var K="ntf_on",busy=false,T0=0,TU="",seen={},W=null,WK="",known=null,pend=false;
+function sup(){return "Notification" in window}
+function isOn(){try{return localStorage.getItem(K)=="1"&&sup()&&Notification.permission=="granted"}catch(e){return false}}
+function show(t,b,tag){
+  if(!isOn())return;
+  var o={body:String(b||"").slice(0,140),tag:tag||undefined,icon:"apple-touch-icon.png",badge:"favicon.png",dir:S.lang=="en"?"ltr":"rtl",lang:S.lang||"ar",vibrate:[120,60,120]};
+  var fb=function(){try{new Notification(t,o)}catch(e){}};
+  try{if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){navigator.serviceWorker.getRegistration().then(function(r){if(r&&r.showNotification)r.showNotification(t,o);else fb()}).catch(fb);return}}catch(e){}
+  fb();
+}
+window.ntfToggle=function(){
+  if(!sup()){alert(L2("المتصفح ده مش بيدعم الإشعارات.","This browser does not support notifications."));return}
+  if(isOn()){try{localStorage.setItem(K,"0")}catch(e){}draw();return}
+  if(Notification.permission=="denied"){alert(L2("الإشعارات محظورة للموقع ده. دوس على أيقونة القفل جنب العنوان في المتصفح، اختار الإشعارات ← سماح، وبعدين دوس تفعيل تاني.","Notifications are blocked for this site. Tap the lock icon next to the address bar, allow Notifications, then tap Enable again."));return}
+  var done=false,fin=function(p){if(done)return;done=true;if(p=="granted"){try{localStorage.setItem(K,"1")}catch(e){}show(L2("تم تفعيل الإشعارات ✅","Notifications enabled ✅"),L2("هتوصلك تنبيهات الواجبات والرسائل.","You will get alerts for homework and messages."),"ntf-test")}draw()};
+  try{var r=Notification.requestPermission(fin);if(r&&r.then)r.then(fin)}catch(e){fin("denied")}
+};
+function ntfCard(){
+  var on=isOn(),p=sup()?Notification.permission:"unsupported";
+  var d=p=="unsupported"?L2("المتصفح ده مش بيدعم الإشعارات.","Not supported in this browser."):on?L2("الإشعارات شغالة ✅ هتوصلك تنبيهات فورية.","Notifications are ON ✅"):p=="denied"?L2("المتصفح حاظر الإشعارات للموقع ده، لازم تسمح بيها من إعدادات الموقع.","Blocked by the browser. Allow it from the site settings."):L2("دوس تفعيل وبعدها وافق على طلب المتصفح.","Tap Enable, then allow the browser request.");
+  return '<div class="card"><div class="nm">🔔 '+L2("الإشعارات","Notifications")+'</div><div class="mu" style="margin:4px 0 10px">'+d+'</div><div class="row"><button class="btn '+(on?"no":"pr")+'" onclick="ntfToggle()">'+(on?L2("تعطيل","Disable"):L2("تفعيل","Enable"))+'</button></div></div>';
+}
+var _tc=window.themeCard;window.themeCard=function(){return _tc.apply(this,arguments)+ntfCard()};
+
+function nameOf(sid){var s=(S.students||[]).find(function(x){return x.id==sid});return s?s.name:null}
+function safeDraw(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||ST.up){pend=true;return}draw()}
+document.addEventListener("focusout",function(){if(pend)setTimeout(function(){var a=document.activeElement;if(!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))&&!ST.up){pend=false;draw()}},300)});
+
+/* ---- المدرس: تسليمات / رسائل / تقارير / ملاحظات ---- */
+function chkT(){
+  var u=AU.user;if(!u){TU="";return}
+  if(TU!=u.uid){TU=u.uid;T0=Date.now();seen={}}
+  function go(k,at,fn){if(!(at>T0)||seen[k])return;seen[k]=1;fn()}
+  (window.TSUBS||[]).forEach(function(x){var n=nameOf(x.sid);if(n)go("s"+x.sid+"|"+x.hwId+"|"+x.at,x.at,function(){show(L2("تسليم واجب جديد 📥","New homework submission 📥"),n,"sub"+x.sid)})});
+  (window.TMSGS||[]).forEach(function(m){var n=nameOf(m.sid);if(n)go("m"+m.id,m.at,function(){show(L2("رسالة جديدة 💬 "+n,"New message 💬 "+n),m.text,"msg"+m.id)})});
+  (window.TREPS||[]).forEach(function(r){var n=nameOf(r.sid);if(n)go("r"+r.id+"|"+r.at,r.at,function(){show(L2("تقرير جديد 📝","New report 📝"),n,"rep"+r.sid)})});
+  (window.TNOTES||[]).forEach(function(r){var n=nameOf(r.sid);if(n)go("n"+r.sid+"|"+r.day+"|"+r.at,r.at,function(){show(L2("ملاحظة جديدة 🗒️ "+n,"New note 🗒️ "+n),r.text,"note"+r.sid)})});
+}
+function trKey(){return "trn_"+((AU.user&&AU.user.email)||"")}
+function getTR(){try{return +localStorage.getItem(trKey())||0}catch(e){return 0}}
+function repMax(){var m=0;(window.TREPS||[]).concat(window.TNOTES||[]).forEach(function(x){if((x.at||0)>m)m=x.at});return m}
+function repNew(){var s=getTR(),c=0;(window.TREPS||[]).concat(window.TNOTES||[]).forEach(function(x){if(x.at>s&&nameOf(x.sid))c++});return c}
+function teacherBadges(){
+  if(tab=="rep"){var m=repMax();if(m>getTR()){try{localStorage.setItem(trKey(),String(m))}catch(e){}}}
+  var n=tab=="rep"?0:repNew();if(!n)return;
+  var i=document.querySelector('nav button[data-k="rep"] i');if(i&&!i.querySelector(".bdg"))i.insertAdjacentHTML("beforeend",bdgT(n));
+}
+
+/* ---- الطالب: واجبات / إخطارات / حصة ملغية ---- */
+function stopS(){if(W){try{W()}catch(e){}}W=null;WK="";known=null}
+function chkS(){
+  if(!ST.data||!window.FB||!FB.watchStudent){if(W)stopS();return}
+  var k=pn(ST.data.phone)+"_"+ST.pc;
+  if(W&&WK==k)return;
+  stopS();WK=k;
+  known={h:{},n:{},c:{}};
+  (ST.hw||[]).forEach(function(w){known.h[w.id]=1});
+  (ST.notes||[]).forEach(function(n){known.n[n.id]=1});
+  var c0=ST.data.cx;if(c0&&typeof c0=="object")Object.keys(c0).forEach(function(d){known.c[d]=1});
+  var d=ST.data;
+  W=FB.watchStudent(pn(d.phone),ST.pc,d.uid,d.grade,function(ev){
+    if(!ST.data||WK!=k)return;
+    if(ev.k=="h"){
+      ev.L.forEach(function(w){if(!known.h[w.id]){known.h[w.id]=1;show(L2("واجب جديد 📚","New homework 📚"),w.title||"","hw"+w.id)}});
+      ST.hw=ev.L;
+    }else if(ev.k=="n"){
+      var L=ev.L.filter(function(n){return !n.grp||n.grp==ST.data.group});
+      L.forEach(function(n){if(!known.n[n.id]){known.n[n.id]=1;show(n.kind=="w"?L2("تنبيه من المدرس ⚠️","Alert from teacher ⚠️"):L2("إخطار من المدرس ℹ️","Notice from teacher ℹ️"),n.text,"nt"+n.id)}});
+      ST.notes=L;ST.newN=hasNew();
+    }else if(ev.k=="p"){
+      var p=ev.d,cc=p.cx;
+      if(cc&&typeof cc=="object")Object.keys(cc).forEach(function(dt){if(cc[dt]&&!known.c[dt]){known.c[dt]=1;show(L2("حصة ملغية ❌","Class cancelled ❌"),L2("تم إلغاء حصة يوم ","Class cancelled on ")+dt,"cx"+dt)}});
+      ST.data.cx=p.cx;ST.data.sch=p.sch||ST.data.sch;ST.data.exams=p.exams||[];
+    }
+    safeDraw();
+  });
+}
+var BELL='<svg viewBox="0 0 24 24"><path pathLength="1" d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path pathLength="1" d="M10 21h4"/></svg>';
+var _sn=window.studentNav;
+window.studentNav=function(){
+  var h=_sn.apply(this,arguments),n=(ST.tab=="nt"&&!ST.set)?0:newNts().length;
+  return h+'<button class="'+(!ST.set&&ST.tab=="nt"?"on":"")+'" data-k="nt" onclick="stGo(\'nt\')"><i>'+BELL+bdg(n,false)+'</i><span>'+L2("الإخطارات","Notices")+'</span></button>';
+};
+
+var _d=window.draw;
+window.draw=function(){
+  var r=_d.apply(this,arguments);
+  if(busy)return r;busy=true;
+  try{if(AU.ready&&AU.user){chkT();teacherBadges();if(W)stopS()}else{TU="";chkS()}}catch(e){console.error(e)}
+  busy=false;return r;
+};
+})();
+</script>
+
 </body>
 </html>
