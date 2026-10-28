@@ -5709,6 +5709,10 @@ window.FB={
     return {sid:p.sid,left,gr:g,total:Math.max(total,done),done,rows};
   },
 
+  watchGames(cb){
+    const u=auth.currentUser;if(!u||u.isAnonymous)return ()=>{};
+    return onSnapshot(query(collection(db,"games"),where("uid","==",u.uid)),x=>{const L=[];x.forEach(y=>{const g=y.data();L.push({sid:g.sid,name:String(g.name||""),grade:g.grade,c:g.c,ms:g.ms||0})});cb(L)},e=>console.error(e));
+  },
   async teacherBoard(c){
     const u=auth.currentUser;if(!u||u.isAnonymous)throw {code:"auth"};
     const qs=await getDocs(query(collection(db,"games"),where("uid","==",u.uid),where("c","==",c)));
@@ -5929,11 +5933,6 @@ async function flush(){
 }
 </script>
 <script>if("serviceWorker"in navigator&&(location.protocol=="https:"||location.hostname=="localhost")){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
-<style id="ntfCss">
-.bdg{border-radius:999px!important;min-width:20px;height:20px;padding:0 5px;background:var(--no)!important;color:var(--onn)!important;border:2px solid var(--card)!important;box-shadow:none!important;font-size:12px}
-.bdg.w{background:var(--no)!important}
-nav .bdg{min-width:18px;height:18px;font-size:11px;padding:0 4px}
-</style>
 <script>
 /* ===== الإشعارات + دوائر العدّاد ===== */
 (function(){
@@ -5975,14 +5974,44 @@ function chkT(){
   (window.TREPS||[]).forEach(function(r){var n=nameOf(r.sid);if(n)go("r"+r.id+"|"+r.at,r.at,function(){show(L2("تقرير جديد 📝","New report 📝"),n,"rep"+r.sid)})});
   (window.TNOTES||[]).forEach(function(r){var n=nameOf(r.sid);if(n)go("n"+r.sid+"|"+r.day+"|"+r.at,r.at,function(){show(L2("ملاحظة جديدة 🗒️ "+n,"New note 🗒️ "+n),r.text,"note"+r.sid)})});
 }
-function trKey(){return "trn_"+((AU.user&&AU.user.email)||"")}
-function getTR(){try{return +localStorage.getItem(trKey())||0}catch(e){return 0}}
-function repMax(){var m=0;(window.TREPS||[]).concat(window.TNOTES||[]).forEach(function(x){if((x.at||0)>m)m=x.at});return m}
-function repNew(){var s=getTR(),c=0;(window.TREPS||[]).concat(window.TNOTES||[]).forEach(function(x){if(x.at>s&&nameOf(x.sid))c++});return c}
+function sk(n){return n+"_"+((AU.user&&AU.user.email)||"")}
+function gl(k){try{return +localStorage.getItem(k)||0}catch(e){return 0}}
+function sl(k,v){try{localStorage.setItem(k,String(v))}catch(e){}}
+function lsMax(){var m=0;(window.TREPS||[]).concat(window.TNOTES||[]).forEach(function(x){if((x.at||0)>m)m=x.at});return m}
+function lsNew(){var s=gl(sk("trn")),c=0;(window.TREPS||[]).concat(window.TNOTES||[]).forEach(function(x){if(x.at>s&&nameOf(x.sid))c++});return c}
+function lbNew(){return gl(sk("lbn"))}
+/* المتصدرين: تغيير الأول أو التاني فقط */
+var GU=null,GUid="",CN={t:"",k:""};
+function startG(){
+  var u=AU.user;if(!u){if(GU){GU();GU=null;GUid=""}return}
+  if(GU&&GUid==u.uid)return;
+  if(GU)GU();GUid=u.uid;
+  if(!window.FB||!FB.watchGames){GUid="";return}
+  GU=FB.watchGames(function(L){
+    var by={};L.forEach(function(g){if(!nameOf(g.sid))return;(by[g.c+"|"+g.grade]=by[g.c+"|"+g.grade]||[]).push(g)});
+    var changed=0;
+    Object.keys(by).forEach(function(k){
+      var R=by[k].sort(function(a,b){return a.ms-b.ms}),sig=R.slice(0,2).map(function(g){return g.sid}).join(","),key=sk("lbt_"+k),old=null;
+      try{old=localStorage.getItem(key)}catch(e){}
+      if(old!==null&&old!==sig){
+        var o=old.split(","),n=sig.split(","),nm=function(i){return R[i]?R[i].name.split(" ")[0]:""};
+        changed++;
+        if(n[0]!=o[0])show(L2("تغيير في المتصدرين 🏆","Leaderboard change 🏆"),L2(nm(0)+" بقى الأول","1st place: "+nm(0)),"lb"+k);
+        else show(L2("تغيير في المتصدرين 🏆","Leaderboard change 🏆"),L2(nm(1)+" بقى التاني","2nd place: "+nm(1)),"lb"+k);
+      }
+      if(old!==sig){try{localStorage.setItem(key,sig)}catch(e){}}
+    });
+    if(changed){sl(sk("lbn"),lbNew()+changed);draw()}
+  });
+}
 function teacherBadges(){
-  if(tab=="rep"){var m=repMax();if(m>getTR()){try{localStorage.setItem(trKey(),String(m))}catch(e){}}}
-  var n=tab=="rep"?0:repNew();if(!n)return;
-  var i=document.querySelector('nav button[data-k="rep"] i');if(i&&!i.querySelector(".bdg"))i.insertAdjacentHTML("beforeend",bdgT(n));
+  if(tab=="rep"&&rtab=="ls"){var m=lsMax();if(m>gl(sk("trn")))sl(sk("trn"),m)}
+  if(tab=="rep"&&rtab=="lb"&&lbNew())sl(sk("lbn"),0);
+  var a=lsNew(),b=lbNew(),i=document.querySelector('nav button[data-k="rep"] i');
+  if(i&&!i.querySelector(".bdg")&&a+b>0)i.insertAdjacentHTML("beforeend",bdgT(a+b));
+  if(tab=="rep"){var B=document.querySelectorAll(".tabs2.cmp button");
+    if(a&&B[2]&&!B[2].querySelector(".bdg"))B[2].insertAdjacentHTML("beforeend",bdg(a,false));
+    if(b&&B[3]&&!B[3].querySelector(".bdg"))B[3].insertAdjacentHTML("beforeend",bdg(b,false));}
 }
 
 /* ---- الطالب: واجبات / إخطارات / حصة ملغية ---- */
@@ -6025,7 +6054,7 @@ var _d=window.draw;
 window.draw=function(){
   var r=_d.apply(this,arguments);
   if(busy)return r;busy=true;
-  try{if(AU.ready&&AU.user){chkT();teacherBadges();if(W)stopS()}else{TU="";chkS()}}catch(e){console.error(e)}
+  try{if(AU.ready&&AU.user){chkT();startG();teacherBadges();if(W)stopS()}else{TU="";startG();chkS()}}catch(e){console.error(e)}
   busy=false;return r;
 };
 })();
