@@ -713,7 +713,7 @@ function stu(){return (edit&&edit.id?'':sAddH())+sbar()+'<div id="sl">'+listS()+
 function ndg(el){var v=el.value.replace(/[\u0660-\u0669]/g,function(c){return c.charCodeAt(0)-1632}).replace(/[\u06F0-\u06F9]/g,function(c){return c.charCodeAt(0)-1776}).replace(/[^0-9]/g,"");if(v!==el.value)el.value=v;if(el.id=="f_pr")syncPrice()}
 function pickPrice(v){document.getElementById("f_pr").value=v;syncPrice()}
 function syncPrice(){var v=+document.getElementById("f_pr").value;[].forEach.call(document.querySelectorAll(".pc"),function(b){b.classList.toggle("pr",+b.getAttribute("data-v")===v)})}
-function addS(){var n=document.getElementById("f_n").value.trim();if(!n)return;var pp=ph("f_p");if(!pp){alert(t("nophone"));return}var pr=+document.getElementById("f_pr").value;if(!(pr>0)){alert(L2("اختار أو اكتب سعر الحصة","Choose or type the class price"));return}if(S.students.some(function(x){return x.phone==pp&&!(edit&&edit.id==x.id)})){alert(t("dup"));return}var o={name:n,sex:document.querySelector('input[name=sx]:checked').value,grade:document.getElementById("f_g").value,group:document.getElementById("f_r").value,phone:ph("f_p"),parentPhone:ph("f_pp"),price:pr};
+function addS(){var n=document.getElementById("f_n").value.trim();if(!n)return;var pp=ph("f_p");if(!pp){alert(t("nophone"));return}var pr=+document.getElementById("f_pr").value;if(!(pr>0)){alert(L2("اختار أو اكتب سعر الحصة","Choose or type the class price"));return}if(S.students.some(function(x){return x.phone==pp&&String(x.name).trim()==n&&x.grade==document.getElementById("f_g").value&&!(edit&&edit.id==x.id)})){alert(t("dup"));return}var o={name:n,sex:document.querySelector('input[name=sx]:checked').value,grade:document.getElementById("f_g").value,group:document.getElementById("f_r").value,phone:ph("f_p"),parentPhone:ph("f_pp"),price:pr};
 if(edit&&edit.id){for(var k in o)edit[k]=o[k]}else{o.id=Date.now();o.code=genCode();S.students.push(o);fg=o.grade;SF.open="";SF.anim="";SG.anim=""}edit=null;save();draw()}
 function delS(id){if(pd!=id){pd=id;draw();return}pd=null;S.students=S.students.filter(function(s){return s.id!=id});for(var k in S.rec)if(k.split("|")[1]==id)delete S.rec[k];save();draw()}
 function sum(){var h=fbar(0),tot=0;
@@ -948,8 +948,18 @@ function studentGo(){var p=pn(document.getElementById("sl_p").value),c=document.
  if(!window.FB){ST.err=t("e_net");draw();return}
  ST.busy=true;ST.err="";draw();
  FB.studentLogin(p,c).then(function(r){ST.busy=false;if(!r){ST.err=t("e_pc");draw();return}ST.data=r.data;ST.hw=r.hw;ST.sol=r.sol;ST.notes=r.notes||[];ST.msgs=r.msgs||[];ST.reps=r.reps||[];ST.pc=c;ST.set=false;ST.newN=hasNew();ST.tab="home";try{localStorage.setItem("stu_sess",JSON.stringify({p:p,c:c}))}catch(e){}draw()}).catch(function(x){ST.busy=false;ST.err=errMsg(x);draw()})}
+function sibTitle(n){return S.lang=="en"?"This number has "+n+" accounts":(n==2?"الرقم ده مسجل عليه حسابين":n<=10?"الرقم ده مسجل عليه "+n+" حسابات":"الرقم ده مسجل عليه "+n+" حساب")}
+function sibCard(){var d=ST.data,L=(d&&d.sibs)||[];if(L.length<2)return "";
+ return '<div class="card"><div class="nm">'+sibTitle(L.length)+'</div><div class="mu">'+L2("اضغط على الحساب اللي عايز تفتحه","Tap the account you want to open")+'</div>'
+ +L.map(function(b){var cur=String(b.c)==String(ST.pc);return '<button class="btn'+(cur?' pr':'')+'" style="width:100%;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px"'+(ST.busy?' disabled':'')+' onclick="stSwitch(\''+esc(b.c)+'\')"><b>'+esc(b.n)+'</b><span style="font-size:12px;opacity:.85">'+esc(gn(b.g))+(b.r?' · '+esc(gd(b.r)):'')+(cur?' ✓':'')+'</span></button>'}).join("")+'</div>'}
+function stSwitch(c){if(ST.busy||String(c)==String(ST.pc))return;var p=pn(ST.ph||(ST.data&&ST.data.phone));if(!p||!window.FB)return;
+ ST.busy=true;draw();
+ FB.studentLogin(p,c).then(function(r){ST.busy=false;if(!r){ST.err=t("e_pc");draw();return}
+  try{gmStop()}catch(e){}ST.bd=null;try{GM.res=null;GM.open=""}catch(e){}
+  ST.data=r.data;ST.hw=r.hw;ST.sol=r.sol;ST.notes=r.notes||[];ST.msgs=r.msgs||[];ST.reps=r.reps||[];ST.pc=c;ST.set=false;ST.newN=hasNew();ST.tab="home";
+  try{localStorage.setItem("stu_sess",JSON.stringify({p:p,c:c}))}catch(e){}draw()}).catch(function(x){ST.busy=false;ST.err=errMsg(x);draw()})}
 function studentOut(){try{localStorage.removeItem("stu_sess")}catch(e){}gmStop();ST.bd=null;GM.res=null;GM.open="";ST.data=null;ST.hw=[];ST.sol={};ST.notes=[];ST.set=false;ST.newN=false;ST.pc="";ST.msgs=[];ST.rp=null;if(window.FB)FB.studentLogout();draw()}
-function studentRefresh(){if(!window.FB||!ST.data)return;FB.studentLogin(pn(ST.data.phone),ST.pc).then(function(r){if(r){ST.data=r.data;ST.hw=r.hw;ST.sol=r.sol;ST.notes=r.notes||[];ST.msgs=r.msgs||[];ST.reps=r.reps||[];ST.newN=hasNew();draw()}})}
+function studentRefresh(){if(!window.FB||!ST.data)return;FB.studentLogin(pn(ST.ph||ST.data.phone),ST.pc).then(function(r){if(r){ST.data=r.data;ST.hw=r.hw;ST.sol=r.sol;ST.notes=r.notes||[];ST.msgs=r.msgs||[];ST.reps=r.reps||[];ST.newN=hasNew();draw()}})}
 function pickSol(id,inp){var f=inp.files;if(!f||!f.length)return;if(hwEnded(id)){inp.value="";alert(t("hwend"));draw();return}ST.up=id;draw();shrinkMany(f,function(L){if(!L.length){ST.up=null;alert(t("e_img"));draw();return}
  var old=(ST.sol[id]&&ST.sol[id].imgs)||[],all=old.concat(L).slice(0,6),tot=0;all.forEach(function(u){tot+=u.length});if(tot>800000){ST.up=null;alert(t("e_big"));draw();return}
  FB.submitSol(ST.data.phone,ST.pc,id,all).then(function(){ST.sol[id]={imgs:all};ST.up=null;draw()}).catch(function(x){ST.up=null;alert(x&&x.code=="permission-denied"?t("hwend"):errMsg(x));draw()})})}
@@ -1031,7 +1041,7 @@ function studentView(){var d=ST.data;
  if(ST.set)return langCard()+themeCard()+'<div class="card"><div class="row"><button class="btn no" onclick="studentOut()">'+t("lo")+'</button></div></div>';
  if(ST.tab=="nt"){markSeen();ST.newN=false}if(ST.tab=="hw")markSeenH();var NN=newNts(),NH=newHw();
  var h='';
- if(ST.tab=="home"){h+='<div class="card sgreet" onclick="stuInfo()"><div class="nm">'+t("hello")+' '+esc(d.name)+'</div><div class="mu">'+gn(d.grade)+(d.group?' · '+esc(gd(d.group)):'')+'</div><div class="sinfo" id="sinfo"><span><small>'+L2("الطالب","Student")+'</small>'+esc(fmtP(d.phone))+'</span><span><small>'+L2("ولي الأمر","Parent")+'</small>'+esc(fmtP(d.parentPhone))+'</span>'+avBtn()+'</div></div>'+gameCard()}
+ if(ST.tab=="home"){h+='<div class="card sgreet" onclick="stuInfo()"><div class="nm">'+t("hello")+' '+esc(d.name)+'</div><div class="mu">'+gn(d.grade)+(d.group?' · '+esc(gd(d.group)):'')+'</div><div class="sinfo" id="sinfo"><span><small>'+L2("الطالب","Student")+'</small>'+esc(fmtP(d.phone))+'</span><span><small>'+L2("ولي الأمر","Parent")+'</small>'+esc(fmtP(d.parentPhone))+'</span>'+avBtn()+'</div></div>'+sibCard()+gameCard()}
  else if(ST.tab=="me"){h+='<div class="card"><div class="stat"><div><b>'+d.a+'</b>'+t("pres")+'</div><div><b class="'+(d.b?"owe":"")+'">'+d.b+'</b>'+t("abs")+'</div><div><b class="'+(d.u?"owe":"")+'">'+d.u+'</b>'+t("unp")+'</div></div></div>'}
  else if(ST.tab=="rp"){h+=repBox()}
  else if(ST.tab=="nt"){var N=(ST.notes||[]).slice().sort(function(a,b){return b.at-a.at});if(!N.length)h+='<div class="card mu">'+t("ntnone")+'</div>';N.forEach(function(n){h+=ntCard(n,false,false)})}
@@ -1108,8 +1118,9 @@ var _sgd=draw,_lt="";draw=function(){var b=document.querySelector(".gmb[data-sg]
  _lt=tab;return r};
 function draw1(){var l=S.lang,on=AU.ready&&AU.user,sv=AU.ready&&ST.data;document.documentElement.lang=l;document.documentElement.dir=l=="ar"?"rtl":"ltr";document.title=t("title");
 var hdh=((sv||on)?logoHtml():'<div class="hn">ahmed khalifa</div>')+'<div class="ht"><span id="htt">'+t("title")+'</span> <span id="sy"></span></div>'+((on||sv)?'<button class="gear'+((on?tab=="set":ST.set)?" on":"")+'" onclick="'+(on?"gearT()":"stSet()")+'" aria-label="'+t("set")+'">'+gearSvg()+'</button>':'');
+if(on)hdh+='<button class="gear calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button>';
 hdh+=(window.calcBtn?calcBtn(sv&&!on):""); if(sv&&!on&&ST.data&&ST.data.av)hdh+='<img class="hav" src="'+ST.data.av+'" alt="" onclick="avTap()">';
-var hdE=document.getElementById("hd");if(hdE)hdE.classList.toggle("hasav",!!(sv&&!on&&ST.data&&ST.data.av));
+var hdE=document.getElementById("hd");if(hdE){hdE.classList.toggle("hasav",!!(sv&&!on&&ST.data&&ST.data.av));hdE.classList.toggle("hascalc",!!on)}
 if(hdh!==window._hdh){window._hdh=hdh;document.getElementById("hd").innerHTML=hdh}
 var htE=document.getElementById("htt");if(htE){var htT=on&&{home:1,att:1,stu:1,tasks:1,rep:1,set:1}[tab]?t(tab):sv?(ST.set?t("set"):({home:t("home"),me:t("me"),rp:L2("الحصة","Lesson"),hw:t("mine"),nt:t("nt")})[ST.tab]||t("title")):t("title");if(htE.textContent!==htT){var htF=htE.textContent!=="";htE.textContent=htT;if(htF&&htE.animate)htE.animate([{opacity:0,transform:"translateY(-6px)"},{opacity:1,transform:"none"}],{duration:280,easing:"cubic-bezier(.2,.8,.2,1)"})}}
 var navH=on?["home","att","stu","tasks","rep"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" data-k="'+k+'" onclick="go(\''+k+'\')"><i>'+(IC[k]||IC.hw)+(k=="tasks"?bdgT(newSubs()):"")+'</i><span>'+t(k)+'</span></button>'}).join(""):(sv?studentNav():"");
@@ -6430,7 +6441,7 @@ function xaRead(A){var M={},hi=-1,i,r,a;
  var g=GR.filter(function(x){return x==M.gr||gn(x)==M.gr})[0]||xaG();
  var ci=function(n){return M.h.indexOf(n)},cN=ci("الاسم"),cX=ci("النوع"),cG=ci("المجموعة"),cP=ci("هاتف الطالب"),cQ=ci("هاتف ولي الأمر"),cR=ci("سعر الحصة");
  var dg=xlNum(M.grp),dp=xlNum(M.pr),used={},seen={},P={grade:g,ok:[],err:[],h:M.h,dg:M.grp,dp:M.pr};
- S.students.forEach(function(s){used[s.phone]=1});
+ S.students.forEach(function(s){used[s.phone+"|"+String(s.name).trim()+"|"+s.grade]=1});
  var cell=function(r,c){return c>-1&&r[c]!=null?r[c]:""};
  for(i=hi+1;i<A.length;i++){r=A[i]||[];
   var nm=String(cell(r,cN)).trim(),pv=cell(r,cP),qv=cell(r,cQ),xv=cell(r,cX),gv=cell(r,cG),rv=cell(r,cR);
@@ -6443,15 +6454,15 @@ function xaRead(A){var M={},hi=-1,i,r,a;
   var q=xaPhone(qv);
   if(q&&(q.length<9||q.length>11)){bad(L2("رقم ولي الأمر غلط","Invalid parent phone"));continue}
   var pp="+20"+p;
-  if(used[pp]){bad(L2("الرقم ده مسجل قبل كده","Phone already registered"));continue}
-  if(seen[pp]){bad(L2("الرقم مكرر في الملف","Duplicate phone in the file"));continue}
+  if(used[pp+"|"+nm+"|"+g]){bad(L2("الرقم ده مسجل قبل كده","Phone already registered"));continue}
+  if(seen[pp+"|"+nm+"|"+g]){bad(L2("الرقم مكرر في الملف","Duplicate phone in the file"));continue}
   var sx=xaSex(xv);
   if(!sx){bad(L2("النوع لازم يكون ولد أو بنت","Gender must be boy or girl"));continue}
   var gp=String(gv).trim()===""?(isNaN(dg)?1:dg):xlNum(gv);
   if(!(gp>=1&&gp<=5&&gp%1===0)||(D.gdel&&D.gdel[g+"|"+gp])){bad(L2("المجموعة غلط","Invalid group"));continue}
   var pr=String(rv).trim()===""?dp:xlNum(rv);
   if(!(pr>0)){bad(L2("سعر الحصة ناقص","Missing class price"));continue}
-  seen[pp]=1;P.ok.push({name:nm,sex:sx,grade:g,group:String(gp),phone:pp,parentPhone:q?"+20"+q:"",price:pr})}
+  seen[pp+"|"+nm+"|"+g]=1;P.ok.push({name:nm,sex:sx,grade:g,group:String(gp),phone:pp,parentPhone:q?"+20"+q:"",price:pr})}
  return P}
 window.xaTpl=function(){var g=xaG();xlLib(function(){
  var A=[["نوع الملف","طلاب جدد"],["المرحلة",gn(g)],["المجموعة الافتراضية",""],["سعر الحصة الافتراضي",""],["* اكتب بيانات الطلاب تحت العناوين. الاسم وهاتف الطالب مطلوبين (الطالب بيدخل برقم تليفونه). النوع: ولد / بنت (الفاضي = ولد). المجموعة وسعر الحصة لو فاضيين بياخدوا القيمة الافتراضية اللي فوق. ما تغيّرش العناوين."],[],["م","الاسم","النوع","المجموعة","هاتف الطالب","هاتف ولي الأمر","سعر الحصة"]];
@@ -6470,9 +6481,9 @@ window.xaFile=function(inp){var f=inp.files&&inp.files[0];if(!f)return;XA.msg=""
   draw()};fr.readAsArrayBuffer(f)})};
 window.xaAdd=function(){var P=XA.p;if(!P||!P.ok.length)return;
  var ph={},ex={},ids=[],id=Date.now();
- S.students.forEach(function(s){ph[s.phone]=1;ex[s.id]=1});
- P.ok.forEach(function(o){if(ph[o.phone])return;ph[o.phone]=1;while(ex[id])id++;ex[id]=1;
-  var s={id:id,name:o.name,sex:o.sex,grade:o.grade,group:o.group,phone:o.phone,parentPhone:o.parentPhone,price:o.price,code:genCode()};
+ S.students.forEach(function(s){ph[s.phone+"|"+String(s.name).trim()+"|"+s.grade]=1;ex[s.id]=1});
+ P.ok.forEach(function(o){var kk=o.phone+"|"+String(o.name).trim()+"|"+o.grade;if(ph[kk])return;ph[kk]=1;while(ex[id])id++;ex[id]=1;
+  var s={id:id,name:o.name,sex:o.sex,grade:o.grade,group:o.group,phone:o.phone,parentPhone:o.parentPhone,price:o.price,code:o.code||genCode()};
   S.students.push(s);ids.push(id)});
  fg=P.grade;XA.done={ids:ids,g:P.grade,grade:P.grade,err:P.err,h:P.h,dg:P.dg,dp:P.dp};XA.p=null;XA.msg="";save();draw()};
 window.xaErr=function(d){var P=d?XA.done:XA.p;if(!P||!P.err||!P.err.length)return;
@@ -6514,14 +6525,19 @@ window.xaHtml=function(){var g=xaG(),P=XA.p,D_=XA.done,
  return h+'</div>'};
 
 /* ---- Rejected students (temporary section in Settings) ---- */
-window.XR={list:[],open:"",edit:null,msg:""};
+window.XR={list:[],open:"",edit:null,msg:"",show:false};
 try{XR.list=JSON.parse(localStorage.getItem("akXaRej")||"[]")||[]}catch(e){XR.list=[]}
 function xrSave(){try{localStorage.setItem("akXaRej",JSON.stringify(XR.list))}catch(e){}}
 window.xaAuto=function(){var P=XA.p;if(!P)return;
  var h=P.h||[],ix=function(n){return h.indexOf(n)},id=Date.now()+1000;
+ var nk=function(n,g){n=String(n==null?"":n).replace(/\s+/g," ").trim();return n?g+"|"+n:""},old={},drop={};
+ XR.list.forEach(function(x){var k=nk(x.name,x.grade);if(k)old[k]=x});
+ P.ok.forEach(function(o){var k=nk(o.name,o.grade);if(k){drop[k]=1;if(old[k])o.code=old[k].code}});
+ P.err.forEach(function(e){var k=nk(e.n,P.grade);if(k)drop[k]=1});
+ XR.list=XR.list.filter(function(x){var k=nk(x.name,x.grade);return !(k&&drop[k])});
  P.err.forEach(function(e,i){var r=e.raw||[],c=function(n){var k=ix(n);return k>-1&&r[k]!=null?r[k]:""};
   var gp=String(c("المجموعة")).trim()===""?P.dg:c("المجموعة"),pr=String(c("سعر الحصة")).trim()===""?P.dp:c("سعر الحصة");
-  XR.list.push({id:"r"+(id+i),grade:P.grade,name:String(c("الاسم")).trim(),sex:xaSex(c("النوع"))||"",group:xlNum(gp)>=1?String(xlNum(gp)):"1",phone:xaPhone(c("هاتف الطالب")),parentPhone:xaPhone(c("هاتف ولي الأمر")),price:xlNum(pr)>0?String(xlNum(pr)):"",m:e.m,code:genCode()})});
+  XR.list.push({id:"r"+(id+i),grade:P.grade,name:String(c("الاسم")).trim(),sex:xaSex(c("النوع"))||"",group:xlNum(gp)>=1?String(xlNum(gp)):"1",phone:xaPhone(c("هاتف الطالب")),parentPhone:xaPhone(c("هاتف ولي الأمر")),price:xlNum(pr)>0?String(xlNum(pr)):"",m:e.m,code:(old[nk(String(c("الاسم")).trim(),P.grade)]||{}).code||genCode()})});
  xrSave();
  if(P.ok.length)xaAdd();
  else{XA.done={ids:[],g:P.grade,grade:P.grade,err:P.err,h:P.h,dg:P.dg,dp:P.dp};XA.p=null;XA.msg="";draw()}};
@@ -6529,6 +6545,8 @@ window.xrSend=function(id){var x=XR.list.filter(function(z){return z.id==id})[0]
  var n=document.getElementById("xr_n"),p=document.getElementById("xr_p"),pd=pn(p?p.value:x.phone);
  if(!pd){alert(t("nophone"));return}
  var w=codeWa({name:(n?n.value.trim():x.name),phone:"+20"+pd,code:x.code});if(!w){alert(t("nophone"));return}window.open(w,"_blank")};
+window.xrMain=function(){XR.show=!XR.show;if(!XR.show){XR.open="";XR.edit=null;XR.msg=""}draw()};
+window.xrPick=function(v){var e=document.getElementById("xr_pr");if(e)e.value=v;[].forEach.call(document.querySelectorAll(".xrpc"),function(b){b.classList.toggle("pr",+b.getAttribute("data-v")===+v)})};
 window.xrOpen=function(g){XR.open=XR.open==g?"":g;XR.edit=null;XR.msg="";draw()};
 window.xrEdit=function(id){XR.edit=XR.edit==id?null:id;XR.msg="";draw()};
 window.xrDel=function(id){XR.list=XR.list.filter(function(x){return x.id!=id});if(XR.edit==id)XR.edit=null;xrSave();draw()};
@@ -6539,7 +6557,7 @@ window.xrOk=function(id){var x=XR.list.filter(function(z){return z.id==id})[0];i
  var pd=pn(g("xr_p").value);if(!pd)return bad(L2("هاتف الطالب ناقص","Missing student phone"));
  if(pd.length<9||pd.length>11)return bad(L2("رقم هاتف الطالب غلط","Invalid student phone"));
  var qd=pn(g("xr_pp").value);if(qd&&(qd.length<9||qd.length>11))return bad(L2("رقم ولي الأمر غلط","Invalid parent phone"));
- if(S.students.some(function(s){return s.phone=="+20"+pd}))return bad(L2("الرقم ده مسجل قبل كده","Phone already registered"));
+ if(S.students.some(function(s){return s.phone=="+20"+pd&&String(s.name).trim()==n&&s.grade==x.grade}))return bad(L2("الرقم ده مسجل قبل كده","Phone already registered"));
  var pr=+g("xr_pr").value;if(!(pr>0))return bad(L2("سعر الحصة ناقص","Missing class price"));
  var o={id:Date.now(),name:n,sex:sx.value,grade:x.grade,group:g("xr_r").value,phone:"+20"+pd,parentPhone:qd?"+20"+qd:"",price:pr,code:(x.code&&!S.students.some(function(z){return z.code==x.code}))?x.code:genCode()};
  while(S.students.some(function(s){return s.id==o.id}))o.id++;
@@ -6553,13 +6571,15 @@ window.xrForm=function(x){
  +'<span class="lbl">'+t("days")+'</span><select id="xr_r">'+gOpts(+x.group||1,x.grade)+'</select>'
  +'<span class="lbl">'+t("ph")+'</span><div class="ph"><span>+20</span><input id="xr_p" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(pn(x.phone))+'"></div>'
  +'<span class="lbl">'+t("pph")+'</span><div class="ph"><span>+20</span><input id="xr_pp" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(pn(x.parentPhone))+'"></div>'
- +'<span class="lbl">'+t("price")+'</span><input id="xr_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" value="'+esc(x.price)+'">'
+ +'<span class="lbl">'+t("price")+'</span><div class="row" style="flex-wrap:nowrap"><button type="button" class="btn xrpc'+(x.price==20?' pr':'')+'" data-v="20" style="flex:0 0 64px" onclick="xrPick(20)">20</button><button type="button" class="btn xrpc'+(x.price==25?' pr':'')+'" data-v="25" style="flex:0 0 64px" onclick="xrPick(25)">25</button><input id="xr_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this);xrPick(this.value)" placeholder="'+L2("أو اكتب السعر","Or type a price")+'" value="'+esc(x.price)+'"></div>'
  +'<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><span class="lbl">'+t("code")+'</span><span class="code">'+esc(x.code||"----")+'</span><div class="row" style="margin-top:8px"><button type="button" class="btn pr" onclick="xrSend(\''+x.id+'\')">'+t("sendc")+'</button></div></div>'
  +'<div id="xr_msg" class="mu" style="color:var(--no);margin-top:8px;display:'+(XR.msg?"block":"none")+'">'+esc(XR.msg)+'</div>'
  +'<div class="row" style="margin-top:12px"><button class="btn pr" onclick="xrOk(\''+x.id+'\')">'+L2("تأكيد","Confirm")+'</button><button class="btn" onclick="xrEdit(\''+x.id+'\')">'+t("cancel")+'</button></div></div>'};
 window.xrHtml=function(){if(!XR.list.length)return "";
  var nc=0;XR.list.forEach(function(x){if(!x.code){x.code=genCode();nc=1}});if(nc)xrSave();
- var h='<div class="card" style="border-inline-start:6px solid var(--no)"><div class="nm">'+L2("الطلاب المرفوضين","Rejected students")+' <span class="pill" style="color:var(--no)">'+XR.list.length+'</span></div><div class="mu">'+L2("طلاب الملف اللي ناقصهم بيانات. افتح الصف، كمّل الناقص، واضغط تأكيد عشان يتضافوا وياخدوا كود.","Rows from the file with missing data. Open the grade, fix the data and press Confirm to add them and generate a code.")+'</div><div style="margin-top:10px">';
+ var h='<div class="card" style="border-inline-start:6px solid var(--no)"><div class="nm" onclick="xrMain()" style="cursor:pointer;display:flex;align-items:center;gap:6px;margin:0"><span>'+L2("الطلاب المرفوضين","Rejected students")+'</span><span class="pill" style="color:var(--no)">'+XR.list.length+'</span><span class="gchev'+(XR.show?' up':'')+'" style="margin-inline-start:auto">'+(XR.show?"\u2304":L2("\u2039","\u203a"))+'</span></div>';
+ if(!XR.show)return h+'</div>';
+ h+='<div class="mu" style="margin-top:6px">'+L2("طلاب الملف اللي ناقصهم بيانات. افتح الصف، كمّل الناقص، واضغط تأكيد عشان يتضافوا وياخدوا كود.","Rows from the file with missing data. Open the grade, fix the data and press Confirm to add them and generate a code.")+'</div><div style="margin-top:10px">';
  GR.forEach(function(g){var L=XR.list.filter(function(x){return x.grade==g});if(!L.length)return;var op=XR.open==g;
   h+='<div class="gb2" onclick="xrOpen(\''+g+'\')"><span class="gsym">'+sgSym(g)+'</span><b>'+esc(gn(g))+'</b><span class="pill" style="color:var(--no)">'+L.length+'</span><span class="gchev'+(op?' up':'')+'">'+(op?"\u2304":L2("\u2039","\u203a"))+'</span></div>';
   if(op)L.forEach(function(x){var ed=XR.edit==x.id;
@@ -6792,7 +6812,7 @@ window.addEventListener("click",function(e){if(e.isTrusted&&e.detail>0&&nav.cont
 .gbo{color:var(--gn)!important;font-weight:700;direction:ltr;margin-inline-start:4px}
 .gnote2{text-align:center;padding:10px;border-radius:14px;background:var(--soft);border:1px dashed var(--bd);color:var(--mu);font-size:13px;margin-top:8px}
 </style>
-<style>#fcalc{position:fixed;left:0;top:0;z-index:30;direction:ltr;display:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}
+<style>#fcalc{position:fixed;right:16px;top:calc(env(safe-area-inset-top,0px) + 66px);z-index:30;direction:ltr;display:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}
 #fcalc .fc-b{width:40px;height:40px;border-radius:14px;border:1px solid var(--bd);background:color-mix(in srgb,var(--card) 62%,transparent);color:var(--pr);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.14);opacity:.8;display:flex;align-items:center;justify-content:center;touch-action:none;padding:0;cursor:grab;transition:transform .15s ease-out,opacity .15s}
 #fcalc .fc-b:active{transform:scale(.92)}
 #fcalc .fc-b svg{width:22px;height:22px}
@@ -6810,6 +6830,7 @@ window.addEventListener("click",function(e){if(e.isTrusted&&e.detail>0&&nav.cont
 #fcalc .fc-k button.op{background:color-mix(in srgb,var(--pr) 14%,transparent);color:var(--pr)}
 #fcalc .fc-k button.eq{background:var(--pr);color:var(--on)}
 #fcalc .fc-k button:active{transform:scale(.92)}
+#fcalc .fc-b{display:none!important}#fcalc .fc-h{cursor:default}.calcg{right:68px}header.hascalc{padding-right:124px}
 </style>
 <script>(function(){
 if(window.__fcalc)return;window.__fcalc=1;
@@ -6856,19 +6877,20 @@ function press(k){var c=exp.slice(-1),n;
 root.querySelector(".fc-k").addEventListener("click",function(e){var b=e.target.closest("button");if(b)press(b.getAttribute("data-k"))});
 root.addEventListener("keydown",function(e){if(!root.classList.contains("o"))return;var k=e.key,m={"*":"\u00D7","/":"\u00F7","-":"\u2212",Enter:"=","=":"=",Backspace:"\u232B",Delete:"C",c:"C",C:"C"};
  if(/^[0-9.+()^%]$/.test(k))m[k]=k;if(!m[k])return;e.preventDefault();press(m[k])});
-function place(){var w=root.offsetWidth,h=root.offsetHeight;st.x=Math.min(Math.max(0,st.x),Math.max(0,innerWidth-w));st.y=Math.min(Math.max(0,st.y),Math.max(0,innerHeight-h));root.style.transform="translate("+st.x+"px,"+st.y+"px)"}
+function place(){}
+function sync(){var b=document.querySelector(".calcg");if(b)b.classList.toggle("on",root.classList.contains("o"))}
 function save(){try{localStorage.setItem(K,JSON.stringify({x:st.x,y:st.y}))}catch(e){}}
-function toggle(){root.classList.toggle("o");place();save()}
+function toggle(){root.classList.toggle("o");sync()}
 function drag(el){var sx,sy,ox,oy,mv,id=null;
  el.addEventListener("pointerdown",function(e){if(e.target.closest(".fc-x")||e.button>0)return;sx=e.clientX;sy=e.clientY;ox=st.x;oy=st.y;mv=0;id=e.pointerId;try{el.setPointerCapture(id)}catch(x){}e.preventDefault()});
  el.addEventListener("pointermove",function(e){if(id===null||e.pointerId!==id)return;var dx=e.clientX-sx,dy=e.clientY-sy;if(!mv){if(Math.hypot(dx,dy)<6)return;mv=1;root.classList.add("dr")}st.x=ox+dx;st.y=oy+dy;place()});
  function up(e){if(id===null||e.pointerId!==id)return;id=null;root.classList.remove("dr");if(!mv&&e.type=="pointerup")toggle();else save()}
  el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up)}
-drag(root.querySelector(".fc-b"));drag(root.querySelector(".fc-h"));
+window.fcalcT=toggle;
 root.querySelector(".fc-x").addEventListener("click",toggle);
 root.addEventListener("mousedown",function(e){e.preventDefault()});
 ["click","mousedown","mouseup","touchstart","touchmove","touchend","pointerdown","pointerup","pointermove"].forEach(function(t){root.addEventListener(t,function(e){e.stopPropagation()},{passive:true})});
-function upd(){var on=!!(window.AU&&AU.ready&&AU.user);root.style.display=on?"block":"none";if(on)place()}
+function upd(){var on=!!(window.AU&&AU.ready&&AU.user);root.style.display=on?"block":"none";if(!on)root.classList.remove("o");sync()}
 var d0=window.draw;if(typeof d0=="function")window.draw=function(){var r=d0.apply(this,arguments);upd();return r};
 addEventListener("resize",place);render();upd();
 })();
@@ -7273,6 +7295,7 @@ async function flush(){
     for(const k in data.rec){const i=k.indexOf("|");if(i>0)(RC[k.slice(i+1)]=RC[k.slice(i+1)]||[]).push(k.slice(0,i))}
     const gt={};data.students.forEach(s=>{gt[s.grade]=(gt[s.grade]||0)+1});
     const td=today();
+    const byPh={};data.students.forEach(s=>{const a=pn(s.phone),b=pn(s.parentPhone);[a,b].filter((v,i,A)=>v&&A.indexOf(v)==i).forEach(v=>{(byPh[v]=byPh[v]||[]).push(s)})});
     const cxOf=(g,grp)=>{const c=cfg.cancel[g+"|"+grp];if(!c||typeof c!=="object")return null;const o={};Object.keys(c).forEach(d=>{if(d>=ld(new Date(Date.now()-21*864e5))&&c[d])o[d]=1});return Object.keys(o).length?o:null};
 
     // student portal copies (own phone + parent phone, both keyed by the same code)
@@ -7287,7 +7310,7 @@ async function flush(){
       const ex=(cfg.exams||[]).filter(e=>e.grade==s.grade&&((e.sc&&e.sc[s.id]!=null)||(e.abs&&e.abs[s.id]))).map(e=>{const sv=e.sc&&e.sc[s.id]!=null;return {t:e.title,m:e.max,d:e.date,v:sv?e.sc[s.id]:null,x:sv?0:1}});
       for(const ph of pids){
         const pid=ph+"_"+String(s.code||"");live[pid]=1;
-        const pj=JSON.parse(JSON.stringify({uid:u.uid,sid:s.id,name:s.name,grade:s.grade,group:s.group==null?"":s.group,phone:ownPh,parentPhone:parPh||"",...stat(s),
+        const pj=JSON.parse(JSON.stringify({uid:u.uid,sid:s.id,name:s.name,grade:s.grade,group:s.group==null?"":s.group,phone:ownPh,parentPhone:parPh||"",sibs:(byPh[ph]||[]).length>1?byPh[ph].map(x=>({n:x.name,g:x.grade,r:x.group==null?"":x.group,c:String(x.code||"")})):[],...stat(s),
           price:+s.price>0?+s.price:data.price,rc,exams:ex,sch:cfg.sched[s.grade+"|"+s.group]||null,cx:cxOf(s.grade,s.group),gt}));
         const j=JSON.stringify(pj);
         if(lastPortal[pid]!==j){lastPortal[pid]=j;ps.push(setDoc(doc(db,"portal",pid),pj))}
