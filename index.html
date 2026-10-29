@@ -645,7 +645,7 @@ var per=mon?(en?"Period: "+mon:"الفترة: شهر "+mon):(en?"Period: all tim
 if(en){m="Hello, student "+s.name+":\n"+per+"\n\nNot paid (all time): "+U.length+" classes"+(U.length?"\n"+lines(U):"")+"\nAmount owed: "+(U.length*sp(s))+" EGP\n\nAttended: "+A.length+" classes"+(A.length?"\n"+lines(A):"")+"\n\nAbsent: "+B.length+" classes"+(B.length?"\n"+lines(B):"")}
 else{m="السلام عليكم، الطالب "+s.name+":\n"+per+"\n\nلم يدفع (إجمالي): "+hs(U.length)+(U.length?"\n"+lines(U):"")+"\nالمبلغ المتبقي: "+(U.length*sp(s))+" جنيه\n\nحضر: "+hs(A.length)+(A.length?"\n"+lines(A):"")+"\n\nغاب: "+hs(B.length)+(B.length?"\n"+lines(B):"")}
 return m}
-function anaBtn(s,x,mon){var pw=wa(s.parentPhone,anaMsg(s,x,mon));return pw?'<a class="btn pr" target="_blank" rel="noopener" href="'+pw+'">'+t("ana")+'</a>':'<span class="btn mu">'+t("nopp")+'</span>'}
+function anaBtn(s,x,mon){var pw=wa(s.parentPhone||s.phone,anaMsg(s,x,mon));return pw?'<a class="btn pr" target="_blank" rel="noopener" href="'+pw+'">'+t("ana")+'</a>':'<span class="btn mu">'+t("nopp")+'</span>'}
 function defAvSvg(s){var f=s.sex=="f",hair=f?'<path class="dr" pathLength="1" transform="rotate(20 15.6 6.2)" d="M15.6 6.2l-2.3-1.4v2.8zM15.6 6.2l2.3-1.4v2.8z"/>':'',neck=f?'<path class="dr fx" pathLength="1" d="M9.6 15.7q2.4 2 4.8 0"/>':'<path class="dr fx" pathLength="1" d="M9.8 15.5L12 18l2.2-2.5"/>';return '<svg class="dav" viewBox="0 0 24 24" aria-hidden="true"><circle class="dr" pathLength="1" cx="12" cy="10.6" r="3.9"/>'+hair+'<path class="dr" pathLength="1" d="M4.6 21.5c0-3.9 3.3-6.3 7.4-6.3s7.4 2.4 7.4 6.3"/>'+neck+'<circle class="ey fx" cx="10.5" cy="10.9" r=".5" fill="currentColor" stroke="none"/><circle class="ey fx" cx="13.5" cy="10.9" r=".5" fill="currentColor" stroke="none"/><path class="dr fx" pathLength="1" d="M10.7 12.5q1.3 1 2.6 0"/><path class="sp" pathLength="1" d="M21.5 1.5v3 M20 3h3" stroke="#F59E42" stroke-width="1.6" style="--sx:2px;--sy:-1px"/></svg>'}
 function stuAv(s){if(!s)return '';return '<button type="button" class="tav'+(s.av?'':' dv')+'" aria-label="'+L2("صورة الطالب","Student photo")+'" onclick="event.stopPropagation();avShow('+s.id+')">'+(s.av?'<img src="'+s.av+'" alt="">':defAvSvg(s))+'</button>'}
 window.avShow=function(id){var s=S.students.filter(function(x){return x.id==id})[0];if(!s||document.getElementById("avov"))return;var o=document.createElement("div");o.className="gmo in";o.id="avov";o.innerHTML='<div class="gmd avd">'+(s.av?'<img src="'+s.av+'" alt="">':'<div class="avdv '+(s.sex=="f"?"f":"m")+'">'+defAvSvg(s)+'</div>')+'</div>';o.onclick=function(e){if(e.target===o)avHide()};document.body.appendChild(o)};
@@ -658,7 +658,7 @@ function toggleDt(id){if(dt==id){dt=null}else{dt=id;edit=null}pd=null;draw()}
 function codeWa(s){return wa(s.phone,t("codeMsg")(s.name,pn(s.phone)?("0"+pn(s.phone)):"",s.code||""))}
 function codeBox(s){var cw=codeWa(s);return '<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><span class="lbl">'+t("code")+'</span><span class="code" id="ecode">'+esc(s.code||"----")+'</span><div class="row" style="margin-top:8px"><a id="esend" class="btn pr" target="_blank" rel="noopener" href="'+(cw||"#")+'"'+(cw?'':' style="display:none"')+'>'+t("sendc")+'</a><button type="button" class="btn" onclick="newCode('+s.id+')">'+t("newc")+'</button></div></div>'}
 function parRep(s,x){var pw=wa(s.parentPhone,anaMsg(s,x));return '<div class="row" style="margin-top:8px">'+(pw?'<a class="btn pr" target="_blank" rel="noopener" href="'+pw+'">'+L2("إرسال التقرير لولي الأمر","Send report to parent")+'</a>':'<span class="btn mu">'+t("nopp")+'</span>')+'</div>'}
-function genCode(){var used={};S.students.forEach(function(s){used[s.code]=1});var c;do{c=String(1000+Math.floor(Math.random()*9000))}while(used[c]);return c}
+function genCode(){var used={};S.students.forEach(function(s){used[s.code]=1});((window.XR&&XR.list)||[]).forEach(function(s){used[s.code]=1});var c;do{c=String(1000+Math.floor(Math.random()*9000))}while(used[c]);return c}
 function newCode(id){var st0=null;S.students.forEach(function(s){if(s.id==id){s.code=genCode();st0=s}});save();var e=document.getElementById("ecode");if(e&&st0){e.textContent=st0.code;var a=document.getElementById("esend"),w=codeWa(st0);if(a){a.href=w||"#";a.style.display=w?"":"none"}}else draw()}
 var VR=null;
 function voiceS(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -767,9 +767,13 @@ if(AN.k){var k=AN.k,B=anBreak(D,k),tot=k=="a"?T.a:k=="b"?T.b:T.u,nm=k=="a"?t("pr
 }
 return h}
 var TA='rows="5" style="margin-top:8px"';
-function setv(){return acct()+themeCard()+'<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'
-+'<div class="card"><div class="nm">'+t("bt")+'</div><div class="mu">'+t("bd")+'</div><div class="row" style="margin-top:8px"><button class="btn pr" onclick="showB()">'+t("show")+'</button></div><textarea id="bx" '+TA+'></textarea></div>'
-+'<div class="card"><div class="nm">'+t("rt")+'</div><div class="mu">'+t("rd")+'</div><textarea id="rx" '+TA+'></textarea><div class="row" style="margin-top:8px"><button class="btn pr" onclick="restoreB()">'+t("rb")+'</button></div></div>'+(window.xlHtml?xlHtml():'')+(window.xaHtml?xaHtml():'')}
+window.BK="";
+function bkSet(k){BK=BK==k?"":k;draw();if(BK=="show")showB()}
+function bkHtml(){var sm='style="padding:5px 14px;font-size:12px;min-height:0;line-height:1.3"';
+ return '<div class="row" style="margin-top:18px;justify-content:center;gap:8px"><button class="btn'+(BK=="show"?" pr":"")+'" '+sm+' onclick="bkSet(\'show\')">'+L2("عرض البيانات","View data")+'</button><button class="btn'+(BK=="rest"?" pr":"")+'" '+sm+' onclick="bkSet(\'rest\')">'+L2("استرجاع","Restore")+'</button></div>'
+ +(BK=="show"?'<div class="card"><div class="mu">'+t("bd")+'</div><textarea id="bx" '+TA+'></textarea></div>':'')
+ +(BK=="rest"?'<div class="card"><div class="mu">'+t("rd")+'</div><textarea id="rx" '+TA+'></textarea><div class="row" style="margin-top:8px"><button class="btn pr" onclick="restoreB()">'+t("rb")+'</button></div></div>':'')}
+function setv(){return acct()+(window.xrHtml?xrHtml():'')+themeCard()+'<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'+(window.xlHtml?xlHtml():'')+(window.xaHtml?xaHtml():'')+bkHtml()}
 function setL(l){S.lang=l;save();draw()}
 function showB(){var x=document.getElementById("bx");x.value=JSON.stringify(S);x.focus();x.select();try{document.execCommand("copy")}catch(e){}}
 function restoreB(){try{var o=JSON.parse(document.getElementById("rx").value.trim());if(!o||!Array.isArray(o.students))throw 1;S={students:o.students,rec:o.rec||{},price:o.price||50,lang:S.lang,hw:S.hw||[],notices:S.notices||[]};save();tab="att";draw()}catch(e){var x=document.getElementById("rx");x.value="";x.placeholder=t("bad")}}
@@ -6462,7 +6466,7 @@ window.xaFile=function(inp){var f=inp.files&&inp.files[0];if(!f)return;XA.msg=""
   try{var wb=XLSX.read(fr.result,{type:"array"}),ws=wb.Sheets[wb.SheetNames[0]];p=xaRead(XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""}))}
   catch(e){XA.msg=L2("الملف مش مقروء","Could not read the file")}
   inp.value="";
-  if(p&&typeof p.err=="string")XA.msg=p.err;else if(p){XA.p=p;XA.g=p.grade}
+  if(p&&typeof p.err=="string")XA.msg=p.err;else if(p){XA.p=p;XA.g=p.grade;xaAuto()}
   draw()};fr.readAsArrayBuffer(f)})};
 window.xaAdd=function(){var P=XA.p;if(!P||!P.ok.length)return;
  var ph={},ex={},ids=[],id=Date.now();
@@ -6506,8 +6510,61 @@ window.xaHtml=function(){var g=xaG(),P=XA.p,D_=XA.done,
   if(P.err.length)h+='<div class="row" style="margin-top:10px"><button class="btn" onclick="xaErr(0)">'+L2("تنزيل الصفوف اللي فيها مشاكل (","Download rows with problems (")+P.err.length+')</button></div>';
   if(P.ok.length)h+='<div class="row" style="margin-top:10px"><button class="btn pr" onclick="xaAdd()">'+L2("إضافة ","Add ")+P.ok.length+L2(" طالب"," students")+'</button></div>';
   h+='</div>'}
- if(D_){h+='<div class="card" style="margin:10px 0 0;box-shadow:none;border:1px solid var(--bd)"><div class="nm">✓ '+L2("تمت إضافة ","Added ")+D_.ids.length+L2(" طالب"," students")+'</div><div class="mu">'+L2("الأكواد اتولّدت. نزّلها في ملف فيه رسالة الدعوة جاهزة لكل طالب.","Codes were generated. Download them with a ready invitation message for each student.")+'</div><div class="row" style="margin-top:8px"><button class="btn pr" onclick="xaCodes(1)">'+L2("تنزيل أكواد الطلاب الجدد","Download new students' codes")+'</button>'+(D_.err&&D_.err.length?'<button class="btn" onclick="xaErr(1)">'+L2("تنزيل الصفوف اللي فيها مشاكل (","Download rows with problems (")+D_.err.length+')</button>':'')+'</div></div>'}
+ if(D_){h+='<div class="card" style="margin:10px 0 0;box-shadow:none;border:1px solid var(--bd)"><div class="nm">✓ '+L2("تمت إضافة ","Added ")+D_.ids.length+L2(" طالب"," students")+'</div>'+(D_.err&&D_.err.length?'<div class="mu" style="color:var(--no);margin-top:4px">'+D_.err.length+L2(" طالب اتحوّلوا لقسم «الطلاب المرفوضين» في آخر الإعدادات"," students moved to the “Rejected students” section at the bottom of Settings")+'</div>':'')+'<div class="mu">'+L2("الأكواد اتولّدت. نزّلها في ملف فيه رسالة الدعوة جاهزة لكل طالب.","Codes were generated. Download them with a ready invitation message for each student.")+'</div><div class="row" style="margin-top:8px"><button class="btn pr" onclick="xaCodes(1)">'+L2("تنزيل أكواد الطلاب الجدد","Download new students' codes")+'</button>'+(D_.err&&D_.err.length?'<button class="btn" onclick="xaErr(1)">'+L2("تنزيل الصفوف اللي فيها مشاكل (","Download rows with problems (")+D_.err.length+')</button>':'')+'</div></div>'}
  return h+'</div>'};
+
+/* ---- Rejected students (temporary section in Settings) ---- */
+window.XR={list:[],open:"",edit:null,msg:""};
+try{XR.list=JSON.parse(localStorage.getItem("akXaRej")||"[]")||[]}catch(e){XR.list=[]}
+function xrSave(){try{localStorage.setItem("akXaRej",JSON.stringify(XR.list))}catch(e){}}
+window.xaAuto=function(){var P=XA.p;if(!P)return;
+ var h=P.h||[],ix=function(n){return h.indexOf(n)},id=Date.now()+1000;
+ P.err.forEach(function(e,i){var r=e.raw||[],c=function(n){var k=ix(n);return k>-1&&r[k]!=null?r[k]:""};
+  var gp=String(c("المجموعة")).trim()===""?P.dg:c("المجموعة"),pr=String(c("سعر الحصة")).trim()===""?P.dp:c("سعر الحصة");
+  XR.list.push({id:"r"+(id+i),grade:P.grade,name:String(c("الاسم")).trim(),sex:xaSex(c("النوع"))||"",group:xlNum(gp)>=1?String(xlNum(gp)):"1",phone:xaPhone(c("هاتف الطالب")),parentPhone:xaPhone(c("هاتف ولي الأمر")),price:xlNum(pr)>0?String(xlNum(pr)):"",m:e.m,code:genCode()})});
+ xrSave();
+ if(P.ok.length)xaAdd();
+ else{XA.done={ids:[],g:P.grade,grade:P.grade,err:P.err,h:P.h,dg:P.dg,dp:P.dp};XA.p=null;XA.msg="";draw()}};
+window.xrSend=function(id){var x=XR.list.filter(function(z){return z.id==id})[0];if(!x)return;
+ var n=document.getElementById("xr_n"),p=document.getElementById("xr_p"),pd=pn(p?p.value:x.phone);
+ if(!pd){alert(t("nophone"));return}
+ var w=codeWa({name:(n?n.value.trim():x.name),phone:"+20"+pd,code:x.code});if(!w){alert(t("nophone"));return}window.open(w,"_blank")};
+window.xrOpen=function(g){XR.open=XR.open==g?"":g;XR.edit=null;XR.msg="";draw()};
+window.xrEdit=function(id){XR.edit=XR.edit==id?null:id;XR.msg="";draw()};
+window.xrDel=function(id){XR.list=XR.list.filter(function(x){return x.id!=id});if(XR.edit==id)XR.edit=null;xrSave();draw()};
+window.xrOk=function(id){var x=XR.list.filter(function(z){return z.id==id})[0];if(!x)return;
+ var g=function(i){return document.getElementById(i)},bad=function(m){XR.msg=m;var e=g("xr_msg");if(e){e.textContent=m;e.style.display="block"}else draw()};
+ var n=g("xr_n").value.trim();if(!n)return bad(L2("الاسم ناقص","Missing name"));
+ var sx=document.querySelector('input[name=xr_sx]:checked');if(!sx)return bad(L2("اختار ولد أو بنت","Choose boy or girl"));
+ var pd=pn(g("xr_p").value);if(!pd)return bad(L2("هاتف الطالب ناقص","Missing student phone"));
+ if(pd.length<9||pd.length>11)return bad(L2("رقم هاتف الطالب غلط","Invalid student phone"));
+ var qd=pn(g("xr_pp").value);if(qd&&(qd.length<9||qd.length>11))return bad(L2("رقم ولي الأمر غلط","Invalid parent phone"));
+ if(S.students.some(function(s){return s.phone=="+20"+pd}))return bad(L2("الرقم ده مسجل قبل كده","Phone already registered"));
+ var pr=+g("xr_pr").value;if(!(pr>0))return bad(L2("سعر الحصة ناقص","Missing class price"));
+ var o={id:Date.now(),name:n,sex:sx.value,grade:x.grade,group:g("xr_r").value,phone:"+20"+pd,parentPhone:qd?"+20"+qd:"",price:pr,code:(x.code&&!S.students.some(function(z){return z.code==x.code}))?x.code:genCode()};
+ while(S.students.some(function(s){return s.id==o.id}))o.id++;
+ S.students.push(o);XR.list=XR.list.filter(function(z){return z.id!=id});XR.edit=null;XR.msg="";xrSave();
+ if(!XR.list.some(function(z){return z.grade==XR.open}))XR.open="";
+ save();draw()};
+window.xrForm=function(x){
+ return '<div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--bd)"><div class="mu" style="color:var(--no);margin-bottom:6px">'+esc(x.m||"")+'</div>'
+ +'<span class="lbl">'+t("name")+'</span><input id="xr_n" value="'+esc(x.name)+'">'
+ +'<div class="dys" style="margin-top:8px"><label><input type="radio" name="xr_sx" value="m"'+(x.sex=="m"?" checked":"")+'>'+t("boy")+'</label><label><input type="radio" name="xr_sx" value="f"'+(x.sex=="f"?" checked":"")+'>'+t("girl")+'</label></div>'
+ +'<span class="lbl">'+t("days")+'</span><select id="xr_r">'+gOpts(+x.group||1,x.grade)+'</select>'
+ +'<span class="lbl">'+t("ph")+'</span><div class="ph"><span>+20</span><input id="xr_p" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(pn(x.phone))+'"></div>'
+ +'<span class="lbl">'+t("pph")+'</span><div class="ph"><span>+20</span><input id="xr_pp" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(pn(x.parentPhone))+'"></div>'
+ +'<span class="lbl">'+t("price")+'</span><input id="xr_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" value="'+esc(x.price)+'">'
+ +'<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><span class="lbl">'+t("code")+'</span><span class="code">'+esc(x.code||"----")+'</span><div class="row" style="margin-top:8px"><button type="button" class="btn pr" onclick="xrSend(\''+x.id+'\')">'+t("sendc")+'</button></div></div>'
+ +'<div id="xr_msg" class="mu" style="color:var(--no);margin-top:8px;display:'+(XR.msg?"block":"none")+'">'+esc(XR.msg)+'</div>'
+ +'<div class="row" style="margin-top:12px"><button class="btn pr" onclick="xrOk(\''+x.id+'\')">'+L2("تأكيد","Confirm")+'</button><button class="btn" onclick="xrEdit(\''+x.id+'\')">'+t("cancel")+'</button></div></div>'};
+window.xrHtml=function(){if(!XR.list.length)return "";
+ var nc=0;XR.list.forEach(function(x){if(!x.code){x.code=genCode();nc=1}});if(nc)xrSave();
+ var h='<div class="card" style="border-inline-start:6px solid var(--no)"><div class="nm">'+L2("الطلاب المرفوضين","Rejected students")+' <span class="pill" style="color:var(--no)">'+XR.list.length+'</span></div><div class="mu">'+L2("طلاب الملف اللي ناقصهم بيانات. افتح الصف، كمّل الناقص، واضغط تأكيد عشان يتضافوا وياخدوا كود.","Rows from the file with missing data. Open the grade, fix the data and press Confirm to add them and generate a code.")+'</div><div style="margin-top:10px">';
+ GR.forEach(function(g){var L=XR.list.filter(function(x){return x.grade==g});if(!L.length)return;var op=XR.open==g;
+  h+='<div class="gb2" onclick="xrOpen(\''+g+'\')"><span class="gsym">'+sgSym(g)+'</span><b>'+esc(gn(g))+'</b><span class="pill" style="color:var(--no)">'+L.length+'</span><span class="gchev'+(op?' up':'')+'">'+(op?"\u2304":L2("\u2039","\u203a"))+'</span></div>';
+  if(op)L.forEach(function(x){var ed=XR.edit==x.id;
+   h+='<div class="card"><div class="nm">'+esc(x.name||L2("(بدون اسم)","(no name)"))+' <span class="mu">'+esc(gd(x.group))+'</span></div><div class="mu" style="color:var(--no)">'+esc(x.m||"")+'</div><div class="row" style="margin-top:6px"><button class="btn sbtn'+(ed?' pr jl':'')+'" onclick="xrEdit(\''+x.id+'\')">'+t("edit")+'</button><button class="btn" onclick="xrDel(\''+x.id+'\')">'+L2("حذف","Delete")+'</button></div>'+(ed?xrForm(x):'')+'</div>'})});
+ return h+'</div></div>'};
 
 window.t3time=function(i,v){D.times=D.times||{};if(v)D.times[GR[i]]=v;else delete D.times[GR[i]];persist()};
 window.t3fb=function(sid,hw,k,v){var o=window.SOLV&&SOLV[hw]&&SOLV[hw][sid];if(!o)return;o[k]=String(v).trim();if(window.cloudFeedback)cloudFeedback(sid,hw,k,o[k]).catch(function(e){alert(errMsg(e))})};
