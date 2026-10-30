@@ -61,7 +61,7 @@ select:focus,input:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .pill.due{font-size:clamp(9px,3.1vw,12px)}
 .pill.ok{background:color-mix(in srgb,var(--pr) 22%,transparent);color:var(--pr)}
 .gate{display:flex;gap:8px;margin:0 0 12px}.gate .btn{flex:1 1 0}
-.cnt button.adj{outline:2px solid var(--pr)}.rlw{position:relative;display:flex;gap:8px;align-items:center;margin:-2px 0 10px}.rl{touch-action:pan-x;overscroll-behavior-x:contain;flex:1;overflow-x:scroll;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;direction:ltr;background:var(--soft);border-radius:12px;padding:0 calc(50% - 28px)}.rl::-webkit-scrollbar{display:none}.rlt{display:flex;width:max-content}.rlt i{font-style:normal;flex:0 0 56px;height:46px;line-height:46px;text-align:center;font-size:18px;color:var(--mu);scroll-snap-align:center;transition:.12s}.rlt i.on{font-size:26px;font-weight:700;color:var(--pr)}.rlm{position:absolute;left:0;right:56px;top:0;bottom:0;pointer-events:none;background:linear-gradient(90deg,var(--soft),transparent 25%,transparent 75%,var(--soft));border-radius:12px;z-index:1}.rlw .btn{flex:0 0 46px;padding:10px 0}
+.cnt button.adj{outline:2px solid var(--pr)}.rlw{position:relative;display:flex;gap:8px;align-items:center;margin:-2px 0 10px}.rl{touch-action:pan-x pan-y;overscroll-behavior-x:contain;flex:1;overflow-x:scroll;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;direction:ltr;background:var(--soft);border-radius:12px;padding:0 calc(50% - 28px)}.rl::-webkit-scrollbar{display:none}.rlt{display:flex;width:max-content}.rlt i{font-style:normal;flex:0 0 56px;height:46px;line-height:46px;text-align:center;font-size:18px;color:var(--mu);scroll-snap-align:center;transition:.12s}.rlt i.on{font-size:26px;font-weight:700;color:var(--pr)}.rlm{position:absolute;left:0;right:56px;top:0;bottom:0;pointer-events:none;background:linear-gradient(90deg,var(--soft),transparent 25%,transparent 75%,var(--soft));border-radius:12px;z-index:1}.rlw .btn{flex:0 0 46px;padding:10px 0}
 :root{--gn:#2E8B57}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--gn:#7FD6A5}}:root[data-theme="dark"]{--gn:#7FD6A5}
 .bdg{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;margin-inline-start:6px;border:2px solid var(--gn);border-radius:6px;background:var(--card);color:var(--gn);font-size:12px;font-weight:700;line-height:1;font-style:normal;box-sizing:border-box}
 .bdg.w{border-color:var(--no);color:var(--no)}.bdg{box-shadow:0 0 0 2px var(--card)}
@@ -666,18 +666,49 @@ function scrollerOf(el){var p=el.parentElement;while(p&&p!==document.body&&p!==d
 function anchorSet(id){var c=cardOf(id);EA=c?{id:id,top:c.getBoundingClientRect().top}:null}
 function anchorRestore(){if(!EA)return;var a=EA;EA=null;var c=cardOf(a.id);if(!c)return;var d=c.getBoundingClientRect().top-a.top;if(Math.abs(d)>1)scrollerOf(c).scrollTop+=d}
 function closeEdit(){edit=null;draw();anchorRestore()}
+function backStep(){
+ if(DP&&DP.o){dpClose();return 1}
+ if(SG&&SG.open){if(!SG.busy)sgClose();return 1}
+ if(typeof GM!="undefined"&&GM.open&&!GM.run){gmClose();return 1}
+ if(AU.ready&&ST.data){if(ST.set||ST.tab!="home"){ST.set=false;ST.tab="home";draw();return 1}return 0}
+ if(AU.ready&&AU.user){
+  if(edit||dt||cd||(SF&&SF.open)){edit=null;dt=null;cd=null;if(SF)SF.open="";draw();return 1}
+  if(tab=="set"){go(prevTab&&prevTab!="set"?prevTab:"att");return 1}
+  if(tab!="att"){go("att");return 1}
+ }
+ return 0}
+(function(){
+ var armed=0,box=null;
+ function note(){try{if(!box){box=document.createElement("div");box.style.cssText="position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(30,30,40,.92);color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;z-index:99999;pointer-events:none;transition:opacity .3s";document.body.appendChild(box)}box.textContent=L2("اضغط رجوع مرة تانية للخروج","Press back again to exit");box.style.opacity="1";setTimeout(function(){box.style.opacity="0"},1800)}catch(e){}}
+ function push(){try{history.pushState({ak:1},"")}catch(e){}}
+ try{history.replaceState({ak:0},"");push()}catch(e){return}
+ window.addEventListener("popstate",function(){
+  var h=0;try{h=backStep()}catch(e){}
+  if(h){push();return}
+  var n=Date.now();
+  if(n-armed<2000){armed=0;history.back();return}
+  armed=n;push();note()});
+})();
+function seenAgo(ms){var d=Math.max(0,Date.now()-ms),m=Math.floor(d/6e4);if(m<1)return L2("الآن","just now");if(m<60)return L2("منذ "+m+" د",m+" min ago");var h=Math.floor(m/60);if(h<24)return L2("منذ "+h+" س",h+" h ago");var dd=Math.floor(h/24);return L2("منذ "+dd+" يوم",dd+" d ago")}
+function seenHtml(s){var v=(window.TSEEN||{})[String(s.id)];
+ if(!v)return '<span class="seen no">🔴 '+L2("ما سجّلش دخول","Not signed in yet")+'</span>';
+ var on=Date.now()-(v.last||0)<150000,mn=Math.round((v.secs||0)/60);
+ return '<span class="seen'+(on?' on':'')+'">'+(on?'🟢 '+L2("متصل الآن","Online now"):'⚪ '+L2("آخر دخول ","Last seen ")+seenAgo(v.last||0))+'</span><span class="mu"> · '+L2("دخل "+(v.n||1)+" مرة","opened "+(v.n||1)+"x")+(mn?' · '+L2("قعد "+mn+" د",mn+" min"):'')+'</span>'}
+function seenSum(){var T=window.TSEEN||{},a=S.students||[],r=0,o=0,now=Date.now();a.forEach(function(s){var v=T[String(s.id)];if(v){r++;if(now-(v.last||0)<150000)o++}});return L2("سجّلوا دخول: "+r+" من "+a.length+" · متصل الآن: "+o,"Signed in: "+r+" of "+a.length+" · Online now: "+o)}
+function seenRefresh(){try{document.querySelectorAll("[data-seen]").forEach(function(e){var s=(S.students||[]).filter(function(x){return String(x.id)==e.getAttribute("data-seen")})[0];if(s)e.innerHTML=seenHtml(s)});var e=document.getElementById("seenSum");if(e)e.textContent=seenSum()}catch(x){}}
+setInterval(seenRefresh,30000);
 function scard(s){var open=dt==s.id,ed=!!(edit&&edit.id==s.id),x=st(s);
-var h='<div class="card" data-sid="'+s.id+'"><div class="nm">'+stuAv(s)+esc(s.name)+' <span class="mu">'+esc(gd(s.group))+'</span></div><div class="row"><button class="btn sbtn'+(open?' pr jl':'')+'" onclick="toggleDt('+s.id+')">'+t("det")+'</button><button class="btn sbtn'+(ed?' pr jl':'')+'" onclick="editS('+s.id+')">'+t("edit")+'</button></div>';
+var h='<div class="card" data-sid="'+s.id+'"><div class="nm">'+stuAv(s)+esc(s.name)+' <span class="mu">'+esc(gd(s.group))+'</span></div><div class="mu" data-seen="'+s.id+'" style="font-size:12px;margin:0 0 8px">'+seenHtml(s)+'</div><div class="row"><button class="btn sbtn'+(open?' pr jl':'')+'" onclick="toggleDt('+s.id+')">'+t("det")+'</button><button class="btn sbtn'+(ed?' pr jl':'')+'" onclick="editS('+s.id+')">'+t("edit")+'</button></div>';
 if(ed)h+=sform(1);if(open)h+=detail(s,x);return h+'</div>'}
 function toggleDt(id){anchorSet(id);if(dt==id){dt=null}else{dt=id;edit=null}pd=null;draw();anchorRestore()}
-function codeWa(s){return wa(s.phone,t("codeMsg")(s.name,pn(s.phone)?("0"+pn(s.phone)):"",s.code||""))}
+function codeWa(s,par){var ph=par?s.parentPhone:s.phone,nm=par?L2("ولي أمر ","Parent of ")+s.name:s.name;return wa(ph,t("codeMsg")(nm,pn(ph)?("0"+pn(ph)):"",s.code||""))}
 var NC="";
 function codeOk(v,id){v=String(v||"").trim();if(!/^\d{3,8}$/.test(v))return L2("الكود أرقام بس، من 3 لـ 8 أرقام.","The code must be 3-8 digits.");
  var d=S.students.filter(function(x){return x.id!=id&&String(x.code)==v}).concat(((window.XR&&XR.list)||[]).filter(function(x){return String(x.code)==v}));
  return d.length?L2("متكرر عند: ","Duplicate of: ")+d.slice(0,2).map(function(x){return x.name+" ("+gn(x.grade)+")"}).join("، ")+(d.length>2?" +"+(d.length-2):""):""}
 function codeMsg(m,ok){var e=document.getElementById("ecmsg");if(e){e.className=ok?"mu":"owe";e.style.cssText="flex:1 1 100%;font-size:13px;font-weight:600;"+(ok?"":"color:var(--no)");e.textContent=m}}
 function codeLive(id,v){v=String(v||"").trim();if(v.length<3){codeMsg("",1);return}var m=codeOk(v,id);if(m)codeMsg(m,0);else codeMsg("",1)}
-function codeSync(s){var a=document.getElementById("esend");if(a&&s){var w=codeWa(s);a.href=w||"#";a.style.display=w?"":"none"}}
+function codeSync(s){var a=document.getElementById("esend"),b=document.getElementById("esendp");if(a&&s){var w=codeWa(s);a.href=w||"#";a.style.display=w?"":"none"}if(b&&s){var w2=codeWa(s,1);b.href=w2||"#";b.style.display=w2?"":"none"}}
 function setCode(id,v){v=String(v||"").trim();var s=id?S.students.filter(function(x){return x.id==id})[0]:null,inp=document.getElementById("ecode"),m=codeOk(v,id);
  if(m){codeMsg(m,0);if(inp)inp.value=s?s.code:NC;return}
  if(s){if(String(s.code)==v)return;s.code=v;save();codeSync(s)}else NC=v;
@@ -686,10 +717,10 @@ function newCode(id){var s=id?S.students.filter(function(x){return x.id==id})[0]
  if(s){s.code=c;save();codeSync(s)}else NC=c;
  if(inp)inp.value=c;else draw();
  codeMsg(s?L2("\u2713 الكود الجديد اتحفظ","\u2713 New code saved"):L2("\u2713 كود جديد","\u2713 New code"),1)}
-function codeBox(s){var ed=!!s.id,cw=ed?codeWa(s):"",val=ed?s.code:(NC||(NC=genCode()));
+function codeBox(s){var ed=!!s.id,cw=ed?codeWa(s):"",cp=ed?codeWa(s,1):"",val=ed?s.code:(NC||(NC=genCode()));
  return '<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><span class="lbl">'+t("code")+'</span>'
  +'<input id="ecode" type="text" dir="ltr" inputmode="numeric" autocomplete="off" maxlength="8" value="'+esc(val||"")+'" oninput="ndg(this);codeLive(\''+(s.id||"")+'\',this.value)" onchange="setCode(\''+(s.id||"")+'\',this.value)" onkeydown="if(event.key==\'Enter\')this.blur()" style="font-weight:700;letter-spacing:3px">'
- +'<div class="row" style="margin-top:8px">'+(ed?'<a id="esend" class="btn pr" target="_blank" rel="noopener" href="'+(cw||"#")+'"'+(cw?'':' style="display:none"')+'>'+t("sendc")+'</a>':'')+'<button type="button" class="btn" onclick="newCode(\''+(s.id||"")+'\')">'+t("newc")+'</button><span id="ecmsg" class="mu" style="flex:1 1 100%;font-size:13px"></span></div></div>'}
+ +'<div class="row" style="margin-top:8px">'+(ed?'<a id="esend" class="btn pr" target="_blank" rel="noopener" href="'+(cw||"#")+'"'+(cw?'':' style="display:none"')+'>'+L2("إرسال الكود للطالب","Send code to student")+'</a><a id="esendp" class="btn pr" target="_blank" rel="noopener" href="'+(cp||"#")+'"'+(cp?'':' style="display:none"')+'>'+L2("إرسال الكود لولي الأمر","Send code to parent")+'</a>':'')+'<button type="button" class="btn" onclick="newCode(\''+(s.id||"")+'\')">'+t("newc")+'</button><span id="ecmsg" class="mu" style="flex:1 1 100%;font-size:13px"></span></div></div>'}
 function parRep(s,x){var pw=wa(s.parentPhone,anaMsg(s,x));return '<div class="row" style="margin-top:8px">'+(pw?'<a class="btn pr" target="_blank" rel="noopener" href="'+pw+'">'+L2("إرسال التقرير لولي الأمر","Send report to parent")+'</a>':'<span class="btn mu">'+t("nopp")+'</span>')+'</div>'}
 function genCode(){var used={};S.students.forEach(function(s){used[s.code]=1});((window.XR&&XR.list)||[]).forEach(function(s){used[s.code]=1});var c;do{c=String(1000+Math.floor(Math.random()*9000))}while(used[c]);return c}
 var VR=null;
@@ -741,7 +772,7 @@ function sform(inl){var e=edit||{};return (inl?'<div style="margin-top:12px;padd
 function sbar(){if(!gHas(sgr,""))sgr="";return '<div class="card"><div class="row" style="flex-wrap:nowrap"><input id="qs" placeholder="'+t("search")+'" value="'+esc(q)+'" oninput="q=this.value;document.getElementById(\'sl\').innerHTML=listS()"><button class="btn sq" id="mic" type="button" aria-label="'+L2("بحث بالصوت","Voice search")+'" onclick="voiceS()">🎤</button></div><div class="row" style="margin-top:8px"><select onchange="sgr=this.value;draw()"><option value="">'+t("allg")+'</option>'+gFlt(sgr,"")+'</select>'+sxSel()+'</div></div>'}
 function sAddH(){var op=!!SF.open,an=SF.anim;
  return '<div class="gb2'+(an?' jl':'')+'" onclick="sfTog()"><span class="gsym">+</span><b>'+t("add")+'</b><span class="gchev'+(op&&an!="out"?' up':'')+'">\u2304</span></div>'+(op?'<div class="gx'+(an?' '+an:'')+'">'+sform()+'</div>':'')}
-function stu(){return (edit&&edit.id?'':sAddH())+sbar()+'<div id="sl">'+listS()+'</div>'+sgModal()}
+function stu(){return (edit&&edit.id?'':sAddH())+sbar()+'<div class="mu" id="seenSum" style="margin:2px 6px 8px;font-size:12px">'+seenSum()+'</div>'+'<div id="sl">'+listS()+'</div>'+sgModal()}
 function ndg(el){var v=el.value.replace(/[\u0660-\u0669]/g,function(c){return c.charCodeAt(0)-1632}).replace(/[\u06F0-\u06F9]/g,function(c){return c.charCodeAt(0)-1776}).replace(/[^0-9]/g,"");if(v!==el.value)el.value=v;if(el.id=="f_pr")syncPrice()}
 function pickPrice(v){document.getElementById("f_pr").value=v;syncPrice()}
 function syncPrice(){var v=+document.getElementById("f_pr").value;[].forEach.call(document.querySelectorAll(".pc"),function(b){b.classList.toggle("pr",+b.getAttribute("data-v")===v)})}
@@ -6647,6 +6678,8 @@ var SNA=["الرابع","الخامس","السادس","أولى إعدادي","�
 "@keyframes wkd{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}",
 ".gmd.wkd{width:100%;max-width:none;max-height:none;margin-bottom:14px;box-shadow:0 14px 36px rgba(0,0,0,.22);animation:gmup .6s cubic-bezier(.2,1.25,.4,1) both}",
 ".wkd .gmb{padding:12px 6px 16px}",
+".gmd.wkd,.gmd.dsh{overflow:hidden;overflow:clip;touch-action:auto}",
+".wkd .gmb,.dsh .gmb{overflow:visible;max-height:none;overscroll-behavior:auto;touch-action:auto}",
 ".wkg{display:grid;grid-template-columns:26px repeat(7,minmax(0,1fr));gap:3px;animation:gmrise .5s .15s cubic-bezier(.2,1.2,.4,1) both}",
 ".wkg .wd{text-align:center;font-size:12px;font-weight:700;padding:9px 0;border-radius:10px}",
 ".wkg .wh{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--mu);line-height:1.15}.wkg .wh small{font-size:10px;font-weight:600}",
@@ -6968,8 +7001,23 @@ async function portalOf(phone,code){
 }
 
 let lastMain="",lastM={},lastHw={},lastPortal={},timer=null;
-let unsubMsgs=null,unsubReps=null,unsubSubs=null,unsubNotes=null,unsubAv=null;
+let unsubMsgs=null,unsubReps=null,unsubSubs=null,unsubNotes=null,unsubAv=null,unsubSeen=null;
 const AVS={};
+window.TSEEN=window.TSEEN||{};
+const seenOn={};let seenT=null;
+function seenPing(d){
+  try{
+    if(!d||!d.uid||d.sid==null)return;
+    const key=d.uid+"_"+d.sid,ref=doc(db,"seen",key),now=Date.now();
+    if(!seenOn[key]){
+      seenOn[key]=1;
+      updateDoc(ref,{last:now,n:increment(1)}).catch(()=>setDoc(ref,{uid:d.uid,sid:d.sid,first:now,last:now,n:1,secs:0}).catch(()=>{}));
+    }
+    clearInterval(seenT);
+    seenT=setInterval(()=>{if(document.visibilityState!=="visible")return;updateDoc(ref,{last:Date.now(),secs:increment(60)}).catch(()=>{})},60000);
+  }catch(e){}
+}
+
 window.SOLV={};
 window.TMSGS=[];window.TREPS=[];window.TSUBS=[];window.TNOTES=[];
 
@@ -6989,8 +7037,8 @@ const _draw=window.draw;
 window.draw=function(){applyAv();return _draw.apply(this,arguments)};
 
 function stopListeners(){
-  [unsubMsgs,unsubReps,unsubSubs,unsubNotes,unsubAv].forEach(f=>{if(f)f()});
-  unsubMsgs=unsubReps=unsubSubs=unsubNotes=unsubAv=null;
+  [unsubMsgs,unsubReps,unsubSubs,unsubNotes,unsubAv,unsubSeen].forEach(f=>{if(f)f()});
+  unsubMsgs=unsubReps=unsubSubs=unsubNotes=unsubAv=unsubSeen=null;window.TSEEN={};
   TMSGS=[];TREPS=[];TSUBS=[];TNOTES=[];
   Object.keys(AVS).forEach(k=>delete AVS[k]);
 }
@@ -7014,6 +7062,9 @@ function startListeners(uid){
     snap.forEach(d=>{const v=d.data();if(v&&v.av)AVS[v.sid]=v.av});
     applyAv();draw();
   },e=>console.error(e));
+  unsubSeen=onSnapshot(query(collection(db,"seen"),where("uid","==",uid)),snap=>{
+    const M={};snap.forEach(d=>{const v=d.data();if(v&&v.sid!=null)M[String(v.sid)]=v});window.TSEEN=M;try{window.seenRefresh()}catch(e){}
+  },e=>console.error(e));
 }
 
 window.FB={
@@ -7029,6 +7080,7 @@ window.FB={
     try{snap=await getDoc(ref)}catch(e){if(e.code=="permission-denied")return null;throw e}
     if(!snap.exists())return null;
     const d=snap.data();
+    seenPing(d);
 
     const hs=await getDocs(query(collection(db,"portal",pid,"hw")));
     const hw=[];hs.forEach(x=>hw.push(x.data()));
