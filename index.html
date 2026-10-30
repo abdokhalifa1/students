@@ -7844,11 +7844,17 @@ window.aiOk=function(){if(!last)return;var D=window.TD,c=0;D.exams=D.exams||[];
 window.aiGo=function(){var t=document.getElementById("aitx").value.trim();if(!t)return;var r=document.getElementById("aires");r.innerHTML='<div class="mu">...</div>';
   if(looksStu(t)){fillForm(parseStu(t));r.innerHTML="";return}
   if(window.AI_ENDPOINT){remote(t).then(show).catch(function(){r.innerHTML='<div style="color:#b3261e">تعذّر الاتصال، هستخدم الفهم المحلي.</div>';show(parse(t))})}else show(parse(t))};
+var want=0;
+function micLab(on){var mb=document.getElementById("aimic");if(mb)mb.textContent=on?"⏹ وقف":"🎤 إملاء"}
+function micRun(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+  rec=new SR();rec.lang="ar-EG";rec.continuous=true;rec.interimResults=false;
+  rec.onresult=function(ev){var s="",tx=document.getElementById("aitx");for(var i=ev.resultIndex;i<ev.results.length;i++){if(ev.results[i].isFinal)s+=ev.results[i][0].transcript+" "}if(tx&&s)tx.value=(tx.value+" "+s).replace(/\s+/g," ").trim()};
+  rec.onerror=function(ev){var er=ev&&ev.error;if(er=="not-allowed"||er=="service-not-allowed"){want=0;micLab(0);alert("اسمح للتطبيق باستخدام الميكروفون من إعدادات المتصفح.")}};
+  rec.onend=function(){rec=null;if(want)setTimeout(function(){if(want&&!rec)micRun()},300);else micLab(0)};
+  try{rec.start()}catch(e){rec=null;if(want)setTimeout(function(){if(want&&!rec)micRun()},500)}}
 window.aiMic=function(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("الإملاء مش مدعوم في المتصفح ده. استخدم ميكروفون كيبورد الموبايل.");return}
-  if(rec){try{rec.stop()}catch(e){}return}
-  rec=new SR();rec.lang="ar-EG";rec.continuous=true;rec.interimResults=false;var tx=document.getElementById("aitx"),mb=document.getElementById("aimic");mb.textContent="⏹ وقف";
-  rec.onresult=function(ev){var s="";for(var i=ev.resultIndex;i<ev.results.length;i++)s+=ev.results[i][0].transcript+" ";tx.value=(tx.value+" "+s).trim()};
-  rec.onend=function(){rec=null;mb.textContent="🎤 إملاء"};rec.onerror=function(){rec=null;mb.textContent="🎤 إملاء"};try{rec.start()}catch(e){rec=null;mb.textContent="🎤 إملاء"}};
+  if(want){want=0;micLab(0);if(rec){try{rec.stop()}catch(e){}}return}
+  want=1;micLab(1);micRun()};
 window.aiOpen=function(){if(box){box.style.display="flex";return}
   box=document.createElement("div");box.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9500;display:flex;align-items:flex-end;justify-content:center";
   box.innerHTML='<div class="card" style="width:100%;max-width:560px;max-height:88vh;overflow:auto;margin:0;border-radius:22px 22px 0 0" dir="rtl"><div class="row" style="align-items:center"><div class="nm" style="flex:1">🤖 المساعد</div><button class="btn" style="flex:0 0 auto;padding:6px 14px" onclick="aiClose()">✕</button></div>'
@@ -7856,7 +7862,7 @@ window.aiOpen=function(){if(box){box.style.display="flex";return}
    +'<textarea id="aitx" rows="4" style="width:100%;box-sizing:border-box" placeholder="امتحان الوحدة الأولى من 20: أحمد محمد 18 سلمى علي 15 يوسف غايب"></textarea>'
    +'<div class="row" style="margin-top:8px"><button id="aimic" class="btn" onclick="aiMic()">🎤 إملاء</button><button class="btn pr" onclick="aiGo()">فهم الطلب</button></div><div id="aires" style="margin-top:10px"></div></div>';
   box.addEventListener("click",function(e){if(e.target===box)aiClose()});document.body.appendChild(box)};
-window.aiClose=function(){if(rec){try{rec.stop()}catch(e){}}if(box)box.style.display="none"};
+window.aiClose=function(){want=0;micLab(0);if(rec){try{rec.stop()}catch(e){}}if(box)box.style.display="none"};
 function ensure(){var on=isT();if(on&&!btn){btn=document.createElement("button");btn.textContent="🤖";btn.setAttribute("aria-label","مساعد الدرجات");btn.style.cssText="position:fixed;left:14px;bottom:92px;width:52px;height:52px;border-radius:50%;border:0;font-size:24px;background:var(--pr);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:9000;cursor:pointer";btn.onclick=window.aiOpen;document.body.appendChild(btn)}
   if(btn)btn.style.display=on?"":"none";if(!on&&box)box.style.display="none"}
 setInterval(ensure,1500);ensure();
