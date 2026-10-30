@@ -7883,6 +7883,7 @@ function parseStu(text){
   if(r.name){var f0=nr(r.name.split(" ")[0]),em=n.indexOf("ولد")>=0||n.indexOf("ابن")>=0;if(FEMS[f0]&&!em&&r.sex!="f")r.sex="f"}
   return r}
 
+window.__ps=parseStu;window.__pe=parse;
 function fillForm(r){
   var $=function(i){return document.getElementById(i)},open=!!($("f_n")&&window.__aiPend);
   try{aiClose()}catch(e){}
@@ -7948,5 +7949,87 @@ function ensure(){var on=isT();if(on&&!btn){btn=document.createElement("button")
 setInterval(ensure,1500);ensure();
 })();
 </script>
+<script>
+/* ===== المساعد الشامل (فهم محلي بالعامية المصرية، من غير أي اتصال) ===== */
+(function(){
+var pend=null;
+function dg(x){return String(x||"").replace(/[٠-٩]/g,function(d){return "٠١٢٣٤٥٦٧٨٩".indexOf(d)}).replace(/٫/g,".")}
+function nz(x){return dg(x).replace(/[\u064B-\u065F\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/[،,؛;:!؟?()"«»]/g," ").replace(/\s+/g," ").toLowerCase().trim()}
+function e(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function stuBy(r){if(r==null||r==="")return null;var a=S.students.filter(function(s){return String(s.id)==String(r)})[0];if(a)return a;var q=nz(r),f=function(fn){return S.students.filter(function(s){return fn(nz(s.name))})},c=f(function(n){return n==q});if(!c.length)c=f(function(n){return n.indexOf(q)==0});if(!c.length)c=f(function(n){return n.indexOf(q)>=0});return c.length==1?c[0]:c.length?{amb:c}:null}
+function gradeOf(g){if(GR.indexOf(g)>=0)return g;var q=nz(g);return GR.filter(function(x){return nz(x)==q})[0]||""}
+function targets(a,out){var L=[];if(a.students&&a.students.length){a.students.forEach(function(r){var s=stuBy(r);if(s&&s.amb)out.push("⚠ اسم مش واضح: "+e(r));else if(s)L.push(s);else out.push("⚠ ملقيتش طالب: "+e(r))});return L}
+ var g=gradeOf(a.grade);return S.students.filter(function(s){return(!g||s.grade==g)&&(!a.group||String(s.group)==String(a.group))&&(g||a.group||a.all)})}
+function setR(s,d,st,p){var k=d+"|"+s.id,o=S.rec[k]||{};if(st==="present"){o.a=1}else if(st==="absent"){o.a=0;o.p=undefined}
+ if(p==="paid"){if(o.a===0)return false;o.p=1}else if(p==="unpaid"){if(o.a===0)return false;o.p=0;o.a=1}S.rec[k]=o;if(o.a===undefined&&o.p===undefined)delete S.rec[k];return true}
+function fields(a,o){if(a.name)o.name=String(a.name).trim();if(a.sex==="m"||a.sex==="f")o.sex=a.sex;var g=gradeOf(a.grade);if(g)o.grade=g;if(a.group&&/^[1-5]$/.test(String(a.group)))o.group=String(a.group);
+ if(a.phone)o.phone="+20"+pn(a.phone);if(a.parent_phone)o.parentPhone="+20"+pn(a.parent_phone);if(a.price&&+a.price>0)o.price=String(+a.price)}
+var X={
+ warn:function(a,o){o.push("⚠ "+e(a.msg))},
+ add_student:function(a,o){var s={id:Date.now()+Math.floor(Math.random()*100000),name:"",sex:"m",grade:fg||GR[0],group:"1",phone:"",parentPhone:"",code:genCode()};fields(a,s);if(!s.name)return o.push("⚠ طالب من غير اسم");S.students.push(s);fg=s.grade;o.push("✅ اتضاف <b>"+e(s.name)+"</b> ("+e(gn(s.grade))+" مجموعة "+e(s.group)+") كود: <b dir='ltr'>"+e(s.code)+"</b>"+(a.guess?" <span class='mu'>— الصف مش مذكور، اتحط "+e(gn(s.grade))+"</span>":""))},
+ edit_student:function(a,o){var s=stuBy(a.student);if(!s||s.amb)return o.push("⚠ مش عارف أي طالب أعدّل");fields(a,s);o.push("✏️ اتعدّل <b>"+e(s.name)+"</b>")},
+ delete_student:function(a,o){var s=stuBy(a.student);if(!s||s.amb)return o.push("⚠ مش عارف أي طالب أحذف");pend=pend||[];if(pend.indexOf(s.id)<0)pend.push(s.id);o.push("🗑 هحذف <b>"+e(s.name)+"</b> بعد تأكيدك")},
+ attendance:function(a,o){var d=a.date||ld(new Date()),L=targets(a,o),n=0;L.forEach(function(s){if(setR(s,d,a.status==="absent"?"absent":"present"))n++});o.push(L.length?(a.status==="absent"?"❌ غياب ":"✅ حضور ")+n+" طالب ("+e(d)+")"+(L.length<4?": "+e(L.map(function(s){return s.name}).join("، ")):""):"⚠ مش عارف مين الطلاب في أمر الحضور")},
+ payment:function(a,o){var d=a.date||ld(new Date()),L=targets(a,o),n=0,sk=[];L.forEach(function(s){if(setR(s,d,"",a.status==="unpaid"?"unpaid":"paid"))n++;else sk.push(s.name)});o.push(L.length?(a.status==="unpaid"?"💸 لم يدفع ":"💰 دفع ")+n+" طالب ("+e(d)+")"+(L.length<4?": "+e(L.map(function(s){return s.name}).join("، ")):"")+(sk.length?" — اتخطّيت الغايبين: "+e(sk.join("، ")):""):"⚠ مش عارف مين الطلاب في أمر الدفع")},
+ settle:function(a,o){var s=stuBy(a.student);if(!s||s.amb)return o.push("⚠ مش عارف أي طالب أسدّد له");var n=a.count==="all"||a.count==null?1e9:+a.count||0,c=0;Object.keys(S.rec).filter(function(k){var r=S.rec[k];return k.split("|")[1]==s.id&&r.a===1&&r.p===0}).sort().slice(0,n).forEach(function(k){S.rec[k].p=1;c++});o.push("💰 اتسدّد "+c+" حصة لـ <b>"+e(s.name)+"</b>")},
+ price:function(a,o){if(+a.value>0){S.price=+a.value;o.push("💵 سعر الحصة بقى "+(+a.value))}},
+ exam:function(a,o){var D=window.TD=window.TD||{exams:[],times:{},sched:{},cancel:{},gdel:{}};D.exams=D.exams||[];var G={},t=a.title||("درجات "+ld(new Date()));
+  (a.scores||[]).forEach(function(r){var s=stuBy(r.student);if(!s||s.amb)return;(G[s.grade]=G[s.grade]||[]).push({s:s,r:r})});
+  Object.keys(G).forEach(function(g){var ex=D.exams.filter(function(x){return x.grade==g&&x.title==t})[0],mx=ex?ex.max:(+a.max||20);if(!ex){ex={id:String(Date.now())+Math.floor(Math.random()*999),grade:g,title:t,max:mx,date:ld(new Date()),sc:{},abs:{}};D.exams.push(ex)}ex.sc=ex.sc||{};ex.abs=ex.abs||{};var c=0;
+   G[g].forEach(function(z){if(z.r.absent){ex.abs[z.s.id]=1;delete ex.sc[z.s.id];c++}else if(z.r.score!=null&&+z.r.score>=0&&+z.r.score<=mx){ex.sc[z.s.id]=+z.r.score;delete ex.abs[z.s.id];c++}else o.push("⚠ درجة "+e(z.s.name)+" مش صحيحة (أكبر من "+mx+")")});o.push("📝 "+c+" درجة في «"+e(t)+"» ("+e(gn(g))+" من "+mx+")")})},
+ go:function(a,o){go(a.tab);o.push("➡️ فتحت الصفحة")},
+ language:function(a,o){S.lang=a.value;o.push("🌐 اللغة اتغيّرت")},
+ message:function(a,o){var s=stuBy(a.student);if(!s||s.amb)return o.push("⚠ مش عارف أي طالب أبعت له");var x=st(s),ph=a.to==="student"?s.phone:s.parentPhone,u=wa(ph,t("sm")(s.name,x.a,x.b,x.u));o.push(u?"💬 <a href='"+u+"' target='_blank' rel='noopener'>افتح واتساب لـ "+e(s.name)+(a.to==="student"?"":" (ولي الأمر)")+"</a>":"⚠ مفيش رقم لـ "+e(s.name))}
+};
+/* ---------- الفهم المحلي ---------- */
+var WD={السبت:6,الاحد:0,الاثنين:1,الاتنين:1,الثلاثاء:2,التلات:2,الاربعاء:3,الاربع:3,الخميس:4,الجمعه:5};
+function dateOf(n){var d=new Date();if(/اول امبارح|اول امس|اولامبارح/.test(n))d.setDate(d.getDate()-2);else if(/امبارح|امس/.test(n))d.setDate(d.getDate()-1);
+ else{var m=n.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);if(m){var y=m[3]?(+m[3]<100?2000+ +m[3]:+m[3]):d.getFullYear();return y+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[1]).slice(-2)}
+  var w=n.match(/يوم (السبت|الاحد|الاثنين|الاتنين|الثلاثاء|التلات|الاربعاء|الاربع|الخميس|الجمعه)/);if(w){var k=(d.getDay()-WD[w[1]]+7)%7;d.setDate(d.getDate()-k)}}
+ return ld(d)}
+function findS(n){var base=" "+n+" ",alt=" "+n.split(" ").map(function(w){return w.length>3&&w.charAt(0)=="و"?w.slice(1):w}).join(" ")+" ",txt=base+alt,res=[],amb=[];
+ S.students.forEach(function(s){var T=nz(s.name).split(" ").filter(Boolean);if(!T.length)return;var two=T.length>1?" "+T[0]+" "+T[1]+" ":"",first=" "+T[0]+" ",p=-1;
+  if(two&&(p=txt.indexOf(two))>=0){res.push({s:s,p:p});return}
+  var same=S.students.filter(function(x){return nz(x.name).split(" ")[0]==T[0]});
+  if((p=txt.indexOf(first))>=0){if(same.length==1)res.push({s:s,p:p});else if(amb.indexOf(T[0])<0)amb.push(T[0])}});
+ var seen={};res.sort(function(a,b){return a.p-b.p});return{list:res.filter(function(r){if(seen[r.s.id])return false;seen[r.s.id]=1;return true}).map(function(r){return r.s}),amb:amb}}
+var TABS=[[/(الرئيسيه|البدايه)/,"home"],[/(الحضور|المتابعه)/,"att"],[/(الطلاب|الطلبه)/,"stu"],[/(المهام|الواجبات|الواجب)/,"tasks"],[/(التقارير|التقرير|الملخص|التحليل)/,"rep"],[/(الاعدادات|الضبط)/,"set"]];
+var ABS=/(مجاش|مجوش|ما جاش|ما جوش|ما حضرش|ما حضروش|مش حاضر|حضرش|غاب|غايب|غياب|غابوا|غايبين)/,PRS=/(حضر|حضروا|حاضر|حاضرين|جه |جم |جوا|حضور| جه$| جم$)/,UNP=/(مدفعش|مدفعوش|ما دفعش|ما دفعوش|مادفعش|لم يدفع|مش دافع|مدفعتش|ما دفعتش|لسه مدفعش)/,PAID=/(دفع|دفعوا|دفعت|دافع|دافعين|مدفوع|ادفع)/;
+function unit(seg,A){var n=nz(seg),F=findS(n),ps=window.__ps,g;
+ if(!n)return;
+ if(/(^| )(احذف|امسح|شيل|ازل|الغي)( |$)/.test(n)&&F.list.length){F.list.forEach(function(s){A.push({do:"delete_student",student:s.id})});return}
+ if(/(^| )(افتح|روح|وديني|اعرض|فتح|ادخل)( |$)/.test(n)){for(var i=0;i<TABS.length;i++)if(TABS[i][0].test(n)){A.push({do:"go",tab:TABS[i][1]});return}}
+ if(/(انجليزي|english|ingleezy)/.test(n)&&/(غير|حول|خلي|اللغه)/.test(n)){A.push({do:"language",value:"en"});return}
+ if(/(عربي|عربى)/.test(n)&&/(غير|حول|خلي|اللغه)/.test(n)&&!F.list.length){A.push({do:"language",value:"ar"});return}
+ if(/(امتحان|اختبار|كويز|درجه|درجات)/.test(n)){var p=window.__pe(dg(seg));if(p.rows.length){A.push({do:"exam",title:p.title,max:p.max,scores:p.rows.map(function(r){return{student:r.s.id,score:r.sc,absent:r.ab}})})}p.amb.forEach(function(m){A.push({do:"warn",msg:"اسم مش واضح في الدرجات: "+m})});if(!p.rows.length&&!p.amb.length)A.push({do:"warn",msg:"مفهمتش الدرجات، قول: امتحان الوحدة من 20: أحمد 18 سلمى 15"});return}
+ if(/(سدد|سددت|خلص حساب|صفر)/.test(n)&&F.list.length){var c=n.match(/(\d+)\s*(حصه|حصص)/);F.list.forEach(function(s){A.push({do:"settle",student:s.id,count:c?+c[1]:"all"})});return}
+ if(/(ابعت|ارسل|رساله|بلغ)/.test(n)&&F.list.length){F.list.forEach(function(s){A.push({do:"message",student:s.id,to:/(الطالب نفسه|للطالب)/.test(n)?"student":"parent"})});return}
+ if(/(^| )(ضيف|اضف|اضيف|سجل|اسجل|اضافه)( |$)|طالب جديد|طالبه جديده/.test(n)&&!ABS.test(n)&&!UNP.test(n)&&!/(حضور|دفع|امتحان)/.test(n)||(/\d{10,}/.test(n.replace(/\s/g,""))&&/(اسمه|اسمها|طالب)/.test(n))){
+  var chunks=dg(seg).split(/(?=(?:^|\s)و?(?:طالبه|طالبة|طالب)\s)|\n+|\s\/\s|\s\|\s/).filter(function(c){return c.trim()}),k=0;
+  chunks.forEach(function(c){var r=ps(c);if(!r.name&&!r.phone)return;k++;A.push({do:"add_student",name:r.name,sex:r.sex,grade:r.grade,group:r.group,phone:r.phone,parent_phone:r.pp,price:r.price,guess:!r.grade})});if(k)return}
+ if(/(^| )(عدل|غير|بدل|حدث|حدّث|خلي)( |$)/.test(n)&&F.list.length&&!/(سعر الحصه)/.test(n)){var r=ps(seg);F.list.forEach(function(s){A.push({do:"edit_student",student:s.id,grade:r.grade,group:r.group,phone:r.phone,parent_phone:r.pp,price:r.price})});return}
+ if(/(سعر|الحصه|حصه)/.test(n)&&/(غير|خلي|اجعل|ظبط|بقت|بقى|هتبقي|يبقي)/.test(n)){var m=n.match(/\d+/);if(m){A.push({do:"price",value:+m[0]});return}}
+ var abs=ABS.test(n),prs=!abs&&PRS.test(" "+n+" "),unp=UNP.test(n),paid=!unp&&PAID.test(n);
+ if(abs||prs||unp||paid){var d=dateOf(n),sc={},r2=ps(seg);if(r2.grade)sc.grade=r2.grade;if(r2.group)sc.group=r2.group;if(/(كلهم|الكل|كل الطلبه|الجميع|كل الطلاب)/.test(n))sc.all=true;
+  var ex=n.split(/\s(?:ما عدا|ماعدا|الا|غير)\s/),main=ex[0],exc=ex[1]?findS(ex[1]).list:[],M=ex.length>1?findS(main):F,tg=M.list.length?{students:M.list.map(function(s){return s.id})}:sc;
+  if(!M.list.length&&!sc.grade&&!sc.group&&!sc.all){A.push({do:"warn",msg:"مش عارف مين الطلاب: "+seg.trim().slice(0,40)});return}
+  if(abs||prs||exc.length){var base=Object.assign({date:d},tg);A.push(Object.assign({do:"attendance",status:abs?"absent":"present"},base));if(exc.length)A.push({do:"attendance",status:abs?"present":"absent",date:d,students:exc.map(function(s){return s.id})})}
+  if(unp||paid){A.push(Object.assign({do:"payment",status:unp?"unpaid":"paid",date:d},tg))}
+  F.amb.forEach(function(m){A.push({do:"warn",msg:"اسم مش واضح: "+m+" (قول الاسم الثنائي)"})});return}
+ A.push({do:"warn",msg:"مفهمتش: «"+seg.trim().slice(0,40)+"»"})}
+function lp(text){var A=[],raw=dg(text);
+ raw.split(/\n+|\.(?:\s|$)|[؟?!؛;]|\s(?:وبعدين|وبعد كده|وبعد كدا|بعد كده|بعدين|ثم|وكمان)\s/).forEach(function(p){if(!p||!p.trim())return;
+  p.split(/(?=\s(?:ضيف|اضف|اضيف|احذف|امسح|شيل|سدد|ابعت|افتح|روح)\s)/).forEach(function(q){unit(q,A)})});return A}
+window.__lp=lp;
+function run(A){var o=[];A.forEach(function(a){try{X[a.do](a,o)}catch(x){o.push("⚠ فشل أمر: "+e(a.do||""))}});try{save();draw()}catch(x){}
+ document.getElementById("aires").innerHTML='<div class="card" style="border-inline-start:6px solid var(--pr)">'+o.map(function(l){return"<div style='margin:4px 0'>"+l+"</div>"}).join("")+(pend&&pend.length?'<button class="btn no" style="margin-top:8px" onclick="aiDel()">تأكيد الحذف</button>':"")+'</div>'}
+window.aiDel=function(){var n=0;(pend||[]).forEach(function(id){S.students=S.students.filter(function(s){return s.id!=id});Object.keys(S.rec).forEach(function(k){if(k.split("|")[1]==id)delete S.rec[k]});n++});pend=null;save();draw();document.getElementById("aires").innerHTML='<div class="card">🗑 اتحذف '+n+' طالب</div>'};
+window.aiGo=function(){var tx=document.getElementById("aitx"),r=document.getElementById("aires"),t=tx.value.trim();if(!t)return;pend=null;
+ var A=lp(t);if(!A.length){r.innerHTML='<div class="mu">مفهمتش الطلب، جرّب تصيغه بشكل تاني.</div>';return}tx.value="";run(A)};
+var _open=window.aiOpen;
+window.aiOpen=function(){_open();var x=document.getElementById("aitx");if(x){x.placeholder="مثال: ضيف طالب أحمد علي رابعة ابتدائي مجموعة 1 رقمه 01012345678 وطالبة سارة محمد خامسة ابتدائي مجموعة 2. وبعدين سجل حضور مجموعة 1 رابعة ابتدائي النهارده ما عدا يوسف";var h=x.previousElementSibling;if(h)h.textContent="قول أي أمر أو أكتر بالعامية: إضافة أكتر من طالب، حضور وغياب، دفع، تسديد حصص، درجات، حذف وتعديل، رسالة لولي الأمر، فتح صفحة، تغيير سعر الحصة أو اللغة."}};
+})();
+</script>
+
 </body>
 </html>
