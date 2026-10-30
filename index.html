@@ -6145,8 +6145,9 @@ function gmCancel(){if(!GM.run)return;var e=document.getElementById("gm_x");
   clearTimeout(GM.cxt);GM.cxt=setTimeout(function(){GM.cx=0;var x=document.getElementById("gm_x");if(x){x.textContent=L2("حذف التحدي","Delete challenge");x.classList.remove("arm")}},3000);return}
  clearTimeout(GM.cxt);GM.cx=0;gmStop();GM.res=null;GM.q=null;GM.anim="";draw()}
 function gmEl(){return ((Date.now()-GM.t0+GM.w*CT[GM.c].pen)/1000).toFixed(1)}
+function gmRefresh(c){if(!window.FB||!FB.getBoard||!ST.data)return;FB.getBoard(ST.data.phone,ST.pc,c).then(function(r){ST.bd=ST.bd||{};ST.bd[c]=r;if(!GM.run)gmBdFill(c)}).catch(function(e){console.error(e)})}
 function gmTog(c){if(GM.run||GM.busy)return;GM.tc=c;
- if(GM.open!=c){GM.open=c;GM.g="";GM.anim="in";draw();setTimeout(function(){GM.anim=""},1000)}
+ if(GM.open!=c){GM.open=c;GM.g="";GM.anim="in";gmRefresh(c);draw();setTimeout(function(){GM.anim=""},1000)}
  else{GM.anim="out";GM.busy=1;draw();setTimeout(function(){GM.open="";GM.anim="";GM.busy=0;draw()},400)}}
 function gmTick(){if(!ST.data||ST.tab!="home"||ST.set){gmStop();draw();return}var t=document.getElementById("gm_t");if(t)t.textContent=gmEl()}
 function gmQHtml(){var q=GM.q,lg=q.o.some(function(v){return String(v).replace(/<[^>]*>/g,'').length>6});return '<div class="gq'+(q.tx?' tx':'')+'">'+(q.tx?q.t:'<bdi dir="ltr">'+String(q.t).replace(/\u061F/g,'<bdi dir="ltr">\u061F</bdi>')+'</bdi>')+'</div><div class="go'+(lg?' sm':'')+'">'+q.o.map(function(v,i){return q.x&&q.x[i]?'<button class="btn no" disabled style="opacity:.45">'+v+'</button>':'<button class="btn" onclick="gmPick('+i+')">'+v+'</button>'}).join('')+'</div>'}
@@ -7193,12 +7194,12 @@ window.FB={
     try{const pl=await getDoc(doc(db,"plays",p.uid+"_"+p.sid+"_"+day+"_"+c));if(pl.exists())left=Math.max(0,3-(pl.data().count||0))}catch(e){}
     const rows=[];let done=0;
     try{
-      const qs=await getDocs(query(collection(db,"games"),where("uid","==",p.uid),where("c","==",c),where("grade","==",g),orderBy("ms"),limit(200)));
-      const all=[];qs.forEach(d=>all.push(d.data()));done=all.length;
+      const qs=await getDocs(query(collection(db,"games"),where("uid","==",p.uid),where("c","==",c),where("grade","==",g)));
+      const all=[];qs.forEach(d=>all.push(d.data()));all.sort((x,y)=>(x.ms||0)-(y.ms||0));done=all.length;
       const both={};
-      try{const q2=await getDocs(query(collection(db,"games"),where("uid","==",p.uid),where("c","==",oc),where("grade","==",g),orderBy("ms"),limit(200)));q2.forEach(d=>{both[d.data().sid]=1})}catch(e){}
+      try{const q2=await getDocs(query(collection(db,"games"),where("uid","==",p.uid),where("c","==",oc),where("grade","==",g)));q2.forEach(d=>{both[d.data().sid]=1})}catch(e){}
       all.slice(0,50).forEach((x,i)=>rows.push({sid:x.sid,name:String(x.name||"").split(" ")[0],ms:x.ms,w:x.w||0,rank:i+1,both:both[x.sid]?1:0}));
-    }catch(e){console.error(e)}
+    }catch(e){console.error(e);return {sid:p.sid,left,gr:g,total:0,done:0,rows:[],na:1}}
     const total=(p.gt&&p.gt[g])||0;
     return {sid:p.sid,left,gr:g,total:Math.max(total,done),done,rows};
   },
