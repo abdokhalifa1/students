@@ -7724,5 +7724,143 @@ window.calcKey=function(el){var a=el.getAttribute("data-a"),x;
 })();
 
 </script>
+<script>
+/* ===== مساعد الدرجات (تجريبي - للمعلم فقط) ===== */
+(function(){
+window.AI_ENDPOINT=window.AI_ENDPOINT||"";
+var box=null,btn=null,rec=null,last=null;
+function isT(){try{return !!(window.AU&&AU.ready&&AU.user&&!(window.ST&&ST.data))}catch(e){return false}}
+function dig(x){return String(x||"").replace(/[٠-٩]/g,function(d){return "٠١٢٣٤٥٦٧٨٩".indexOf(d)}).replace(/٫/g,".")}
+function nr(x){return String(x||"").replace(/[\u064B-\u065F\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").toLowerCase()}
+function isNum(t){return /^\d+(\.\d+)?$/.test(t)}
+function toks(text){var o=dig(text).replace(/[،,؛;:!؟?()\[\]"«»]/g," ").split(/\s+/).map(function(t){return t.replace(/^\.+|\.+$/g,"")}).filter(Boolean);return {o:o,n:o.map(nr)}}
+function parse(text){
+  var T=toks(text),o=T.o,n=T.n,N=n.length,A=S.students||[],P=A.map(function(s){return {s:s,t:nr(dig(s.name)).split(/\s+/).filter(Boolean)}}),max=null,title="",res=[],amb=[],i;
+  function match(i){var best=0,c=[];P.forEach(function(p){var k=0;while(k<p.t.length&&i+k<N&&n[i+k]==p.t[k])k++;if(!k)return;var fn=P.filter(function(q){return q.t[0]==p.t[0]}).length;if(k<2&&fn>1&&p.t.length>1)k=-k;var a=Math.abs(k);if(k<0){if(!best)c.push({p:p,k:0,x:1});return}if(a>best){best=a;c=[{p:p,k:a}]}else if(a==best)c.push({p:p,k:a})});
+    var g=c.filter(function(z){return z.k>0});if(g.length==1)return {s:g[0].p.s,len:g[0].k};if(g.length>1)return {amb:1,len:g[0].k,names:g.map(function(z){return z.p.s.name})};var u=c.filter(function(z){return z.x});if(u.length)return {amb:1,len:1,names:u.map(function(z){return z.p.s.name})};return null}
+  for(i=0;i<N-1;i++){if(n[i]=="من"&&isNum(n[i+1])){max=+n[i+1];break}}
+  for(i=0;i<N;i++){if(/^(امتحان|اختبار|كويز|quiz)$/.test(n[i])){var w=[o[i]],j=i+1;while(j<N&&w.length<6&&!isNum(n[j])&&n[j]!="من"&&!/^(درجات|الدرجات|درجه|الدرجه)$/.test(n[j])&&!match(j)){w.push(o[j]);j++}title=w.join(" ");break}}
+  i=0;while(i<N){var m=match(i);if(!m){i++;continue}var j=i+m.len,sc=null,ab=false,st=0;
+    while(j<N&&st<4){var w=n[j];if(isNum(w)){sc=+w;j++;if(n[j]=="من"&&isNum(n[j+1]))j+=2;break}if(/^(غايب|غائب|غايبه|غائبه|غياب)$/.test(w)){ab=true;j++;break}if(match(j))break;j++;st++}
+    if(m.amb){amb.push(m.names.join(" / "))}else if(sc!=null||ab){res.push({s:m.s,sc:sc,ab:ab})}
+    i=Math.max(j,i+m.len)}
+  return {title:title,max:max,rows:res,amb:amb}}
+
+var ORD={اول:1,اولي:1,الاول:1,الاولي:1,تاني:2,ثاني:2,الثاني:2,التاني:2,ثانيه:2,تانيه:2,الثانيه:2,التانيه:2,تالت:3,ثالث:3,الثالث:3,التالت:3,تالته:3,ثالثه:3,الثالثه:3,التالته:3,رابع:4,الرابع:4,رابعه:4,الرابعه:4,خامس:5,الخامس:5,خامسه:5,الخامسه:5,سادس:6,السادس:6,سادسه:6,السادسه:6};
+var WN={واحد:1,واحده:1,اتنين:2,اثنين:2,تلاته:3,ثلاثه:3,اربعه:4,خمسه:5,عشرين:20,ثلاثين:30,تلاتين:30,اربعين:40,خمسين:50,ستين:60,سبعين:70,تمانين:80,ثمانين:80,تسعين:90,ميه:100,مائه:100,مئه:100};
+function setOf(s){var o={};s.split(" ").forEach(function(w){o[w]=1});return o}
+var FILL=setOf("الاسم هنا هناك دا دول تسجيل سجل اسجل اضافه اضف اضيف ضيف عايز عاوز عاوزه عايزه طالب طالبه جديد جديده اسمه اسمها اسم ده دي يا لو سمحت ممكن مساعد بس يعني اه ايوه اممم رقم رقمه رقمها ارقام تليفون تليفونه موبايل موبايله واتس واتساب الطالب الطالبه بتاعه بتاعها نمره نمرته ولي الامر امر والده والدته ابوه امه ماما بابا الوالد مجموعه المجموعه جروب جروبه سعر الحصه حصه بسعر جنيه جنيها ج مش مفيش ما معرفش عارف عارفه اعرف اعرفه نسيت لسه بعدين لاحقا موجود موجوده بدون لا يوجد غير فاضي سيب سيبه تخطي تخطى اتخطي عنده عندها ماعندوش ماعندهاش و في من ال الصف صف مرحله المرحله سنه السنه دراسي بنت ولد انسه ابن");
+var FEMS={};"فاطمه مريم سلمي منه نور ندي هدي ايه رنا ملك جني حبيبه شهد ساره سارا اسراء اميره يمني هبه دعاء رحمه ريم رودينا سميه ميار لينا جنه هنا ليلي روان رقيه زينب عائشه اسماء امنيه نورهان مي ميرنا مروه نهي ايمان سندس رزان تسنيم جميله خلود علا اسيل بسمله بسمه دينا هاجر هند شيماء شيما ولاء سهيله كريمه فرح لبني ريهام رغد رهف جودي جوري لجين ملاك منار نادين نيره هاله وفاء ياسمين يارا سجي سلسبيل شروق عبير عزه غاده فدوي كارما لمياء لميس نسمه نوال وعد".split(" ").forEach(function(w){FEMS[nr(w)]=1});
+function isStage(w){return /^(ال)?(ابتدائي|ابتدائيه|ابتدايي|ابتدايه|اعدادي|اعداديه)$/.test(w||"")}
+var EXW=/(^| )(امتحان|اختبار|كويز|درجه|درجات|غايب|غائب|غايبه|غائبه|غياب)( |$)/;
+function looksStu(text){var t=nr(dig(text));
+  if(/(تسجيل|اضافه|اضف|ضيف|سجل|اسجل|اضيف)\s+(طالب|طالبه)(\s|$)|(^|\s)(طالب|طالبه)\s+جديد/.test(t))return true;
+  if(EXW.test(t))return false;
+  var form=!!(window.__aiPend&&document.getElementById("f_n"));
+  var hasPh=/\d[\d\s]{8,}\d/.test(dig(text));
+  if(/^(اسمه|اسمها|الاسم|اسم)( |$)/.test(t))return true;
+  return form||hasPh||/(^|\s)(ابتدائي|ابتدائيه|ابتدايي|اعدادي|اعداديه|الابتدائي|الاعدادي|مجموعه|جروب|سعر|الحصه)(\s|$)/.test(t)}
+function parseStu(text){
+  var raw=dig(text),re=/(\d[\d\s]{8,}\d)/g,m,P=[],prevEnd=0,clean="",last=0;
+  while((m=re.exec(raw))){var d=m[1].replace(/\s/g,""),ix=d.search(/01[0125]\d{8}/),p=null,left="";
+    if(ix>=0){p=d.substr(ix,11);left=d.slice(0,ix)+" "+d.slice(ix+11)}else if(/^1[0125]\d{8}$/.test(d))p=d;else if(/^201[0125]\d{8}$/.test(d))p=d.slice(2);
+    if(!p)continue;
+    var pre=nr(raw.slice(Math.max(prevEnd,m.index-30),m.index));
+    P.push({d:p,par:/ولي|والد|ماما|بابا|امه|ابوه/.test(pre)});clean+=raw.slice(last,m.index)+" "+left+" ";last=m.index+m[0].length;prevEnd=last}
+  clean+=raw.slice(last);
+  var T=toks(clean),o=T.o,n=T.n,N=n.length,nc=nr(clean),U=[],r={name:"",sex:"",grade:"",group:"",phone:"",pp:"",noPar:false,price:""},i,j;
+  for(i=0;i<N;i++)U.push(!!FILL[n[i]]||(n[i].length>3&&n[i].charAt(0)=="و"&&!!FILL[n[i].slice(1)]));
+  var np=P.filter(function(p){return !p.par}),pp=P.filter(function(p){return p.par});
+  if(np.length)r.phone=np[0].d;
+  if(pp.length)r.pp=pp[0].d;else if(np.length>1&&!/ولي (ال)?امر/.test(nc))r.pp=np[1].d;
+  r.noPar=!r.pp&&/ولي (ال)?امر (مش|مفيش|ما|بدون|لا|غير)|(مفيش|بدون|لا يوجد|ما عنده|مالوش) ولي|ولي (ال)?امر.{0,12}(مش عارف|مش موجود|معرفش)/.test(nc);
+  /* sex */
+  for(i=0;i<N;i++){if(n[i]=="طالبه"||n[i]=="بنت"||n[i]=="انسه"){r.sex="f";break}if(n[i]=="طالب"||n[i]=="ولد"||n[i]=="ابن"){r.sex="m";break}}
+  /* grade */
+  var st=0,od=0;
+  for(i=0;i<N;i++){if(/^(ال)?(اعدادي|اعداديه)$/.test(n[i])){st=2;U[i]=true}else if(/^(ال)?(ابتدائي|ابتدائيه|ابتدايي|ابتدايه)$/.test(n[i])){st=1;U[i]=true}}
+  for(i=0;i<N;i++){var kw=i>0&&/^(الصف|صف|مرحله|المرحله|سنه|السنه|في)$/.test(n[i-1]);
+    if(ORD[n[i]]&&!od&&(st||kw)){od=ORD[n[i]];U[i]=true}
+    else if(isNum(n[i])&&kw&&+n[i]>=1&&+n[i]<=6&&!od&&/^(الصف|صف|مرحله|المرحله|سنه|السنه)$/.test(n[i-1])){od=+n[i];U[i]=true}}
+  if(od){var gi=-1;if(st==2||(!st&&od<=3)){if(od<=3)gi=3+od-1}else if(od>=4)gi=od-4;if(gi>=0&&GR[gi])r.grade=GR[gi]}
+  /* group */
+  for(i=0;i<N;i++){if(/^(مجموعه|المجموعه|جروب|جروبه)$/.test(n[i])){var v=n[i+1],g=isNum(v)?v:(ORD[v]?String(ORD[v]):(WN[v]&&WN[v]<=5?String(WN[v]):""));if(g){r.group=g;U[i+1]=true;break}}}
+  /* price */
+  for(i=0;i<N;i++){var pv=null,pj=-1;
+    if(/^(سعر|الحصه|حصه|بسعر)$/.test(n[i])){for(j=i+1;j<Math.min(N,i+4);j++){if(isNum(n[j])){pv=n[j];pj=j;break}if(WN[n[j]]&&WN[n[j]]>5){pv=String(WN[n[j]]);pj=j;break}if(n[j]=="خمسه"&&/^(و)?عشرين$/.test(n[j+1]||"")){pv="25";pj=j+1;U[j]=true;break}}}
+    if(pv==null&&(n[i]=="جنيه"||n[i]=="ج")&&i>0&&isNum(n[i-1])){pv=n[i-1];pj=i-1}
+    if(pv==null&&(n[i]=="جنيه"||n[i]=="ج")&&i>0&&WN[n[i-1]]&&WN[n[i-1]]>5){pv=String(WN[n[i-1]]);pj=i-1}
+    if(pv!=null){r.price=pv;U[pj]=true;break}}
+  /* leftover numbers */
+  for(i=0;i<N;i++){if(U[i]||!isNum(n[i]))continue;var x=+n[i];
+    if(!r.price&&x>=5&&x<=500){r.price=String(x);U[i]=true}else if(!r.group&&x>=1&&x<=5){r.group=String(x);U[i]=true}}
+  /* name = longest run of unused word tokens */
+  var best=[],cur=[],mk=-1;
+  for(i=0;i<N;i++){if(/^(اسمه|اسمها|الاسم|اسم)$/.test(n[i])){mk=i;break}}
+  if(mk>=0){for(i=mk+1;i<N&&!U[i]&&!isNum(n[i])&&!ORD[n[i]]&&cur.length<5;i++)cur.push(o[i]);best=cur;cur=[]}
+  if(!best.length){for(i=0;i<=N;i++){if(i<N&&!U[i]&&!isNum(n[i])&&!ORD[n[i]]){cur.push(o[i])}else{if(cur.length>best.length)best=cur;cur=[]}}}
+  r.name=best.slice(0,5).join(" ");
+  if(r.name){var f0=nr(r.name.split(" ")[0]),em=n.indexOf("ولد")>=0||n.indexOf("ابن")>=0;if(FEMS[f0]&&!em&&r.sex!="f")r.sex="f"}
+  return r}
+
+function fillForm(r){
+  var $=function(i){return document.getElementById(i)},open=!!($("f_n")&&window.__aiPend);
+  try{aiClose()}catch(e){}
+  if(!open){go("stu");SF.open=1;SF.anim="";SF.busy=0;edit=null;if(r.grade)fg=r.grade;draw()}
+  setTimeout(function(){if(!$("f_n"))return;
+    if(r.name)$("f_n").value=r.name;
+    if(r.sex||!open)[].forEach.call(document.querySelectorAll("input[name=sx]"),function(x){x.checked=x.value==(r.sex=="f"?"f":"m")});
+    if(r.grade&&$("f_g")){$("f_g").value=r.grade;try{if($("f_r"))$("f_r").innerHTML=gOpts(+$("f_r").value||1,r.grade)}catch(e){}}
+    if(r.group&&$("f_r")&&/^[1-5]$/.test(r.group))$("f_r").value=r.group;
+    if(r.phone&&$("f_p"))$("f_p").value=pn(r.phone);
+    if(r.pp&&$("f_pp"))$("f_pp").value=pn(r.pp);else if(r.noPar&&$("f_pp"))$("f_pp").value="";
+    if(r.price&&$("f_pr")){$("f_pr").value=r.price;try{syncPrice()}catch(e){}}
+    window.__aiPend=1;$("f_n").scrollIntoView({block:"center"});toast(open?"اتحدّثت الخانات اللي قلتها":"اتملّت البيانات من الصوت — راجعها واضغط حفظ")},80)}
+function toast(m){try{var b=document.createElement("div");b.textContent=m;b.style.cssText="position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(30,30,40,.92);color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;z-index:99999;pointer-events:none;max-width:90%;text-align:center";document.body.appendChild(b);setTimeout(function(){b.remove()},3500)}catch(e){}}
+function aiDone(o){window.aiOpen();var tx=document.getElementById("aitx");if(tx)tx.value="";var w1=codeWa(o),w2=o.parentPhone?codeWa(o,1):"";
+  document.getElementById("aires").innerHTML='<div class="card" style="border-inline-start:6px solid var(--pr)"><div>✅ اتضاف <b>'+esc2(o.name)+'</b></div><div style="margin:8px 0">كود الدخول: <b dir="ltr" style="font-size:22px;letter-spacing:3px">'+esc2(o.code)+'</b></div><div class="row">'
+   +(w1?'<a class="btn pr" target="_blank" rel="noopener" href="'+w1+'">إرسال الكود للطالب</a>':'')+(w2?'<a class="btn pr" target="_blank" rel="noopener" href="'+w2+'">إرسال الكود لولي الأمر</a>':'')+'</div></div>';
+  if(w1){try{window.open(w1,"_blank")}catch(e){}}}
+if(!window.__aiWrapped&&typeof window.addS=="function"){window.__aiWrapped=1;var _add=window.addS;window.addS=function(){var n0=S.students.length;_add.apply(this,arguments);if(window.__aiPend&&S.students.length>n0){window.__aiPend=0;aiDone(S.students[S.students.length-1])}}}
+function remote(text){return fetch(window.AI_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,students:(S.students||[]).map(function(s){return {id:s.id,name:s.name,grade:s.grade}})})}).then(function(r){return r.json()}).then(function(j){var by={};(S.students||[]).forEach(function(s){by[s.id]=s});return {title:j.title||"",max:j.max||null,amb:j.amb||[],rows:(j.rows||[]).filter(function(r){return by[r.id]}).map(function(r){return {s:by[r.id],sc:r.sc==null?null:+r.sc,ab:!!r.ab}})}})}
+function plan(p){var D=window.TD;D.exams=D.exams||[];var G={};
+  p.rows.forEach(function(r){var g=r.s.grade;(G[g]=G[g]||{grade:g,rows:[],bad:[]});G[g].rows.push(r)});
+  return Object.keys(G).map(function(g){var o=G[g],ti=p.title||("درجات "+today()),ex=D.exams.filter(function(e){return e.grade==g&&e.title==ti})[0],mx=ex?ex.max:(p.max||20);o.title=ti;o.max=mx;o.ex=ex||null;o.ok=[];
+    o.rows.forEach(function(r){if(r.ab)o.ok.push(r);else if(r.sc==null||r.sc<0||r.sc>mx)o.bad.push(r);else o.ok.push(r)});return o})}
+function esc2(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function show(p){var G=plan(p),h="";last=G;
+  if(!G.length&&!p.amb.length){h='<div class="mu">'+"مفهمتش أسماء أو درجات. جرّب: «امتحان الوحدة الأولى من 20: أحمد 18 سلمى 15 يوسف غايب»"+'</div>'}
+  G.forEach(function(g){h+='<div class="card" style="margin:8px 0"><div class="nm">'+esc2(g.title)+' <span class="mu">· '+esc2(gn(g.grade))+' · '+"من "+g.max+(g.ex?" · هيتحدّث امتحان موجود":" · امتحان جديد")+'</span></div>';
+    g.ok.forEach(function(r){h+='<div>✓ '+esc2(r.s.name)+' ← <b>'+(r.ab?"غايب":r.sc+"/"+g.max)+'</b></div>'});
+    g.bad.forEach(function(r){h+='<div style="color:#b3261e">⚠ '+esc2(r.s.name)+' ← '+(r.sc==null?"من غير درجة":r.sc+" أكبر من "+g.max+" أو غير صحيحة")+' (مش هتتسجل)</div>'});h+='</div>'});
+  if(p.amb.length)h+='<div style="color:#b3261e;margin:6px 0">⚠ اسم مش واضح (فيه أكتر من طالب): '+esc2(p.amb.join(" ، "))+' — قول الاسم الثنائي</div>';
+  var any=G.some(function(g){return g.ok.length});
+  document.getElementById("aires").innerHTML=h+(any?'<button class="btn pr" style="margin-top:6px" onclick="aiOk()">✓ تسجيل الدرجات</button>':'')}
+window.aiOk=function(){if(!last)return;var D=window.TD,c=0;D.exams=D.exams||[];
+  last.forEach(function(g){if(!g.ok.length)return;var e=g.ex;if(!e){e={id:String(Date.now())+Math.floor(Math.random()*999),grade:g.grade,title:g.title,max:g.max,date:today(),sc:{},abs:{}};D.exams.push(e)}e.sc=e.sc||{};e.abs=e.abs||{};
+    g.ok.forEach(function(r){if(r.ab){e.abs[r.s.id]=1;delete e.sc[r.s.id]}else{e.sc[r.s.id]=r.sc;delete e.abs[r.s.id]}c++})});
+  try{if(window.cloudSave)window.cloudSave()}catch(e){}
+  last=null;document.getElementById("aires").innerHTML='<div class="card" style="border-inline-start:6px solid var(--pr)">✅ اتسجلت '+c+' درجة. هتلاقيها في قسم الاختبارات.</div>';try{draw()}catch(e){}};
+window.aiGo=function(){var t=document.getElementById("aitx").value.trim();if(!t)return;var r=document.getElementById("aires");r.innerHTML='<div class="mu">...</div>';
+  if(looksStu(t)){fillForm(parseStu(t));r.innerHTML="";return}
+  if(window.AI_ENDPOINT){remote(t).then(show).catch(function(){r.innerHTML='<div style="color:#b3261e">تعذّر الاتصال، هستخدم الفهم المحلي.</div>';show(parse(t))})}else show(parse(t))};
+window.aiMic=function(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("الإملاء مش مدعوم في المتصفح ده. استخدم ميكروفون كيبورد الموبايل.");return}
+  if(rec){try{rec.stop()}catch(e){}return}
+  rec=new SR();rec.lang="ar-EG";rec.continuous=true;rec.interimResults=false;var tx=document.getElementById("aitx"),mb=document.getElementById("aimic");mb.textContent="⏹ وقف";
+  rec.onresult=function(ev){var s="";for(var i=ev.resultIndex;i<ev.results.length;i++)s+=ev.results[i][0].transcript+" ";tx.value=(tx.value+" "+s).trim()};
+  rec.onend=function(){rec=null;mb.textContent="🎤 إملاء"};rec.onerror=function(){rec=null;mb.textContent="🎤 إملاء"};try{rec.start()}catch(e){rec=null;mb.textContent="🎤 إملاء"}};
+window.aiOpen=function(){if(box){box.style.display="flex";return}
+  box=document.createElement("div");box.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9500;display:flex;align-items:flex-end;justify-content:center";
+  box.innerHTML='<div class="card" style="width:100%;max-width:560px;max-height:88vh;overflow:auto;margin:0;border-radius:22px 22px 0 0" dir="rtl"><div class="row" style="align-items:center"><div class="nm" style="flex:1">🤖 المساعد</div><button class="btn" style="flex:0 0 auto;padding:6px 14px" onclick="aiClose()">✕</button></div>'
+   +'<div class="mu" style="font-size:13px;margin:4px 0 8px">املي أو اكتب: «امتحان … من 20: أحمد 18 سلمى 15» لتسجيل الدرجات، أو «تسجيل طالب …» لإضافة طالب جديد.</div>'
+   +'<textarea id="aitx" rows="4" style="width:100%;box-sizing:border-box" placeholder="امتحان الوحدة الأولى من 20: أحمد محمد 18 سلمى علي 15 يوسف غايب"></textarea>'
+   +'<div class="row" style="margin-top:8px"><button id="aimic" class="btn" onclick="aiMic()">🎤 إملاء</button><button class="btn pr" onclick="aiGo()">فهم الطلب</button></div><div id="aires" style="margin-top:10px"></div></div>';
+  box.addEventListener("click",function(e){if(e.target===box)aiClose()});document.body.appendChild(box)};
+window.aiClose=function(){if(rec){try{rec.stop()}catch(e){}}if(box)box.style.display="none"};
+function ensure(){var on=isT();if(on&&!btn){btn=document.createElement("button");btn.textContent="🤖";btn.setAttribute("aria-label","مساعد الدرجات");btn.style.cssText="position:fixed;left:14px;bottom:92px;width:52px;height:52px;border-radius:50%;border:0;font-size:24px;background:var(--pr);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:9000;cursor:pointer";btn.onclick=window.aiOpen;document.body.appendChild(btn)}
+  if(btn)btn.style.display=on?"":"none";if(!on&&box)box.style.display="none"}
+setInterval(ensure,1500);ensure();
+})();
+</script>
 </body>
 </html>
