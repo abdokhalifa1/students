@@ -7811,7 +7811,7 @@ att=function(){
   +'<button class="mb'+(r.p===0&&r.a!==0?' no':'')+'"'+(r.a===0?' disabled style="opacity:.35;pointer-events:none"':'')+' aria-label="'+t("np")+'" onclick="setRec('+s.id+',\'p\',0)">$</button></div></div>'});
  g='<div class="cgrid'+(sel?' pad':'')+'">'+g+'</div>';
  var sh=sel?'<div class="csheet"><div class="csh"><div><div class="nm" style="margin:0">'+esc(sel.name)+'</div><div class="mu">'+esc(gd(sel.group))+'</div></div><button class="btn sq" onclick="cgClose()">✕</button></div>'+cx(sel,fdate.slice(0,7))+'</div>':'';
- return '<div class="attw">'+head+'<div id="attchip">'+lg+'</div><div class="attbox"><div class="attcol">'+attRail(LA)+'</div>'+g+'</div>'+sh+'</div>'};
+ return '<div class="attw">'+head+'<div id="attchip">'+lg+'</div><div class="attbox"'+(LA.length?' style="min-height:min('+(LA.length*26+12)+'px,calc(100vh - 176px))"':'')+'><div class="attcol">'+attRail(LA)+'</div>'+g+'</div>'+sh+'</div>'};
 })();
 </script>
 <style id="att-grid-soft">
