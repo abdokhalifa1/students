@@ -951,6 +951,28 @@ function delS(id){if(pd!=id){pd=id;draw();return}pd=null;S.students=S.students.f
 var PDV=false;function pdvTog(){PDV=!PDV;draw()}
 var SX={};
 function sxTog(id){var ex=SX[id]||(cd&&cd.id==id)||(adj&&adj.id==id);anchorSet(id);SX[id]=!ex;if(ex){if(cd&&cd.id==id)cd=null;if(adj&&adj.id==id)adj=null}draw();anchorRestore()}
+var SMK="",SML=false;
+function smOpen(k){SMK=k;draw()}
+function smClose(){SMK="";draw()}
+function smBg(e){if(e.target&&e.target.id=="smo")smClose()}
+function smList(){SML=!SML;draw()}
+document.addEventListener("keydown",function(e){if(e.key=="Escape"&&SMK)smClose()});
+(function(){var g0=go;go=function(){SMK="";return g0.apply(this,arguments)}})();
+function smBuild(k,L,day,A1,B1,U1,tot,lab){
+ var M=L.length,rec=A1+B1,R=[],sym=k=="a"?"\u2713":k=="b"?"\u2715":"$",ttl=k=="a"?t("pr"):k=="b"?t("ab"):t("np"),
+ pc=k=="a"?pct(A1,rec):k=="b"?pct(B1,rec):pct(U1,A1),
+ pl=k=="a"?L2("نسبة الحضور","Attendance rate"):k=="b"?L2("نسبة الغياب","Absence rate"):L2("لم يدفعوا من الحضور","Unpaid of attended");
+ L.forEach(function(x){var n=day?(k=="a"?(x.r.a===1?1:0):k=="b"?(x.r.a===0?1:0):(x.r.a===1&&x.r.p===0?1:0)):(k=="a"?x.a:k=="b"?x.b:x.u);if(n>0)R.push({x:x,n:n})});
+ if(k=="u")R.sort(function(p,q){return q.x.o-p.x.o});else R.sort(function(p,q){return String(p.x.s.name).localeCompare(String(q.x.s.name),"ar")});
+ var b='<div class="sm-t" style="margin:0 0 12px"><div><b>'+pc+'</b><small>'+pl+'</small></div><div><b>'+R.length+' / '+M+'</b><small>'+L2("طالب","Students")+'</small></div>'
+  +(k=="u"?'<div><b'+(tot?' class="owe"':'')+'>'+tot+'</b><small>'+L2("المتأخرات (","Arrears (")+t("cur")+')</small></div>':'')+'</div>';
+ R.forEach(function(r){var x=r.x,s=x.s,v;
+  if(k=="u")v='<span class="sr-a owe">'+x.o+' '+t("cur")+(day?'':'<small class="mu" style="display:block;font-size:11px">'+r.n+' '+L2("حصة","classes")+'</small>')+'</span>';
+  else if(day)v=(k=="a"&&x.r.p===0)?'<span class="pill">'+t("np")+'</span>':'';
+  else v='<span class="sr-a mu">'+r.n+' '+L2("حصة","classes")+'</span>';
+  b+='<div class="card cp"><div class="sr-h">'+stuAv(s)+'<span class="sr-n"><b>'+esc(s.name)+'</b><small>'+gn(s.grade)+'</small></span>'+v+'</div></div>'});
+ if(!R.length)b+='<div class="card mu">'+L2("لا يوجد طلاب هنا.","No students here.")+'</div>';
+ return '<div class="gmo" id="smo" onclick="smBg(event)"><div class="gmd"><div class="gmh"><span class="gmsym">'+sym+'</span><div class="gmt"><b>'+ttl+'</b><small>'+lab+'</small></div><button class="gmx" type="button" aria-label="Close" onclick="smClose()">\u2715</button></div><div class="gmb">'+b+'</div></div></div>'}
 function sum(){var h=fbar(0),tot=0,day=SM.day,yr=day?"":SM.y,rt=S.lang=="en";
 var L=sortSex(flt()).map(function(s){var x=day?null:st(s,yr||fmon);if(!x){var r=rc(s.id,day);x={r:r,o:(r.a===1&&r.p===0)?sp(s):0}}x.s=s;return x});L.forEach(function(x){tot+=x.o});L.sort(function(p,q){return q.o-p.o});
 var lab=day?dayName(day)+' <bdi>'+day+'</bdi>':yr?(rt?"Year ":"سنة ")+'<bdi>'+yr+'</bdi>':new Date(+fmon.slice(0,4),+fmon.slice(5,7)-1,1).toLocaleDateString(rt?"en-US":"ar-u-nu-latn",{month:"long",year:"numeric"});
@@ -959,13 +981,15 @@ if(day)L.forEach(function(x){var r=x.r;if(r.a===1){A1++;if(r.p===0)U1++}else if(
 var PD=0;L.forEach(function(x){if(day){if(x.r.a===1&&x.r.p!==0)PD+=sp(x.s)}else PD+=x.p*sp(x.s)});
 var pl=day?L2("المدفوع في اليوم","Collected today"):yr?L2("المدفوع في السنة","Collected this year"):L2("المدفوع في الشهر","Collected this month");
 h+='<div class="card cp"><div class="btn dpb" role="button" tabindex="0" onclick="dpOpen(\'sum\')" style="min-height:40px;padding:6px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center"><b style="font-size:14px;font-weight:600">'+lab+'</b></div>';
-h+='<div class="sm-hero"><small>'+t("tot")+'</small><b class="'+(tot?"owe":"mu")+'">'+tot+' '+t("cur")+'</b></div>';
-h+='<div class="sm-t"><div><b>'+A1+'</b><small>'+t("pr")+'</small></div><div><b'+(B1?' class="owe"':'')+'>'+B1+'</b><small>'+t("ab")+'</small></div><div><b'+(U1?' class="owe"':'')+'>'+U1+'</b><small>'+t("np")+'</small></div></div>';
+h+='<div class="sm-hero"'+(tot?' onclick="smOpen(\'u\')" style="cursor:pointer;-webkit-tap-highlight-color:transparent"':'')+'><small>'+t("tot")+'</small><b class="'+(tot?"owe":"mu")+'">'+tot+' '+t("cur")+'</b></div>';
+h+='<div class="sm-t"><div onclick="smOpen(\'a\')" style="cursor:pointer;-webkit-tap-highlight-color:transparent"><b>'+A1+'</b><small>'+t("pr")+'</small><small style="display:block;font-size:11px;opacity:.75">'+pct(A1,A1+B1)+'</small></div><div onclick="smOpen(\'b\')" style="cursor:pointer;-webkit-tap-highlight-color:transparent"><b'+(B1?' class="owe"':'')+'>'+B1+'</b><small>'+t("ab")+'</small><small style="display:block;font-size:11px;opacity:.75">'+pct(B1,A1+B1)+'</small></div><div onclick="smOpen(\'u\')" style="cursor:pointer;-webkit-tap-highlight-color:transparent"><b'+(U1?' class="owe"':'')+'>'+U1+'</b><small>'+t("np")+'</small><small style="display:block;font-size:11px;opacity:.75">'+pct(U1,A1)+'</small></div></div>';
 h+='<div class="sm-m"><span>'+L2("عدد الطلاب","Students")+': <b>'+L.length+'</b>'+(day&&N1?' · '+t("unrec")+': <b>'+N1+'</b>':'')+'</span><span onclick="pdvTog()" style="cursor:pointer;-webkit-tap-highlight-color:transparent;'+(PDV?'':'opacity:.6;')+'">'+(PDV?pl+': <b style="font-size:14px;color:var(--tx)">'+PD+' '+t("cur")+'</b>':'\u25BE '+pl)+'</span></div></div>';
-L.forEach(function(x){var s=x.s,id=s.id,ex=!day&&(SX[id]||(cd&&cd.id==id)||(adj&&adj.id==id));
+var HD=h;h='';L.forEach(function(x){var s=x.s,id=s.id,ex=!day&&(SX[id]||(cd&&cd.id==id)||(adj&&adj.id==id));
 var st2=day?(x.r.a===1?'<span class="pill ok">'+t("pr")+(x.r.p===0?' · '+t("np"):'')+'</span>':x.r.a===0?'<span class="pill">'+t("ab")+'</span>':'<span class="mu">'+t("unrec")+'</span>'):'';
 h+='<div class="card cp" data-sid="'+id+'"><div class="sr-h"'+(day?'':' onclick="sxTog('+id+')"')+'>'+stuAv(s)+'<span class="sr-n"><b>'+esc(s.name)+'</b><small>'+gn(s.grade)+'</small>'+st2+'</span><span class="sr-a '+(x.o?"owe":"mu")+'">'+x.o+' '+t("cur")+'</span>'+(day?'':'<span class="sr-c'+(ex?' o':'')+'">\u25BE</span>')+'</div>'+(ex?'<div class="sr-b">'+cnt(s,yr||fmon)+anaBtn(s,x,yr||fmon)+'</div>':'')+'</div>'});
-if(!L.length)h+='<div class="card mu">'+t("nost")+'</div>';return h}
+if(!L.length)h+='<div class="card mu">'+t("nost")+'</div>';
+var LST=h;h=HD+(L.length?'<div class="card cp" onclick="smList()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;-webkit-tap-highlight-color:transparent"><b>'+L2("كل الطلاب","All students")+'</b><span class="mu">'+L.length+' &nbsp;'+(SML?'\u25B4':'\u25BE')+'</span></div>':'')+((SML||!L.length)?LST:'');
+if(SMK)h+=smBuild(SMK,L,day,A1,B1,U1,tot,lab);return h}
 function pct(n,d){return d?Math.round(n*100/d)+"%":"0%"}
 var TA='rows="5" style="margin-top:8px"';
 window.BK="";
@@ -8859,8 +8883,8 @@ function env(){return {S:root.S,TD:getTD(),pn:root.pn,genCode:root.genCode,go:ro
 function undoLast(inner){var sn=snaps.pop();if(!sn)return "⚠ مفيش حاجة أرجع عنها";restore(sn);return "↩ رجّعت آخر عملية"}
 /* ---------- واجهة ---------- */
 function css(){if($("a3css"))return;var s=doc.createElement("style");s.id="a3css";s.textContent=".a3m{display:flex;flex-direction:column;gap:8px;padding:2px 0}.a3b{max-width:92%;padding:10px 12px;border-radius:14px;font-size:14.5px;line-height:1.7;word-break:break-word}.a3u{align-self:flex-start;background:var(--pr);color:#fff;border-end-start-radius:4px}.a3a{align-self:flex-end;background:var(--card2,rgba(127,127,127,.14));border-end-end-radius:4px}.a3o{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.a3o button,.a3x button{font:inherit}.a3c{display:block;width:100%;text-align:right;padding:9px 11px;margin:4px 0;border-radius:11px;border:1px solid rgba(127,127,127,.3);background:transparent;color:inherit;cursor:pointer}.a3c.on{background:var(--pr);color:#fff;border-color:var(--pr)}.a3ok{border-inline-start:5px solid var(--pr)}.a3dg{border-inline-start:5px solid #b3261e}.a3i{display:inline-block;width:20px;height:20px;vertical-align:-4px;margin-inline-end:6px;line-height:0}.a3i svg{display:block;width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;overflow:visible}.a3i path,.a3i rect{stroke-dasharray:1;stroke-dashoffset:0}.a3i.only{margin:0}.a3i *{transform-box:fill-box}.a3i.ani path,.a3i.ani rect{animation:icdraw .7s ease-out backwards}.a3i.ani .p2{animation-delay:.18s}.a3i.ani .u{transform-origin:center;animation:icswing 1s ease-in-out}.a3i.ani .xx{transform-origin:center;animation:a3rot .6s cubic-bezier(.3,1.6,.5,1)}.a3i.ani .mb{transform-origin:center;animation:icbob .9s ease-in-out}.a3i.ani .ck{transform-origin:center;animation:icbob .8s ease-in-out}@keyframes a3rot{from{transform:rotate(-90deg) scale(.6)}to{transform:none}}.a3i.fill rect{fill:currentColor}.a3in{width:100%;box-sizing:border-box;margin-top:6px}.a3ex{font-size:12.5px;opacity:.75;cursor:pointer;display:inline-block;margin:3px;padding:4px 9px;border-radius:12px;border:1px dashed rgba(127,127,127,.5)}";doc.head.appendChild(s)}
-function build(){css();box=doc.createElement("div");box.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9500;display:none;align-items:flex-end;justify-content:center";
-  box.innerHTML='<div class="card" dir="rtl" style="width:100%;max-width:600px;height:auto;max-height:86vh;margin:0;border-radius:22px 22px 0 0;display:flex;flex-direction:column;padding:8px 12px 12px"><div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:14px;flex:none;margin:0 0 18px"><div class="nm" style="font-size:17px;margin:0;flex:1;display:flex;align-items:center;gap:8px"><span class="a3t" style="display:inline-block;width:28px;height:28px;color:var(--pr)">'+window.AIICO+'</span>المساعد</div><div style="display:flex;flex-direction:row;flex-wrap:nowrap;gap:12px;flex:none"><button class="btn" id="a3undo" style="flex:0 0 auto;min-height:36px;padding:2px 14px;white-space:nowrap">'+a3i("undo")+'تراجع</button><button class="btn" id="a3x" aria-label="إغلاق" style="flex:0 0 auto;min-height:36px;padding:2px 14px;white-space:nowrap">'+a3i("x",1)+'</button></div></div><div id="a3log" class="a3m" style="flex:0 1 auto;min-height:0;overflow:auto;margin:8px 0"></div><div style="flex:none"><textarea id="a3tx" rows="2" class="a3in" style="margin:0" placeholder="اكتب هنا..."></textarea><div class="row" style="margin-top:6px;gap:6px"><button id="a3mic" class="btn" style="flex:1">'+a3i("mic")+'إملاء</button><button id="a3go" class="btn pr" style="flex:2">إرسال</button></div></div></div>';
+function build(){css();micCss();box=doc.createElement("div");box.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9500;display:none;align-items:flex-end;justify-content:center";
+  box.innerHTML='<div class="card" dir="rtl" style="width:100%;max-width:600px;height:auto;max-height:86vh;margin:0;border-radius:22px 22px 0 0;display:flex;flex-direction:column;padding:8px 12px 12px"><div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:14px;flex:none;margin:0 0 18px"><div class="nm" style="font-size:17px;margin:0;flex:1;display:flex;align-items:center;gap:8px"><span class="a3t" style="display:inline-block;width:28px;height:28px;color:var(--pr)">'+window.AIICO+'</span>المساعد</div><div style="display:flex;flex-direction:row;flex-wrap:nowrap;gap:12px;flex:none"><button class="btn" id="a3undo" style="flex:0 0 auto;min-height:36px;padding:2px 14px;white-space:nowrap">'+a3i("undo")+'تراجع</button><button class="btn" id="a3x" aria-label="إغلاق" style="flex:0 0 auto;min-height:36px;padding:2px 14px;white-space:nowrap">'+a3i("x",1)+'</button></div></div><div id="a3log" class="a3m" style="flex:0 1 auto;min-height:0;overflow:auto;margin:8px 0"></div><div style="flex:none"><div id="a3st" class="a3st"></div><textarea id="a3tx" rows="2" class="a3in" style="margin:0" placeholder="اكتب هنا أو اضغط إملاء وتكلّم..."></textarea><div class="row" style="margin-top:6px;gap:6px"><button id="a3mic" class="btn" style="flex:1">'+a3i("mic")+'إملاء</button><button id="a3go" class="btn pr" style="flex:2">إرسال</button></div></div></div>';
   doc.body.appendChild(box);log=$("a3log");tx=$("a3tx");
   box.addEventListener("click",function(e){if(e.target===box)hide()});$("a3x").onclick=hide;$("a3go").onclick=function(){send()};$("a3mic").onclick=mic;
   $("a3undo").onclick=function(){bot("<div>"+undoLast()+"</div>");};
@@ -8873,15 +8897,61 @@ function bubble(html,cls){var d=doc.createElement("div");d.className="a3b "+cls;
 function bot(html,cls){return bubble(html,"a3a "+(cls||""))}
 function me(t){bubble(esc(t).replace(/\n/g,"<br>"),"a3u")}
 function show(){if(!box)build();box.style.display="flex";[].forEach.call(box.querySelectorAll(".a3t i"),function(i){i.classList.remove("ani");void i.offsetWidth;i.classList.add("ani");setTimeout(function(){i.classList.remove("ani")},2800)});[].forEach.call(box.querySelectorAll("#a3undo .a3i,#a3x .a3i,#a3mic .a3i"),a3play);setTimeout(function(){try{tx.focus()}catch(e){}},50)}
-function hide(){want=0;micLab(0);if(rec){try{rec.stop()}catch(e){}}if(box)box.style.display="none"}
+function hide(){micStop(true);if(box)box.style.display="none"}
 /* ---------- الإملاء ---------- */
-function micLab(on){var b=$("a3mic");if(b)b.textContent=on?"⏹ وقف":"🎤 إملاء"}
-function micRun(){var SR=root.SpeechRecognition||root.webkitSpeechRecognition;if(!SR)return;rec=new SR();rec.lang="ar-EG";rec.continuous=true;rec.interimResults=false;
-  rec.onresult=function(ev){var s="";for(var i=ev.resultIndex;i<ev.results.length;i++){if(ev.results[i].isFinal)s+=ev.results[i][0].transcript+" "}if(s)tx.value=(tx.value?tx.value+" ":"")+s.trim()};
-  rec.onerror=function(ev){var er=ev&&ev.error;if(er=="not-allowed"||er=="service-not-allowed"){want=0;micLab(0);alert("اسمح للتطبيق باستخدام الميكروفون من إعدادات المتصفح.")}};
-  rec.onend=function(){rec=null;if(want)setTimeout(function(){if(want&&!rec)micRun()},300);else micLab(0)};
-  try{rec.start()}catch(e){rec=null}}
-function mic(){var SR=root.SpeechRecognition||root.webkitSpeechRecognition;if(!SR){alert("الإملاء مش مدعوم في المتصفح ده. استخدم ميكروفون كيبورد الموبايل.");return}if(want){want=0;micLab(0);if(rec){try{rec.stop()}catch(e){}}return}want=1;micLab(1);micRun()}
+function a3Nums(str){
+ function nz(w){return String(w).replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ئ/g,"ي").replace(/ؤ/g,"و")}
+ var D={},TEN={};
+ function add(v,list,tens){list.split(" ").forEach(function(w){D[nz(w)]=v;if(tens)TEN[nz(w)]=1})}
+ add(0,"صفر");add(1,"واحد واحده");add(2,"اتنين اثنين اثنان تنين");add(3,"تلاته ثلاثه تلات ثلاث");add(4,"اربعه أربعة اربع");add(5,"خمسه خمسة خمس");
+ add(6,"سته ستة");add(7,"سبعه سبعة سبع");add(8,"تمانيه ثمانيه ثمانية تمان ثمان");add(9,"تسعه تسعة تسع");add(10,"عشره عشرة عشر");
+ add(11,"حداشر احدعشر");add(12,"اتناشر اثناعشر");add(13,"تلاتاشر ثلاثةعشر");add(14,"اربعتاشر");add(15,"خمستاشر");add(16,"ستاشر");add(17,"سبعتاشر");add(18,"تمنتاشر تمانتاشر ثمانيةعشر");add(19,"تسعتاشر");
+ add(20,"عشرين عشرون",1);add(30,"تلاتين ثلاثين ثلاثون",1);add(40,"اربعين اربعون",1);add(50,"خمسين خمسون",1);add(60,"ستين ستون",1);add(70,"سبعين سبعون",1);add(80,"تمانين ثمانين ثمانون",1);add(90,"تسعين تسعون",1);
+ add(100,"ميه مايه مئه مائه مية مائة مئة");add(200,"ميتين مئتين مائتين");add(300,"تلتميه تلتمية ثلاثمائه ثلثمية ثلاثمائة");add(400,"ربعميه ربعمية اربعمائه اربعمائة");add(500,"خمسميه خمسمية خمسمائه خمسمائة");
+ add(600,"ستميه ستمية ستمائه ستمائة");add(700,"سبعميه سبعمية سبعمائه سبعمائة");add(800,"تمنميه تمنمية ثمانمائه ثمانمائة");add(900,"تسعميه تسعمية تسعمائه تسعمائة");add(1000,"الف ألف");add(2000,"الفين ألفين");
+ var tk=String(str).split(/\s+/).filter(Boolean),out=[],i=0;
+ function val(w){var k=nz(w);if(k=="ست"||k=="ست")return null;if(k in D)return D[k];if(k.charAt(0)=="و"&&k.length>2){var r=k.slice(1);if(r in D&&r!="ست")return D[r]}return null}
+ function isTens(v){return v>=20&&v<100&&v%10==0}
+ while(i<tk.length){var k0=nz(tk[i]),k1=i+1<tk.length?nz(tk[i+1]):"";
+  if((k0=="احد"||k0=="اثنا"||k0=="اثني")&&(k1=="عشر"||k1=="عشره")){out.push(k0=="احد"?"11":"12");i+=2;continue}
+  var v=val(tk[i]);
+  if(v===1&&(k0=="واحد"||k0=="واحده")){var pv=i>0?nz(tk[i-1]):"",nv=i+1<tk.length?val(tk[i+1]):null;
+   if(!(pv=="مجموعه"||pv=="جروب"||pv=="رقم"||pv=="حصه"||(nv!==null&&isTens(nv))))v=null}
+  if(v===null){out.push(tk[i]);i++;continue}
+  var cur=v,j=i+1;
+  if(cur>=1&&cur<=9&&j<tk.length&&(function(){var k=nz(tk[j]);return k=="عشر"||k=="عشره"})()){cur+=10;j++}
+  while(j<tk.length){var n=val(tk[j]);if(n===null)break;
+   if(n==10&&(nz(tk[j])=="عشر"||nz(tk[j])=="عشره")&&false)break;
+   if(cur<10&&isTens(n))cur+=n;
+   else if(cur>=100&&cur%100==0&&cur<1000&&n<100&&n>0)cur+=n;
+   else if(cur>100&&cur<1000&&cur%100>=1&&cur%100<10&&isTens(n))cur+=n;
+   else if(cur>=1000&&cur%1000==0&&n<1000&&n>0)cur+=n;
+   else break;
+   j++}
+  var s=String(cur);
+  if(j<tk.length&&/^(ونص|ونصف)$/.test(nz(tk[j]))){s+=".5";j++}
+  else if(j+1<tk.length&&nz(tk[j])=="و"&&/^(نص|نصف)$/.test(nz(tk[j+1]))){s+=".5";j+=2}
+  out.push(s);i=j}
+ return out.join(" ")}
+
+var rtm=0,live="",base="";
+function micCss(){if($("a3mic-css"))return;var e=doc.createElement("style");e.id="a3mic-css";e.textContent=".a3st{display:none;font-size:13px;margin:0 0 6px;padding:6px 10px;border-radius:10px;background:var(--soft,rgba(127,127,127,.12));color:var(--mu,inherit)}.a3st.on{display:block;color:var(--pr)}.a3st.er{display:block;color:#b3261e}#a3mic.a3rec{animation:a3pulse 1.1s ease-in-out infinite}@keyframes a3pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pr) 55%,transparent)}50%{box-shadow:0 0 0 7px transparent}}";doc.head.appendChild(e)}
+function setSt(msg,cls){var e=$("a3st");if(!e)return;e.textContent=msg||"";e.className="a3st"+(cls?" "+cls:"")}
+function micLab(on){var b=$("a3mic");if(!b)return;b.innerHTML=on?a3i("stop")+"وقف وإرسال":a3i("mic")+"إملاء";b.classList.toggle("pr",!!on);b.classList.toggle("a3rec",!!on)}
+function micStop(nosend){want=0;clearTimeout(rtm);var r=rec;rec=null;if(r){r.onresult=r.onerror=r.onend=null;try{r.stop()}catch(e){}}micLab(0);setSt("");var go=!nosend&&live&&tx&&tx.value.trim();live="";if(go)send()}
+function micRun(){var SR=root.SpeechRecognition||root.webkitSpeechRecognition;if(!SR)return;var r=new SR();rec=r;r.lang="ar-EG";r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
+  r.onresult=function(ev){var s="";for(var i=0;i<ev.results.length;i++)s+=" "+ev.results[i][0].transcript;live=a3Nums(s.replace(/\s+/g," ").trim());tx.value=(base?base+" ":"")+live;
+    setSt("🎤 بسمعك... هبعت لوحدي لما تسكت","on");clearTimeout(rtm);if(live)rtm=setTimeout(function(){if(want)micStop()},1500)};
+  r.onerror=function(ev){var er=ev&&ev.error;
+    if(er=="not-allowed"||er=="service-not-allowed"){micStop(true);setSt("الميكروفون مش مسموح. اسمح له من إعدادات المتصفح أو التطبيق.","er")}
+    else if(er=="audio-capture"){micStop(true);setSt("مفيش ميكروفون شغال على الجهاز.","er")}
+    else if(er=="network"){micStop(true);setSt("الإملاء محتاج إنترنت. اتأكد من الاتصال وجرب تاني.","er")}};
+  r.onend=function(){if(r!==rec)return;rec=null;if(!want)return;
+    if(live)micStop();else{micStop(true);setSt("مسمعتش صوت. اضغط الميكروفون وجرب تاني.","er")}};
+  try{r.start()}catch(e){micStop(true);setSt("مقدرتش أشغّل الميكروفون. جرب تاني.","er")}}
+function mic(){var SR=root.SpeechRecognition||root.webkitSpeechRecognition;if(!SR){setSt("الإملاء مش مدعوم في المتصفح ده. استخدم ميكروفون كيبورد الموبايل.","er");return}
+  if(want){micStop();return}
+  base=tx.value.trim();live="";want=1;micLab(1);setSt("🎤 بسمعك... اتكلم دلوقتي","on");micRun()}
 /* ---------- ذكاء اصطناعي اختياري (لو AI_ENDPOINT متظبط) ---------- */
 function llmPlan(text,C){
   var ctx={today:C.today,grades:C.GR,price:C.price,students:C.students.map(function(s){return {id:s.id,name:s.name,grade:s.grade,group:s.group}}),exams:(C.TD.exams||[]).map(function(e){return {id:e.id,title:e.title,grade:e.grade}}),notices:(C.notices||[]).map(function(n){return {id:n.id,grade:n.grade,text:String(n.text).slice(0,80)}}),sched:C.TD.sched||{}};
@@ -8889,7 +8959,7 @@ function llmPlan(text,C){
     var steps=(j.steps||[]).filter(function(s){return A3.tools[s.tool]}).map(function(s){return {tool:s.tool,args:s.args||{}}});
     if(!steps.length&&!j.say)throw new Error("empty");return {steps:steps,say:j.say||"",ask:j.ask||null,llm:true}})}
 /* ---------- المحادثة ---------- */
-function send(){if(busy)return;var t=tx.value.trim();if(!t)return;tx.value="";me(t);busy=true;
+function send(){if(busy)return;micStop(true);var t=tx.value.trim();if(!t)return;tx.value="";me(t);busy=true;
   var C=A3.ctx(),go=function(pl){busy=false;handle(pl,C)};
   if(root.AI_ENDPOINT){var th=bot("<span class='mu'>...</span>");llmPlan(t,C).then(function(pl){th.remove();go(pl)}).catch(function(){th.remove();go(A3.plan(t,C))})}
   else go(A3.plan(t,C))}
