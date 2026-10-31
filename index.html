@@ -9018,5 +9018,190 @@ root.__a3test={snap:snap,restore:restore,env:env,execute:function(steps){work={s
 })(typeof window!=="undefined"?window:globalThis);
 
 </script>
+<style id="aks-css">
+/* ===== AK Select Sheet: قوائم منسدلة عصرية (شاشة منبثقة) ===== */
+select:not([multiple]){-webkit-appearance:none;appearance:none;cursor:pointer;text-overflow:ellipsis;padding-inline-start:12px;padding-inline-end:32px;font-weight:600;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2348426D' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+background-repeat:no-repeat;background-size:16px 16px;background-position:right 9px center;transition:box-shadow .25s}
+:root[dir="rtl"] select:not([multiple]){background-position:left 9px center}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) select:not([multiple]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F0C38E' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}}
+:root[data-theme="dark"] select:not([multiple]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F0C38E' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+select.aks-open{outline:3px solid color-mix(in srgb,var(--pr) 45%,transparent);outline-offset:1px}
+
+.aks-ov{position:fixed;inset:0;z-index:100000;display:flex;align-items:flex-end;justify-content:center;background:rgba(24,20,48,0);-webkit-backdrop-filter:blur(0);backdrop-filter:blur(0);transition:background .3s,-webkit-backdrop-filter .3s,backdrop-filter .3s;touch-action:none;-webkit-tap-highlight-color:transparent}
+.aks-ov.on{background:rgba(24,20,48,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.aks-sh{position:relative;width:min(100%,520px);max-height:78vh;max-height:min(78dvh,640px);display:flex;flex-direction:column;background:var(--card);color:var(--tx);border-radius:30px 30px 0 0;box-shadow:0 -14px 44px rgba(20,16,45,.35);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateY(105%);transition:transform .45s cubic-bezier(.22,1.08,.36,1);overflow:hidden;font-family:inherit;touch-action:auto;outline:0}
+.aks-ov.on .aks-sh{transform:translateY(0)}
+.aks-hd{flex:none;display:flex;align-items:center;gap:10px;padding:8px 18px 10px;touch-action:none;cursor:grab;position:relative}
+.aks-gr{position:absolute;top:8px;left:50%;width:44px;height:5px;margin-left:-22px;border-radius:5px;background:color-mix(in srgb,var(--mu) 45%,transparent)}
+.aks-tt{flex:1;min-width:0;margin-top:14px;font-size:18px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aks-x{flex:none;margin-top:14px;width:40px;height:40px;padding:0;border:0;border-radius:14px;background:var(--soft);color:var(--tx);box-shadow:var(--out,var(--sh));display:grid;place-items:center;cursor:pointer;transition:transform .35s cubic-bezier(.3,1.7,.5,1),box-shadow .25s;-webkit-tap-highlight-color:transparent}
+.aks-x:active{transform:scale(.9);box-shadow:var(--in,none)}
+.aks-x svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;display:block}
+.aks-q{flex:none;margin:2px 18px 8px;display:block;width:auto;font:inherit;font-size:15px}
+.aks-ls{position:relative;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:6px 14px 8px;display:flex;flex-direction:column;gap:6px;scrollbar-width:none;touch-action:pan-y}
+.aks-ls::-webkit-scrollbar{display:none}
+.aks-op{flex:none;display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:10px 16px;border:0;border-radius:18px;background:transparent;color:var(--tx);font:inherit;font-size:16px;font-weight:600;text-align:start;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .18s,transform .3s cubic-bezier(.3,1.7,.5,1),box-shadow .25s;animation:aksIn .4s cubic-bezier(.22,1.1,.36,1) both;animation-delay:calc(var(--i,0) * 22ms)}
+.aks-op:active{transform:scale(.975)}
+.aks-op.hl{background:var(--soft)}
+@media (hover:hover){.aks-op:hover{background:var(--soft)}.aks-op.sel:hover{background:var(--sc)}}
+.aks-op.sel{background:var(--sc);color:var(--h2);box-shadow:var(--out,var(--sh))}
+.aks-op.mt{color:var(--mu);font-weight:500}
+.aks-op.sel.mt{color:var(--h2)}
+.aks-op[disabled]{opacity:.38;pointer-events:none}
+.aks-tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.aks-ck{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid color-mix(in srgb,var(--mu) 50%,transparent);display:grid;place-items:center;transition:background .2s,border-color .2s}
+.aks-ck svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.4);transition:opacity .2s,transform .35s cubic-bezier(.3,1.9,.5,1)}
+.aks-op.sel .aks-ck{background:var(--h2);border-color:var(--h2);color:var(--sc)}
+.aks-op.sel .aks-ck svg{opacity:1;transform:none}
+.aks-gh{flex:none;padding:12px 16px 4px;font-size:12px;font-weight:700;color:var(--mu);letter-spacing:.3px}
+.aks-em{padding:26px 10px;text-align:center;color:var(--mu);font-size:15px}
+@keyframes aksIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (min-width:640px){
+.aks-ov{align-items:center}
+.aks-sh{border-radius:28px;transform:translateY(18px) scale(.96);opacity:0;transition:transform .38s cubic-bezier(.22,1.15,.36,1),opacity .22s;padding-bottom:14px;width:min(92vw,440px)}
+.aks-ov.on .aks-sh{transform:none;opacity:1}
+.aks-gr{display:none}.aks-hd{cursor:default}.aks-tt,.aks-x{margin-top:6px}
+}
+@media (prefers-reduced-motion:reduce){.aks-ov,.aks-sh,.aks-op,.aks-x,.aks-ck,.aks-ck svg{transition:none!important;animation:none!important}}
+</style>
+<script id="aks-js">
+/* ===== AK Select Sheet: أي <select> في التطبيق يفتح كشاشة منبثقة عصرية ===== */
+(function(){
+if(window.__aks)return;window.__aks=1;
+var ov=null,sh=null,cur=null,rows=[],hl=-1,lastOpen=0,tm=null;
+function T(a,e){try{return typeof L2==="function"?L2(a,e):(document.documentElement.lang==="en"?e:a)}catch(x){return a}}
+function wide(){return window.matchMedia&&window.matchMedia("(min-width:640px)").matches}
+function el(tag,cls,txt){var n=document.createElement(tag);if(cls)n.className=cls;if(txt!=null)n.textContent=txt;return n}
+var CK='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',XI='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+function isEnh(s){return !!s&&s.tagName==="SELECT"&&!s.multiple&&(s.size||1)<=1&&!s.disabled&&!s.hasAttribute("data-native")&&!(s.closest&&s.closest(".aks-ov"))}
+function selOf(e){var t=e.target;return t&&t.closest?t.closest("select"):null}
+function titleOf(s){
+ var a=s.getAttribute("data-aks-title")||s.getAttribute("aria-label");if(a)return a;
+ var p=s.previousElementSibling;
+ if(p&&(p.classList.contains("lbl")||p.tagName==="LABEL")){var x=(p.textContent||"").trim();if(x)return x}
+ if(s.id){var l=document.querySelector('label[for="'+s.id+'"]');if(l&&l.textContent.trim())return l.textContent.trim()}
+ return T("اختر","Select")}
+function collect(s){
+ var out=[];
+ function mk(o){var tx=(o.textContent||"").trim();return{o:o,t:tx||T("— اختر —","— Select —"),mt:!tx,dis:o.disabled}}
+ [].forEach.call(s.children,function(n){
+  if(n.tagName==="OPTGROUP"){out.push({g:n.label});[].forEach.call(n.children,function(o){if(o.tagName==="OPTION")out.push(mk(o))})}
+  else if(n.tagName==="OPTION")out.push(mk(n))});
+ return out}
+function open(s){
+ if(ov)close(true);
+ try{s.blur()}catch(e){}
+ var data=collect(s);if(!data.length)return;
+ cur=s;s.classList.add("aks-open");
+ var title=titleOf(s),rtl=getComputedStyle(document.documentElement).direction==="rtl";
+ ov=el("div","aks-ov");ov.setAttribute("dir",rtl?"rtl":"ltr");
+ sh=el("div","aks-sh");sh.setAttribute("role","dialog");sh.setAttribute("aria-modal","true");sh.setAttribute("aria-label",title);sh.tabIndex=-1;
+ var hd=el("div","aks-hd");hd.appendChild(el("div","aks-gr"));hd.appendChild(el("div","aks-tt",title));
+ var x=el("button","aks-x");x.type="button";x.setAttribute("aria-label",T("إغلاق","Close"));x.innerHTML=XI;x.onclick=function(){close()};hd.appendChild(x);
+ sh.appendChild(hd);
+ var count=data.filter(function(d){return d.o}).length,q=null;
+ var ls=el("div","aks-ls");ls.setAttribute("role","listbox");
+ if(count>10){q=el("input","aks-q");q.type="search";q.placeholder=T("ابحث...","Search...");q.setAttribute("autocomplete","off");q.setAttribute("dir","auto");sh.appendChild(q)}
+ rows=[];var i=0;
+ data.forEach(function(d){
+  if(d.g!=null){if(d.g){var g=el("div","aks-gh",d.g);g.setAttribute("data-g","1");ls.appendChild(g)}return}
+  var b=el("button","aks-op"+(d.mt?" mt":"")+(d.o.index===s.selectedIndex?" sel":""));b.type="button";
+  b.setAttribute("role","option");b.setAttribute("aria-selected",d.o.index===s.selectedIndex?"true":"false");
+  if(d.dis)b.disabled=true;
+  b.style.setProperty("--i",Math.min(i++,10));
+  b.appendChild(el("span","aks-tx",d.t));var ck=el("span","aks-ck");ck.innerHTML=CK;b.appendChild(ck);
+  var r={b:b,o:d.o,t:d.t.toLowerCase()};b.onclick=function(){pick(r)};rows.push(r);ls.appendChild(b)});
+ var em=el("div","aks-em",T("مفيش نتائج","No results"));em.style.display="none";ls.appendChild(em);
+ sh.appendChild(ls);ov.appendChild(sh);document.body.appendChild(ov);
+ hl=-1;
+ if(q)q.oninput=function(){var v=q.value.trim().toLowerCase(),n=0;
+  rows.forEach(function(r){var ok=!v||r.t.indexOf(v)>=0;r.b.style.display=ok?"":"none";if(ok)n++});
+  [].forEach.call(ls.querySelectorAll("[data-g]"),function(g){g.style.display=v?"none":""});
+  em.style.display=n?"none":"";hl=-1;rows.forEach(function(r){r.b.classList.remove("hl")})};
+ /* إغلاق بالضغط على الخلفية */
+ ov.addEventListener("click",function(e){e.stopPropagation();if(e.target===ov)close()});
+ ov.addEventListener("touchmove",function(e){if(!e.target.closest(".aks-ls"))e.preventDefault()},{passive:false});
+ drag(hd);
+ requestAnimationFrame(function(){requestAnimationFrame(function(){
+  if(!ov)return;ov.classList.add("on");
+  var se=ls.querySelector(".aks-op.sel");
+  if(se){ls.scrollTop=Math.max(0,se.offsetTop-ls.clientHeight/2+se.offsetHeight/2)}
+  var hov=window.matchMedia&&window.matchMedia("(hover:hover)").matches;
+  try{(q&&hov?q:sh).focus({preventScroll:true})}catch(e){}
+ })})}
+function pick(r){
+ if(!ov||!cur)return;var s=cur,o=r.o;
+ rows.forEach(function(x){x.b.classList.remove("sel","hl");x.b.setAttribute("aria-selected","false")});
+ r.b.classList.add("sel");r.b.setAttribute("aria-selected","true");
+ setTimeout(function(){
+  close();
+  if(!s.isConnected&&!document.contains(s))return;
+  if(s.selectedIndex!==o.index){
+   s.selectedIndex=o.index;
+   s.dispatchEvent(new Event("input",{bubbles:true}));
+   s.dispatchEvent(new Event("change",{bubbles:true}))}
+ },140)}
+function close(now){
+ if(!ov)return;var o=ov,s=cur;ov=null;sh=null;cur=null;rows=[];hl=-1;
+ if(s)s.classList.remove("aks-open");
+ if(sh)sh.style.transform="";
+ o.classList.remove("on");
+ if(now){o.remove();return}
+ setTimeout(function(){if(o.parentNode)o.remove()},380)}
+/* سحب الشاشة لتحت لإغلاقها (موبايل) */
+function drag(hd){
+ var d=null;
+ hd.addEventListener("pointerdown",function(e){
+  if(wide()||e.button>0||e.target.closest(".aks-x"))return;
+  d={y:e.clientY,t:Date.now(),dy:0};try{hd.setPointerCapture(e.pointerId)}catch(x){}
+  if(sh)sh.style.transition="none"});
+ hd.addEventListener("pointermove",function(e){
+  if(!d||!sh)return;d.dy=Math.max(0,e.clientY-d.y);sh.style.transform="translateY("+d.dy+"px)"});
+ function end(){
+  if(!d)return;var z=d;d=null;
+  var v=z.dy/Math.max(1,Date.now()-z.t);
+  if(sh){sh.style.transition="";
+   if(z.dy>90||(z.dy>28&&v>.5)){var s=sh;close();s.style.transform=""}
+   else sh.style.transform=""}}
+ hd.addEventListener("pointerup",end);hd.addEventListener("pointercancel",end)}
+/* ===== التقاط الضغط على أي قائمة (حتى القوائم اللي بتتبني بعدين) ===== */
+document.addEventListener("mousedown",function(e){var s=selOf(e);if(isEnh(s))e.preventDefault()},true);
+document.addEventListener("touchstart",function(e){var s=selOf(e),t=e.touches&&e.touches[0];tm=(isEnh(s)&&t)?{s:s,x:t.clientX,y:t.clientY,m:0}:null},{capture:true,passive:true});
+document.addEventListener("touchmove",function(e){if(!tm)return;var t=e.touches[0];if(t&&(Math.abs(t.clientX-tm.x)>10||Math.abs(t.clientY-tm.y)>10))tm.m=1},{capture:true,passive:true});
+document.addEventListener("touchend",function(e){
+ if(!tm)return;var z=tm;tm=null;if(z.m)return;
+ if(e.cancelable)e.preventDefault();
+ if(Date.now()-lastOpen<350)return;lastOpen=Date.now();open(z.s)},{capture:true,passive:false});
+document.addEventListener("click",function(e){
+ var s=selOf(e);if(!isEnh(s))return;
+ e.preventDefault();e.stopPropagation();
+ if(Date.now()-lastOpen<350)return;lastOpen=Date.now();open(s)},true);
+/* كيبورد */
+document.addEventListener("keydown",function(e){
+ if(!ov){
+  var s=e.target&&e.target.tagName==="SELECT"?e.target:null;
+  if(isEnh(s)&&(e.key==="Enter"||e.key===" "||(e.altKey&&e.key==="ArrowDown"))){e.preventDefault();open(s)}
+  return}
+ var k=e.key,vis=rows.filter(function(r){return r.b.style.display!=="none"&&!r.b.disabled});
+ if(k==="Escape"){e.preventDefault();e.stopPropagation();close();return}
+ if(k==="ArrowDown"||k==="ArrowUp"){
+  e.preventDefault();if(!vis.length)return;
+  var c=hl>=0?vis.indexOf(rows[hl]):-1;
+  c=k==="ArrowDown"?Math.min(vis.length-1,c+1):Math.max(0,c<0?vis.length-1:c-1);
+  rows.forEach(function(r){r.b.classList.remove("hl")});
+  var r=vis[c];hl=rows.indexOf(r);r.b.classList.add("hl");
+  try{r.b.scrollIntoView({block:"nearest"})}catch(x){}return}
+ if(k==="Enter"&&hl>=0&&rows[hl]&&e.target.tagName!=="BUTTON"){e.preventDefault();pick(rows[hl])}
+ if(k==="Tab"&&sh){var f=[].filter.call(sh.querySelectorAll("button,input"),function(n){return !n.disabled&&n.style.display!=="none"&&n.offsetParent!==null});
+  if(!f.length)return;var a=document.activeElement,i=f.indexOf(a);
+  if(e.shiftKey&&(i<=0)){e.preventDefault();f[f.length-1].focus()}
+  else if(!e.shiftKey&&(i<0||i===f.length-1)){e.preventDefault();f[0].focus()}}
+},true);
+/* زرار الرجوع في الموبايل يقفل الشاشة بدل ما يطلع من الصفحة */
+try{var _b=window.backStep;if(typeof _b==="function"){window.backStep=function(){if(ov){close();return 1}return _b.apply(this,arguments)}}}catch(e){}
+window.addEventListener("pagehide",function(){close(true)});
+})();
+</script>
 </body>
 </html>
