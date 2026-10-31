@@ -606,7 +606,7 @@ function ph(id){var v=pn(document.getElementById(id).value);return v?"+20"+v:""}
 function rc(id,d){return S.rec[d+"|"+id]||{}}
 function setRec(id,k,v){var key=fdate+"|"+id,o=S.rec[key]||{};if(k=="p"&&o.a===0)return;o[k]=o[k]===v?undefined:v;if(k=="p"&&o.p===0&&o.a!==1)o.a=1;if(k=="a"&&o.a!==1)o.p=undefined;S.rec[key]=o;if(o.a===undefined&&o.p===undefined)delete S.rec[key];save();draw()}
 var prevTab="att";
-function go(x){if(x=="nt"){x="tasks"}if(x=="hw"){x="tasks"}if(x=="home"){x="att"}if(x=="tasks"&&window.markTS){window._tmPrev=getTM();markTS()}if(x=="sum"||x=="an"){rtab="sum";x="rep"}if(x=="set"&&tab!="set")prevTab=tab;tab=x;edit=null;pd=null;draw()}
+function go(x){if(x=="nt"){x="tasks"}if(x=="hw"){x="tasks"}if(x=="tasks"&&window.markTS){window._tmPrev=getTM();markTS()}if(x=="sum"||x=="an"){rtab="sum";x="rep"}if(x=="set"&&tab!="set")prevTab=tab;tab=x;edit=null;pd=null;draw()}
 function gearT(){if(tab=="set")goBack();else{LGD=false;STS=false;SDT=false;SDF={s:null,g:null,id:null};LG2.open="";LG2.anim="";LG2.busy=0;go("set")}}
 var LGD=false,STS=false,SDT=false,SDF={s:null,g:null,id:null};function goBack(){if(AU.user&&tab=="set"){if(SDT){if(LG2.open){lgClose();return}SDT=false;draw();return}if(LGD){if(LG2.open){lgClose();return}LGD=false;draw();return}if(STS){STS=false;draw();return}go(prevTab||"att")}else if(ST.data&&ST.set){ST.set=false;draw()}else if(edit){closeEdit()}}
 function grades(){var g=[];S.students.forEach(function(s){if(g.indexOf(s.grade)<0)g.push(s.grade)});return g.sort(function(a,b){return GR.indexOf(a)-GR.indexOf(b)})}
@@ -1314,7 +1314,7 @@ function themeCard(){var m=getTheme();return '<div class="card"><div class="nm">
 function langCard(){return '<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'}
 applyTheme();
 var AU={ready:false,user:null,err:"",busy:false,sync:"",email:""};
-function setData(o){S={students:o.students||[],rec:o.rec||{},price:o.price==null?50:o.price,lang:o.lang||"ar",hw:o.hw||[],notices:o.notices||[]};tab="att";edit=null;pd=null;dt=null}
+function setData(o){S={students:o.students||[],rec:o.rec||{},price:o.price==null?50:o.price,lang:o.lang||"ar",hw:o.hw||[],notices:o.notices||[]};tab="home";edit=null;pd=null;dt=null}
 function errMsg(x){var c=(x&&x.code)||"",m={"auth/invalid-credential":"e_cred","auth/wrong-password":"e_cred","auth/user-not-found":"e_cred","auth/invalid-email":"e_mail","auth/email-already-in-use":"e_used","auth/weak-password":"e_weak","auth/network-request-failed":"e_net","unavailable":"e_net","auth/too-many-requests":"e_many","auth/operation-not-allowed":"e_op","permission-denied":"e_perm","auth/unauthorized-domain":"e_dom","auth/invalid-api-key":"e_key","auth/api-key-not-valid.-please-pass-a-valid-api-key.":"e_key"};
 return m[c]?t(m[c]):t("e_gen")+(c||(x&&x.message)||"")}
 function loginView(){return '<div class="card"><div class="nm">'+t("lg")+'</div>'
@@ -1373,7 +1373,7 @@ hdh+=(window.calcBtn?calcBtn(sv&&!on):""); if(sv&&!on&&ST.data&&ST.data.av)hdh+=
 var hdE=document.getElementById("hd");if(hdE)hdE.classList.toggle("hasav",!!(sv&&!on&&ST.data&&ST.data.av));
 if(hdh!==window._hdh){window._hdh=hdh;document.getElementById("hd").innerHTML=hdh}
 var htE=document.getElementById("htt");if(htE){var htT=on&&{home:1,att:1,stu:1,tasks:1,rep:1,set:1}[tab]?t(tab):sv?(ST.set?t("set"):({home:t("home"),me:t("me"),rp:L2("الحصة","Lesson"),hw:t("mine"),nt:t("nt")})[ST.tab]||t("title")):t("title");if(htE.textContent!==htT){var htF=htE.textContent!=="";htE.textContent=htT;if(htF&&htE.animate)htE.animate([{opacity:0,transform:"translateY(-6px)"},{opacity:1,transform:"none"}],{duration:280,easing:"cubic-bezier(.2,.8,.2,1)"})}}
-var navH=on?["att","stu","tasks","rep"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" data-k="'+k+'" onclick="go(\''+k+'\')"><i>'+(IC[k]||IC.hw)+(k=="tasks"?bdgT(newSubs()):"")+'</i><span>'+t(k)+'</span></button>'}).join(""):(sv?studentNav():"");
+var navH=on?["home","att","stu","tasks","rep"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" data-k="'+k+'" onclick="go(\''+k+'\')"><i>'+(IC[k]||IC.hw)+(k=="tasks"?bdgT(newSubs()):"")+'</i><span>'+t(k)+'</span></button>'}).join(""):(sv?studentNav():"");
 var navE=document.getElementById("nav");if(sv&&!on){if(window._navh!==navH){window._navh=navH;navE.innerHTML=navH}}else{window._navh=null;navE.innerHTML=navH}
 var body;
 if(!AU.ready||ST.rs)body='<div class="card mu">'+t("ldg")+'</div>';
@@ -9205,22 +9205,102 @@ window.addEventListener("pagehide",function(){close(true)});
 </script>
 
 <script id="ak-nav-v2">
-/* ===== تبسيط تبويبات المعلم: 4 تبويبات + أدوات الاستخدام النادر جوه الترس =====
-   واجهة فقط: مفيش أي تعديل على بيانات الطلاب أو الحضور أو الدفع أو طريقة الحفظ. */
+/* ===== الترس: الجدول + إضافة طالب (شرائح) + استيراد Excel | الرئيسية رجعت زي ما كانت =====
+   واجهة فقط: نفس منطق حفظ الطالب القديم (id, code, group, price) ومفيش تغيير في طريقة التخزين. */
 (function(){
- var GX={o:false};window.GFR=null;
+ var GX={o:false,w:false};window.GFR=null;
+ function g_(i){return document.getElementById(i)}
  function sv(p){return '<svg viewBox="0 0 24 24" style="width:24px;height:24px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true">'+p+'</svg>'}
  var IS=sv('<path d="M4 8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 10h16"/><path d="M8 3v3M16 3v3"/><path d="M12 13v2.5l1.8 1"/>'),
- IC2=sv('<rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/>'),
  IX=sv('<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M3.5 15h17M9.5 10v9.5"/>');
  function chev(){return '<span class="gchev">'+L2("\u2039","\u203a")+'</span>'}
  function row(sym,title,on,extra,tail){return '<div class="gb2"'+(extra||'')+' onclick="'+on+'"><span class="gsym">'+sym+'</span><b>'+title+'</b>'+(tail||chev())+'</div>'}
  window.gxTog=function(){GX.o=!GX.o;draw()};
  window.gOpenSch=function(){window.GFR=prevTab;go("sch")};
+
+ /* ---------- شرائح إضافة طالب ---------- */
+ var N=5,WV=null;
+ var WZ=window.WZ={i:0,ok:"",n:0,via:false,full:false,d:{name:"",sex:"m",grade:"",group:"1",phone:"",pp:"",price:""}};
+ var css=document.createElement("style");
+ css.textContent='.wzc{overflow:hidden}.wzs{animation:wzin .28s cubic-bezier(.2,.9,.3,1) both}@keyframes wzin{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}[dir=rtl] .wzs{animation-name:wzinr}@keyframes wzinr{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}'
+ +'.wzdots{display:flex;gap:6px;margin:2px 0 12px}.wzdots i{flex:1;height:5px;border-radius:5px;background:var(--bd)}.wzdots i.on{background:var(--pr)}'
+ +'.wzh{display:flex;align-items:center;gap:8px;justify-content:space-between}.wzh .btn{flex:none;padding:6px 14px;min-height:0;font-size:13px}'
+ +'.wzbig input,.wzbig select{font-size:18px}.wzc .row .btn:not(.sq):not(.wpc){flex:1}@media (prefers-reduced-motion:reduce){.wzs{animation:none}}';
+ document.head.appendChild(css);
+ function stopV(){if(WV){try{WV.stop()}catch(e){}WV=null}}
+ function rd(){var d=WZ.d,e;
+  if(e=g_("w_n"))d.name=e.value;
+  var x=document.querySelector('input[name=wsx]:checked');if(x)d.sex=x.value;
+  if(e=g_("w_g"))d.grade=e.value;
+  if(e=g_("w_r"))d.group=e.value;
+  if(e=g_("w_p"))d.phone=e.value;
+  if(e=g_("w_pp"))d.pp=e.value;
+  if(e=g_("w_pr"))d.price=e.value}
+ function foc(){setTimeout(function(){var e=g_("w_n")||g_("w_p")||g_("w_pp")||g_("w_pr");if(e&&e.focus)try{e.focus()}catch(x){}},60)}
+ function body(){var d=WZ.d,i=WZ.i,gr=d.grade||fg||GR[0],h='';
+  if(i==0){
+   h+='<span class="lbl">'+t("name")+'</span><div class="row" style="flex-wrap:nowrap"><input id="w_n" autocomplete="off" value="'+esc(d.name)+'" onkeydown="if(event.key==\'Enter\'){event.preventDefault();wzGo(1)}"><button class="btn sq" id="wz_mic" type="button" aria-label="'+L2("إملاء الاسم بالصوت","Dictate the name")+'" onclick="wzVoice()">'+icoH('mic','bare')+'</button></div>'
+   +'<div class="dys" style="margin-top:10px"><label><input type="radio" name="wsx" value="m"'+(d.sex!="f"?" checked":"")+'>'+t("boy")+'</label><label><input type="radio" name="wsx" value="f"'+(d.sex=="f"?" checked":"")+'>'+t("girl")+'</label></div>'}
+  else if(i==1){
+   h+='<span class="lbl">'+t("grade")+'</span><select id="w_g" onchange="wzRef(this.value)">'+GR.map(function(g){return '<option value="'+g+'"'+(g==gr?" selected":"")+'>'+gn(g)+'</option>'}).join("")+'</select>'
+   +'<span class="lbl">'+t("days")+'</span><select id="w_r">'+gOpts(+d.group||1,gr)+'</select>'}
+  else if(i==2){
+   h+='<span class="lbl">'+t("ph")+'</span><div class="ph"><span>+20</span><input id="w_p" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(d.phone)+'" onkeydown="if(event.key==\'Enter\'){event.preventDefault();wzGo(1)}"></div>'}
+  else if(i==3){
+   h+='<span class="lbl">'+t("pph")+' <span class="mu">'+L2("(اختياري)","(optional)")+'</span></span><div class="ph"><span>+20</span><input id="w_pp" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(d.pp)+'" onkeydown="if(event.key==\'Enter\'){event.preventDefault();wzGo(1)}"></div>'}
+  else{
+   var pv=+d.price;
+   h+='<span class="lbl">'+t("price")+'</span><div class="row" style="flex-wrap:nowrap"><button type="button" class="btn wpc'+(pv==20?' pr':'')+'" data-v="20" style="flex:0 0 64px" onclick="wzPrice(20)">20</button><button type="button" class="btn wpc'+(pv==25?' pr':'')+'" data-v="25" style="flex:0 0 64px" onclick="wzPrice(25)">25</button><input id="w_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this);wzSync()" placeholder="'+L2("أو اكتب السعر","Or type a price")+'" value="'+(d.price?esc(String(d.price)):'')+'" onkeydown="if(event.key==\'Enter\'){event.preventDefault();wzGo(1)}"></div>'}
+  return h}
+ function wzHtml(){
+  if(WZ.ok)return '<div class="card wzc"><div class="wzs"><div class="nm">\u2705 '+L2("اتضاف","Added")+': '+esc(WZ.ok)+'</div><div class="mu" style="margin-top:4px">'+L2("عدد اللي اتضافوا دلوقتي: ","Added in this session: ")+WZ.n+'</div><div class="row" style="margin-top:14px"><button class="btn pr" onclick="wzAgain()">'+L2("إضافة طالب آخر","Add another")+'</button><button class="btn ok" onclick="wzClose()">'+L2("تم","Done")+'</button></div></div></div>';
+  var i=WZ.i,dots='';for(var k=0;k<N;k++)dots+='<i'+(k<=i?' class="on"':'')+'></i>';
+  return '<div class="card wzc"><div class="wzh"><div class="nm">'+t("add")+' <span class="mu">'+(i+1)+'/'+N+'</span></div><button class="btn" onclick="wzFull()">'+L2("عرض كامل","Full view")+'</button></div><div class="wzdots">'+dots+'</div>'
+  +'<div class="wzs wzbig" id="wzb'+i+'">'+body()+'</div>'
+  +'<div class="row" style="margin-top:14px">'+(i>0?'<button class="btn" style="flex:0 0 auto;padding:0 20px" onclick="wzGo(-1)">'+L2("السابق","Back")+'</button>':'')+'<button class="btn '+(i==N-1?'ok':'pr')+'" onclick="wzGo(1)">'+(i==N-1?L2("تم","Done"):L2("التالي","Next"))+'</button></div></div>'}
+ window.wzRef=function(g){var r=g_("w_r");if(r)r.innerHTML=gOpts(+r.value||1,g)};
+ window.wzSync=function(){var v=+(g_("w_pr")||{}).value;[].forEach.call(document.querySelectorAll(".wpc"),function(b){b.classList.toggle("pr",+b.getAttribute("data-v")===v)})};
+ window.wzPrice=function(v){var e=g_("w_pr");if(e)e.value=v;wzSync()};
+ window.wzVoice=function(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert(L2("الإملاء بالصوت مش مدعوم في المتصفح ده. استخدم ميكروفون الكيبورد.","Voice input isn't supported here. Use your keyboard's mic."));return}
+  if(WV){stopV();return}
+  var r=new SR();WV=r;r.lang=S.lang=="en"?"en-US":"ar-EG";r.interimResults=true;r.maxAlternatives=1;
+  function mic(on){var b=g_("wz_mic");if(b)b.classList.toggle("pr",on)}
+  r.onresult=function(e){var tx="";for(var i=0;i<e.results.length;i++)tx+=e.results[i][0].transcript;var n=g_("w_n");if(n)n.value=tx;WZ.d.name=tx};
+  r.onerror=function(e){if(e.error=="not-allowed"||e.error=="service-not-allowed")alert(L2("مفيش إذن للميكروفون. اسمح للمتصفح باستخدام الميكروفون.","Microphone permission is blocked. Allow it in the browser."))};
+  r.onend=function(){if(WV===r)WV=null;mic(false)};
+  try{r.start();mic(true)}catch(e){WV=null;mic(false)}};
+ function save1(){var d=WZ.d,n=String(d.name).trim(),p=pn(d.phone),pa=pn(d.pp),pr=+String(d.price).replace(/\D/g,""),g=d.grade||fg||GR[0];
+  if(!n){WZ.i=0;draw();foc();return}
+  if(!p){WZ.i=2;draw();alert(t("nophone"));return}
+  if(!(pr>0)){alert(L2("اختار أو اكتب سعر الحصة","Choose or type the class price"));return}
+  var pp="+20"+p;
+  if(S.students.some(function(x){return x.phone==pp&&String(x.name).trim()==n&&x.grade==g})){alert(t("dup"));return}
+  S.students.push({id:Date.now(),code:genCode(),name:n,sex:d.sex=="f"?"f":"m",grade:g,group:String(d.group||1),phone:pp,parentPhone:pa?"+20"+pa:"",price:pr});
+  fg=g;d.grade=g;WZ.ok=n;WZ.n++;d.name="";d.phone="";d.pp="";save();draw()}
+ window.wzGo=function(k){stopV();rd();var d=WZ.d;
+  if(k>0){
+   if(WZ.i==0&&!String(d.name).trim()){alert(L2("اكتب اسم الطالب","Enter the student's name"));return}
+   if(WZ.i==2&&!pn(d.phone)){alert(t("nophone"));return}
+   if(WZ.i==N-1){save1();return}}
+  WZ.i=Math.max(0,Math.min(N-1,WZ.i+k));draw();foc()};
+ window.wzAgain=function(){WZ.ok="";WZ.i=0;draw();foc()};
+ window.wzClose=function(){stopV();WZ.ok="";WZ.i=0;WZ.n=0;GX.w=false;if(tab=="stu"&&SF.open){SF.open="";SF.anim="";SF.busy=0}draw()};
+ window.wzFull=function(){stopV();rd();WZ.full=true;GX.w=false;edit=null;if(tab!="stu"){SF.open=1;SF.anim="";SF.busy=0;go("stu")}else{SF.open=1;SF.anim="";draw()}try{window.scrollTo(0,0)}catch(e){}};
+ window.wzSlides=function(){WZ.full=false;WZ.i=0;WZ.ok="";edit=null;draw()};
+ window.wzGear=function(){stopV();GX.w=!GX.w;if(GX.w){WZ.ok="";WZ.i=0}draw();if(GX.w)foc()};
+
+ /* تبويب الطلاب: نفس صف "إضافة طالب" بس بالشرائح، و"عرض كامل" يفتح النموذج القديم */
+ var _sf=window.sfTog;
+ window.sfTog=function(){var was=!!SF.open;if(!was){WZ.full=false;WZ.ok="";WZ.i=0;WZ.via=true}return _sf.apply(this,arguments)};
+ window.sAddH=sAddH=function(){var op=!!SF.open,an=SF.anim;if(!op)WZ.via=false;
+  var inner=op?((WZ.via&&!WZ.full)?wzHtml():((WZ.via?'<div class="row" style="margin-bottom:10px"><button class="btn" onclick="wzSlides()">'+L2("← شرائح سريعة","← Quick slides")+'</button></div>':'')+sform())):'';
+  return '<div class="gb2'+(an?' jl':'')+'" onclick="sfTog()"><span class="gsym">+</span><b>'+t("add")+'</b><span class="gchev'+(op&&an!="out"?' up':'')+'">\u2304</span></div>'+(op?'<div class="gx'+(an?' '+an:'')+'">'+inner+'</div>':'')};
+
  function tools(){
-  var h=row(IS,L2("الجدول","Schedule"),"gOpenSch()");
-  /* مرساة الآلة الحاسبة: لازم تفضل موجودة في الصفحة عشان الآلة تفضل مفتوحة */
-  h+=row(IC2,L2("الآلة الحاسبة","Calculator"),"fcalcT()",' style="position:relative"','<span class="calcg" aria-hidden="true" style="visibility:hidden;pointer-events:none"></span>'+chev());
+  var h=row('+',t("add"),"wzGear()",'','<span class="gchev'+(GX.w?' up':'')+'">\u2304</span>');
+  if(GX.w)h+='<div class="gx">'+wzHtml()+'</div>';
+  h+=row(IS,L2("الجدول","Schedule"),"gOpenSch()");
   if(window.xlHtml||window.xaHtml){
    h+=row(IX,L2("استيراد من Excel","Excel import"),"gxTog()","",'<span class="gchev'+(GX.o?' up':'')+'">\u2304</span>');
    if(GX.o)h+=(window.xlHtml?xlHtml():'')+(window.xaHtml?xaHtml():'');
@@ -9234,17 +9314,13 @@ window.addEventListener("pagehide",function(){close(true)});
  /* الرجوع من الجدول لو اتفتح من الترس */
  var _go=window.go;
  window.go=function(x){var was=(tab=="sch"),r=_go.apply(this,arguments);
-  if(x=="set"&&was){var p=window.GFR;prevTab=(p&&p!="sch"&&p!="set")?p:"att"}return r};
+  if(x=="set"&&was){var p=window.GFR;prevTab=(p&&p!="sch"&&p!="set")?p:"home"}
+  if(x!="set"&&GX.w){GX.w=false;stopV()}
+  return r};
  var _gb=window.goBack;
  window.goBack=function(){
-  if(window.AU&&AU.user&&tab=="sch"){var f=window.GFR;go(f?"set":"att");window.GFR=null;return}
+  if(window.AU&&AU.user&&tab=="sch"){var f=window.GFR;go(f?"set":"home");window.GFR=null;return}
   return _gb.apply(this,arguments)};
- /* شاشة البداية لو مفيش طلاب لسه (كانت في الرئيسية) */
- var _at=window.att;
- window.att=att=function(){
-  if(!S.students.length){var td=ld(new Date());
-   return '<div class="card"><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div><div class="row"><button class="btn ok" onclick="go(\'stu\')">'+t("add")+'</button></div>'}
-  return _at.apply(this,arguments)};
 })();
 </script>
 
