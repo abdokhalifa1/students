@@ -9219,8 +9219,10 @@ window.addEventListener("pagehide",function(){close(true)});
  window.gOpenSch=function(){window.GFR=prevTab;go("sch")};
 
  /* ---------- شرائح إضافة طالب ---------- */
- var N=5,WV=null;
- var WZ=window.WZ={i:0,ok:"",n:0,via:false,full:false,d:{name:"",sex:"m",grade:"",group:"1",phone:"",pp:"",price:""}};
+ var N=5,WV=null,AT=0,LK="ak_wz_draft_v1";
+ var WZ=window.WZ={i:0,ok:"",n:0,full:false,d:{name:"",sex:"m",grade:"",group:"1",phone:"",pp:"",price:""}};
+ function persist(){try{localStorage.setItem(LK,JSON.stringify({d:WZ.d,i:WZ.i}))}catch(e){}}
+ try{var o0=JSON.parse(localStorage.getItem(LK)||"null");if(o0&&o0.d){for(var k0 in WZ.d)if(o0.d[k0]!=null)WZ.d[k0]=o0.d[k0];if(o0.i>=0&&o0.i<N)WZ.i=o0.i}}catch(e){}
  var css=document.createElement("style");
  css.textContent='.wzc{overflow:hidden}.wzs{animation:wzin .28s cubic-bezier(.2,.9,.3,1) both}@keyframes wzin{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}[dir=rtl] .wzs{animation-name:wzinr}@keyframes wzinr{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}'
  +'.wzdots{display:flex;gap:6px;margin:2px 0 12px}.wzdots i{flex:1;height:5px;border-radius:5px;background:var(--bd)}.wzdots i.on{background:var(--pr)}'
@@ -9235,7 +9237,7 @@ window.addEventListener("pagehide",function(){close(true)});
   if(e=g_("w_r"))d.group=e.value;
   if(e=g_("w_p"))d.phone=e.value;
   if(e=g_("w_pp"))d.pp=e.value;
-  if(e=g_("w_pr"))d.price=e.value}
+  if(e=g_("w_pr"))d.price=e.value;persist()}
  function foc(){setTimeout(function(){var e=g_("w_n")||g_("w_p")||g_("w_pp")||g_("w_pr");if(e&&e.focus)try{e.focus()}catch(x){}},60)}
  function body(){var d=WZ.d,i=WZ.i,gr=d.grade||fg||GR[0],h='';
   if(i==0){
@@ -9266,7 +9268,7 @@ window.addEventListener("pagehide",function(){close(true)});
   if(WV){stopV();return}
   var r=new SR();WV=r;r.lang=S.lang=="en"?"en-US":"ar-EG";r.interimResults=true;r.maxAlternatives=1;
   function mic(on){var b=g_("wz_mic");if(b)b.classList.toggle("pr",on)}
-  r.onresult=function(e){var tx="";for(var i=0;i<e.results.length;i++)tx+=e.results[i][0].transcript;var n=g_("w_n");if(n)n.value=tx;WZ.d.name=tx};
+  r.onresult=function(e){var tx="";for(var i=0;i<e.results.length;i++)tx+=e.results[i][0].transcript;var n=g_("w_n");if(n)n.value=tx;WZ.d.name=tx;persist()};
   r.onerror=function(e){if(e.error=="not-allowed"||e.error=="service-not-allowed")alert(L2("مفيش إذن للميكروفون. اسمح للمتصفح باستخدام الميكروفون.","Microphone permission is blocked. Allow it in the browser."))};
   r.onend=function(){if(WV===r)WV=null;mic(false)};
   try{r.start();mic(true)}catch(e){WV=null;mic(false)}};
@@ -9277,29 +9279,57 @@ window.addEventListener("pagehide",function(){close(true)});
   var pp="+20"+p;
   if(S.students.some(function(x){return x.phone==pp&&String(x.name).trim()==n&&x.grade==g})){alert(t("dup"));return}
   S.students.push({id:Date.now(),code:genCode(),name:n,sex:d.sex=="f"?"f":"m",grade:g,group:String(d.group||1),phone:pp,parentPhone:pa?"+20"+pa:"",price:pr});
-  fg=g;d.grade=g;WZ.ok=n;WZ.n++;d.name="";d.phone="";d.pp="";save();draw()}
+  fg=g;d.grade=g;WZ.ok=n;WZ.n++;d.name="";d.phone="";d.pp="";WZ.i=0;persist();save();draw()}
  window.wzGo=function(k){stopV();rd();var d=WZ.d;
   if(k>0){
    if(WZ.i==0&&!String(d.name).trim()){alert(L2("اكتب اسم الطالب","Enter the student's name"));return}
    if(WZ.i==2&&!pn(d.phone)){alert(t("nophone"));return}
    if(WZ.i==N-1){save1();return}}
-  WZ.i=Math.max(0,Math.min(N-1,WZ.i+k));draw();foc()};
+  WZ.i=Math.max(0,Math.min(N-1,WZ.i+k));persist();draw();foc()};
  window.wzAgain=function(){WZ.ok="";WZ.i=0;draw();foc()};
- window.wzClose=function(){stopV();WZ.ok="";WZ.i=0;WZ.n=0;GX.w=false;if(tab=="stu"&&SF.open){SF.open="";SF.anim="";SF.busy=0}draw()};
- window.wzFull=function(){stopV();rd();WZ.full=true;GX.w=false;edit=null;if(tab!="stu"){SF.open=1;SF.anim="";SF.busy=0;go("stu")}else{SF.open=1;SF.anim="";draw()}try{window.scrollTo(0,0)}catch(e){}};
- window.wzSlides=function(){WZ.full=false;WZ.i=0;WZ.ok="";edit=null;draw()};
- window.wzGear=function(){stopV();GX.w=!GX.w;if(GX.w){WZ.ok="";WZ.i=0}draw();if(GX.w)foc()};
+ window.wzClose=function(){stopV();WZ.ok="";WZ.i=0;WZ.n=0;GX.w=false;GX.full=false;persist();draw()};
+ /* نقل اللي في النموذج الكامل (إضافة جديدة) لمسودة الشرائح */
+ function fromFull(){var d=WZ.d,e;if(!g_("f_n")||(edit&&edit.id))return;
+  d.name=g_("f_n").value;var x=document.querySelector('input[name=sx]:checked');if(x)d.sex=x.value;
+  if(e=g_("f_g"))d.grade=e.value;if(e=g_("f_r"))d.group=e.value;if(e=g_("f_p"))d.phone=e.value;if(e=g_("f_pp"))d.pp=e.value;if(e=g_("f_pr"))d.price=e.value;persist()}
+ window.wzFull=function(){stopV();rd();GX.w=false;GX.full=true;edit=null;draw();try{window.scrollTo(0,0)}catch(e){}};
+ window.wzSlides=function(){fromFull();GX.full=false;GX.w=true;WZ.ok="";edit=null;draw();foc()};
+ window.wzGear=function(){stopV();if(GX.full){fromFull();GX.full=false;GX.w=false}else{GX.w=!GX.w;if(GX.w&&WZ.ok){WZ.ok="";WZ.i=0}}draw();if(GX.w)foc()};
 
- /* تبويب الطلاب: نفس صف "إضافة طالب" بس بالشرائح، و"عرض كامل" يفتح النموذج القديم */
- var _sf=window.sfTog;
- window.sfTog=function(){var was=!!SF.open;if(!was){WZ.full=false;WZ.ok="";WZ.i=0;WZ.via=true}return _sf.apply(this,arguments)};
- window.sAddH=sAddH=function(){var op=!!SF.open,an=SF.anim;if(!op)WZ.via=false;
-  var inner=op?((WZ.via&&!WZ.full)?wzHtml():((WZ.via?'<div class="row" style="margin-bottom:10px"><button class="btn" onclick="wzSlides()">'+L2("← شرائح سريعة","← Quick slides")+'</button></div>':'')+sform())):'';
-  return '<div class="gb2'+(an?' jl':'')+'" onclick="sfTog()"><span class="gsym">+</span><b>'+t("add")+'</b><span class="gchev'+(op&&an!="out"?' up':'')+'">\u2304</span></div>'+(op?'<div class="gx'+(an?' '+an:'')+'">'+inner+'</div>':'')};
+ /* النموذج الكامل بيتملي من المسودة بدل ما يبدأ فاضي */
+ var _sform=window.sform;
+ window.sform=sform=function(inl){var had=edit;
+  if(!(edit&&edit.id)){var d=WZ.d;edit={name:d.name,sex:d.sex,grade:d.grade||fg,group:d.group,phone:d.phone,parentPhone:d.pp,price:+d.price||""}}
+  try{return _sform.call(this,inl)}finally{edit=had}};
+ /* قسم الطلاب مفيهوش صف إضافة طالب. النموذج بيظهر هنا بس لو اتفتح من خارج (مثلا من الإدخال الصوتي) */
+ window.sAddH=sAddH=function(){return SF.open?'<div class="gx">'+sform()+'</div>':''};
+ /* بعد أي إضافة ناجحة بالنموذج الكامل: صفّر المسودة وقفل العرض الكامل */
+ var _addS=window.addS;
+ window.addS=addS=function(){var n0=S.students.length,r=_addS.apply(this,arguments);
+  if(S.students.length>n0){var d=WZ.d;d.name="";d.phone="";d.pp="";WZ.i=0;persist();if(GX.full){GX.full=false;GX.w=false;draw()}}
+  return r};
+
+ /* ===== حفظ فوري: أي تعديل على بيانات طالب بيتحفظ لوحده بعد ثانية تقريباً، وكل ما تكتب في الإضافة بيتحفظ كمسودة ===== */
+ function autoEdit(){var s0=edit;if(!s0||!s0.id||!g_("f_n"))return;var e,ch=false;
+  var n=g_("f_n").value.trim();if(n&&n!==s0.name){s0.name=n;ch=true}
+  var x=document.querySelector('input[name=sx]:checked');if(x&&x.value!==s0.sex){s0.sex=x.value;ch=true}
+  if((e=g_("f_g"))&&e.value&&e.value!==s0.grade){s0.grade=e.value;ch=true}
+  if((e=g_("f_r"))&&e.value&&String(e.value)!==String(s0.group)){s0.group=e.value;ch=true}
+  var p=pn((g_("f_p")||{}).value);if(p&&"+20"+p!==s0.phone){s0.phone="+20"+p;ch=true}
+  if(g_("f_pp")){var q=pn(g_("f_pp").value),v=q?"+20"+q:"";if(v!==(s0.parentPhone||"")){s0.parentPhone=v;ch=true}}
+  var pr=+((g_("f_pr")||{}).value);if(pr>0&&pr!==s0.price){s0.price=pr;ch=true}
+  if(ch)save()}
+ function onEv(e){var t=e.target;if(!t)return;var id=t.id||"";
+  if(/^w_/.test(id)||t.name=="wsx"){rd();return}
+  if(/^f_(n|g|r|p|pp|pr)$/.test(id)||t.name=="sx"){if(edit&&edit.id){clearTimeout(AT);AT=setTimeout(function(){AT=0;autoEdit()},400)}else fromFull()}}
+ document.addEventListener("input",onEv,true);document.addEventListener("change",onEv,true);
+ document.addEventListener("focusout",function(){if(AT){clearTimeout(AT);AT=0;autoEdit()}},true);
+ window.addEventListener("pagehide",function(){if(AT){clearTimeout(AT);AT=0;autoEdit()}});
 
  function tools(){
-  var h=row('+',t("add"),"wzGear()",'','<span class="gchev'+(GX.w?' up':'')+'">\u2304</span>');
-  if(GX.w)h+='<div class="gx">'+wzHtml()+'</div>';
+  var h=row('+',t("add"),"wzGear()",'','<span class="gchev'+((GX.w||GX.full)?' up':'')+'">\u2304</span>');
+  if(GX.full)h+='<div class="gx"><div class="row" style="margin-bottom:10px"><button class="btn" onclick="wzSlides()">'+L2("\u2190 شرائح سريعة","\u2190 Quick slides")+'</button></div>'+sform()+'</div>';
+  else if(GX.w)h+='<div class="gx">'+wzHtml()+'</div>';
   h+=row(IS,L2("الجدول","Schedule"),"gOpenSch()");
   if(window.xlHtml||window.xaHtml){
    h+=row(IX,L2("استيراد من Excel","Excel import"),"gxTog()","",'<span class="gchev'+(GX.o?' up':'')+'">\u2304</span>');
@@ -9313,7 +9343,7 @@ window.addEventListener("pagehide",function(){close(true)});
   return acct()+tools()+stsCard()+(window.xrHtml?xrHtml():'')+themeCard()+langCard()+bkHtml()};
  /* الرجوع من الجدول لو اتفتح من الترس */
  var _go=window.go;
- window.go=function(x){var was=(tab=="sch"),r=_go.apply(this,arguments);
+ window.go=function(x){var was=(tab=="sch");if(GX.full&&x!="set"){fromFull();GX.full=false}var r=_go.apply(this,arguments);
   if(x=="set"&&was){var p=window.GFR;prevTab=(p&&p!="sch"&&p!="set")?p:"home"}
   if(x!="set"&&GX.w){GX.w=false;stopV()}
   return r};
