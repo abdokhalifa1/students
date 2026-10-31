@@ -573,7 +573,10 @@ function flt(){return S.students.filter(function(s){return(!sg||s.grade==sg)&&(!
 function sp(s){return s&&+s.price>0?+s.price:S.price}
 var RXon=false,RX=null;function rxi(){if(!RX){RX={};for(var k in S.rec){var i=k.indexOf("|"),id=k.slice(i+1);(RX[id]||(RX[id]=[])).push([k.slice(0,i),S.rec[k]])}}return RX}
 function st(s,mon){var a=0,b=0,p=0,u=0;var E;if(RXon){E=rxi()[s.id]||[]}else{E=[];for(var k in S.rec){var x=k.split("|");if(x[1]==s.id)E.push([x[0],S.rec[k]])}}for(var j=0;j<E.length;j++){if(mon&&E[j][0].slice(0,mon.length)!=mon)continue;var r=E[j][1];if(r.a===1){a++;if(r.p===1)p++;else if(r.p===0)u++}else if(r.a===0)b++}return{a:a,b:b,p:p,u:u,o:u*sp(s)}}
-function gOpts(v){return [1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(n==v?" selected":"")+'>'+t("grp")+" "+n+'</option>'}).join("")}
+/* المجموعات المتاحة لصف = اللي في الجدول (١-٣ افتراضي + اللي اتضافت - اللي اتحذفت + أي مجموعة فيها طلاب) */
+function grpList(g){var T=window.TD||{},gd=T.gdel||{},sc=T.sched||{};return [1,2,3,4,5].filter(function(n){var k=g+"|"+n;if((window.S&&S.students||[]).some(function(x){return x.grade==g&&x.group==n}))return true;if(gd[k])return false;return n<=3||!!sc[k]})}
+window.grpList=grpList;
+function gOpts(v,g){var L=g?grpList(g):[1,2,3,4,5];if(!L.length)L=[1];return L.map(function(n){return '<option value="'+n+'"'+(n==v?" selected":"")+'>'+t("grp")+" "+n+'</option>'}).join("")}
 function gFlt(v,g){var a=[];S.students.forEach(function(s){var x=String(s.group||"");if(x&&(!g||s.grade==g)&&a.indexOf(x)<0)a.push(x)});a.sort(function(p,q2){return p-q2});if(v&&a.indexOf(String(v))<0)v="";return a.map(function(n){return '<option value="'+n+'"'+(n==v?" selected":"")+'>'+t("grp")+" "+n+'</option>'}).join("")}
 function gHas(v,g){return !v||S.students.some(function(s){return String(s.group)==String(v)&&(!g||s.grade==g)})}
 function sxSel(){return '<select onchange="ss=this.value;draw()"><option value="">'+t("allsx")+'</option><option value="m"'+(ss=="m"?" selected":"")+'>'+t("boys")+'</option><option value="f"'+(ss=="f"?" selected":"")+'>'+t("girls")+'</option></select>'}
@@ -6630,7 +6633,7 @@ function xaRead(A){var M={},hi=-1,i,r,a;
   var sx=xaSex(xv);
   if(!sx){bad(L2("النوع لازم يكون ولد أو بنت","Gender must be boy or girl"));continue}
   var gp=String(gv).trim()===""?(isNaN(dg)?1:dg):xlNum(gv);
-  if(!(gp>=1&&gp<=5&&gp%1===0)||(D.gdel&&D.gdel[g+"|"+gp])){bad(L2("المجموعة غلط","Invalid group"));continue}
+  if(!(gp>=1&&gp<=5&&gp%1===0)||(D.gdel&&D.gdel[g+"|"+gp])||grpList(g).indexOf(gp)<0){bad(L2("المجموعة غلط","Invalid group"));continue}
   var pr=String(rv).trim()===""?dp:xlNum(rv);
   if(!(pr>0)){bad(L2("سعر الحصة ناقص","Missing class price"));continue}
   seen[pp+"|"+nm+"|"+g]=1;P.ok.push({name:nm,sex:sx,grade:g,group:String(gp),phone:pp,parentPhone:q?"+20"+q:"",price:pr})}
@@ -7535,7 +7538,7 @@ async function flush(){
     for(const k in data.rec){const i=k.indexOf("|");if(i>0)(RC[k.slice(i+1)]=RC[k.slice(i+1)]||[]).push(k.slice(0,i))}
     const gt={};data.students.forEach(s=>{gt[s.grade]=(gt[s.grade]||0)+1});
     const td=today();
-    const byPh={};data.students.forEach(s=>{const a=pn(s.phone),b=pn(s.parentPhone);[a,b].filter((v,i,A)=>v&&A.indexOf(v)==i).forEach(v=>{(byPh[v]=byPh[v]||[]).push(s)})});
+    const byPh={};data.students.forEach(s=>{const b=pn(s.parentPhone);if(b)(byPh[b]=byPh[b]||[]).push(s)});/* الإخوات بيظهروا بس لما الدخول برقم ولي الأمر المشترك */
     const cxOf=(g,grp)=>{const c=cfg.cancel[g+"|"+grp];if(!c||typeof c!=="object")return null;const o={};Object.keys(c).forEach(d=>{if(d>=ld(new Date(Date.now()-21*864e5))&&c[d])o[d]=1});return Object.keys(o).length?o:null};
 
     // student portal copies (own phone + parent phone, both keyed by the same code)
@@ -7550,7 +7553,7 @@ async function flush(){
       const ex=(cfg.exams||[]).filter(e=>e.grade==s.grade&&((e.sc&&e.sc[s.id]!=null)||(e.abs&&e.abs[s.id]))).map(e=>{const sv=e.sc&&e.sc[s.id]!=null;return {t:e.title,m:e.max,d:e.date,v:sv?e.sc[s.id]:null,x:sv?0:1}});
       for(const ph of pids){
         const pid=ph+"_"+String(s.code||"");live[pid]=1;
-        const pj=JSON.parse(JSON.stringify({uid:u.uid,sid:s.id,name:s.name,grade:s.grade,group:s.group==null?"":s.group,phone:ownPh,parentPhone:parPh||"",sibs:(byPh[ph]||[]).length>1?byPh[ph].map(x=>({n:x.name,g:x.grade,r:x.group==null?"":x.group,c:String(x.code||"")})):[],...stat(s),
+        const pj=JSON.parse(JSON.stringify({uid:u.uid,sid:s.id,name:s.name,grade:s.grade,group:s.group==null?"":s.group,phone:ownPh,parentPhone:parPh||"",sibs:(ph===parPh&&(byPh[ph]||[]).length>1)?byPh[ph].map(x=>({n:x.name,g:x.grade,r:x.group==null?"":x.group,c:String(x.code||"")})):[],...stat(s),
           price:+s.price>0?+s.price:data.price,rc,exams:ex,sch:cfg.sched[s.grade+"|"+s.group]||null,cx:cxOf(s.grade,s.group),gt}));
         const j=JSON.stringify(pj);
         if(lastPortal[pid]!==j){lastPortal[pid]=j;ps.push(setDoc(doc(db,"portal",pid),pj))}
@@ -8533,7 +8536,7 @@ function planSegment(seg,C,ctxState){
     a.F.list.forEach(function(f){var j=f.i+f.len,sc=null,ab=false,cnt=0;while(j<N&&cnt<4){var w=T.n[j];if(isNum(w)){sc=+w;if(T.n[j+1]=="من"&&isNum(T.n[j+2]))j+=2;break}if(/^(غايب|غايبه|غائب|غياب|مجاش)$/.test(w)){ab=true;break}var nxt=a.F.list.concat(a.F.amb).some(function(g){return g.i==j});if(nxt)break;j++;cnt++}if(sc!=null||ab)rows.push({student:f.s.id,score:sc,absent:ab})});
     var st3={tool:"exam_scores",args:{title:tt,max:mx,rows:rows,grade:a.grade,date:a.date},pendAmb:a.F.amb.slice()};
     if(!rows.length&&!a.F.amb.length){
-      if(/(اعمل|ضيف|اضف|سجل|جديد)/.test(n)&&(a.grade||tt)){st3.tool="exam_scores";st3.args.empty=true;if(!a.grade)st3.ask=Q("grade","الامتحان لأنهي صف؟",gradeOpts(C))}
+      if(/(اعمل|ضيف|اضف|سجل|جديد)/.test(n)){st3.tool="exam_scores";st3.args.empty=true;st3.guided=1;st3.maxAsked=!!mx}
       else return {steps:[],notes:[],unclear:{q:"مفهمتش درجات مين. اكتبها كده: «امتحان الوحدة الأولى من 20: أحمد محمد 18 سلمى علي 15 يوسف غايب»",opts:[]}}}
     return {steps:[st3],notes:[]}}
   /* إشعار */
@@ -8551,8 +8554,8 @@ function planSegment(seg,C,ctxState){
     var parts=a.raw.split(/(?=(?:^|\s)و?(?:طالبه|طالبة|طالب)\s)|\n+|\s\/\s|\s\|\s/).filter(function(c){return c.trim()}),out=[];
     parts.forEach(function(p){var r=parseNewStudent(p,C);if(r)out.push(r)});
     if(!out.length){var r0=parseNewStudent(a.raw,C);if(r0)out.push(r0)}
-    if(out.length)return {steps:out.map(function(r){return mkAdd(r,C)}),notes:[]};
-    return {steps:[{tool:"add_student",args:{},ask:Q("name","اسم الطالب إيه؟",null,{text:true,ph:"اكتب الاسم"})}],notes:[]}}
+    if(out.length)return {steps:out.map(function(r){var s1=mkAdd(r,C);if(out.length==1){s1.askGroup=!r.group;s1.askPrice=!r.price}return s1}),notes:[]};
+    return {steps:[{tool:"add_student",args:{},askGroup:1,askPrice:1,ask:Q("name","اسم الطالب إيه؟",null,{text:true,ph:"اكتب الاسم"})}],notes:[]}}
   /* تعديل طالب */
   if(RX.edit.test(n)&&hasStu&&!RX.abs.test(n)&&!RX.paid.test(n)&&!RX.unp.test(n)){
     var f={};if(a.grade)f.grade=a.grade;if(a.group)f.group=a.group;
@@ -8688,6 +8691,9 @@ var A3=root.__A3,Q=A3.Q,esc=A3.esc;
 var DAYN=[["السبت",6],["الأحد",0],["الإثنين",1],["الثلاثاء",2],["الأربعاء",3],["الخميس",4],["الجمعة",5]];
 function hasTarget(a){return (a.students&&a.students.length)||a.grade||a.group||a.all}
 function allGrades(C){return A3.gradeOpts(C)}
+function grpNums(C,g){var L=(root.grpList?root.grpList(g):[1,2,3]);return L.map(function(x){return {l:"مجموعة "+x,v:String(x)}})}
+function priceOpts(C){var L=[20,25,30,35,40,50],o=L.map(function(x){return {l:String(x),v:String(x)}});if(L.indexOf(+C.price)<0)o.unshift({l:"العادي ("+C.price+")",v:"__def"});return o}
+function examStus(C,a){return C.students.filter(function(s){return s.grade==a.grade&&(!a.group||String(s.group)==String(a.group))})}
 /* يرجع السؤال الجاي للخطوة، أو null لو مكتملة */
 A3.nextAsk=function(step,C){
   if(step.ask)return step.ask;
@@ -8702,7 +8708,17 @@ A3.nextAsk=function(step,C){
   if(t=="add_student"){
     if(!a.name)return Q("name","اسم الطالب إيه؟",null,{text:true,ph:"اكتب الاسم"});
     if(!a.grade)return Q("grade","الطالب "+a.name+" في أنهي صف؟",A3.gradeOpts({students:[],GR:C.GR}));
+    var GL=grpNums(C,a.grade),gOk=GL.some(function(o){return String(o.v)==String(a.group)});
+    if((step.askGroup&&!step.groupAsked)||(!step.groupAsked&&!gOk))return Q("group","مجموعة "+a.name+(gOk||step.askGroup?"":" — المجموعة "+a.group+" مش في جدول "+a.grade+" —")+" رقم كام؟ (من الجدول)",GL,{groupOnly:true});
+    if(step.askPrice&&!step.priceAsked)return Q("price","سعر حصة "+a.name+"؟ (العادي "+C.price+")",priceOpts(C),{text:true,num:true,ph:"أو اكتب سعر تاني"});
     if(!step.phoneAsked&&!a.phone)return Q("phone","رقم موبايل "+a.name+"؟ (لازم عشان يدخل بالكود)",null,{text:true,ph:"01xxxxxxxxx",skip:"من غير رقم"})}
+  if(t=="exam_scores"&&step.guided){
+    if(!a.title&&!step.titleAsked)return Q("title","اسم الامتحان إيه؟",null,{text:true,ph:"مثلاً: امتحان الوحدة الأولى"});
+    if(!a.grade)return Q("grade","«"+a.title+"» لأنهي صف؟",allGrades(C));
+    if(!step.maxAsked)return Q("max","«"+a.title+"» من كام درجة؟",[10,15,20,25,30,40,50].map(function(x){return {l:String(x),v:String(x)}}),{text:true,num:true,ph:"أو اكتب رقم تاني"});
+    if(!step.scoresDone){var SL=examStus(C,a),dn={};(a.rows||[]).forEach(function(r){dn[r.student]=1});var nx=SL.filter(function(s){return !dn[s.id]})[0];
+      if(nx)return Q("score","("+(SL.length-SL.filter(function(s){return !dn[s.id]}).length+1)+"/"+SL.length+") درجة "+nx.name+" من "+a.max+"؟",[{l:"❌ غايب",v:"__abs"},{l:"⏭ كفاية كده",v:"__done"}],{text:true,num:true,ph:"اكتب الدرجة",sid:nx.id});
+      step.scoresDone=1}}
   if(t=="exam_scores"&&!(a.rows&&a.rows.length)&&!a.grade)return Q("grade","الامتحان لأنهي صف؟",allGrades(C));
   if(t=="exam_delete"){var L=A3.findExams(a,C),all=C.TD.exams||[];
     if(!all.length)return {key:"none",q:"مفيش امتحانات مسجلة أحذفها.",opts:[]};
@@ -8730,7 +8746,11 @@ A3.applyAsk=function(step,ask,value,C){
    case "amb":a.students=(a.students||[]).concat(L(value));step.pendAmb.shift();break;
    case "students":a.students=L(value).filter(Boolean);if(!a.students.length)return "اختار طالب";break;
    case "grade":a.grade=value;step.ask=null;break;
-   case "group":a.group=value;break;
+   case "group":a.group=value;step.groupAsked=1;break;
+   case "price":step.priceAsked=1;if(value==="__def"){a.price=C.price;break}var pv=+A3.dg(value);if(!(pv>0))return "السعر لازم رقم";a.price=pv;break;
+   case "title":if(!String(value).trim())return "اكتب اسم الامتحان";a.title=String(value).trim();step.titleAsked=1;break;
+   case "max":var mv=+A3.dg(value);if(!(mv>0))return "اكتب رقم";a.max=mv;step.maxAsked=1;break;
+   case "score":if(value==="__done"){step.scoresDone=1;break}a.rows=a.rows||[];if(value==="__abs"){a.rows.push({student:ask.sid,score:null,absent:true});break}var sv=A3.dg(value).replace(",",".").trim();if(sv===""||isNaN(+sv)||+sv<0)return "اكتب الدرجة كرقم";if(+sv>+a.max)return "الدرجة أكبر من "+a.max;a.rows.push({student:ask.sid,score:+sv,absent:false});break;
    case "grades":a.grades=value==="__all"?A3.gradeOpts(C).map(function(o){return o.v}):L(value);break;
    case "target":if(Array.isArray(value)||(typeof value=="object")){a.students=L(value)}else if(value==="__all"){a.all=true}else if(ask.pick&&C.students.some(function(s){return String(s.id)==String(value)})){a.students=[value]}else{a.grade=value;step.ask=Q("group","أنهي مجموعة؟",A3.groupOpts(C,value).concat([{l:"كل المجموعات",v:"__every"}]));return true}break;
    case "status":a.status=value;break;
@@ -8756,7 +8776,7 @@ A3.fromUnclear=function(v,ids,C){
     if(kind=="msg")return [{tool:"message",args:{students:id,to:"parent"}}];
     if(kind=="edit")return [{tool:"edit_student",args:{students:id,fields:{}}}];
     if(kind=="del")return [{tool:"delete_student",args:{students:id}}]}
-  var T={attendance:{tool:"attendance",args:{date:C.today}},payment:{tool:"payment",args:{date:C.today}},add_student:{tool:"add_student",args:{price:C.price,group:"1",sex:"m"}},delete_student:{tool:"delete_student",args:{students:[]}},edit_student:{tool:"edit_student",args:{students:[],fields:{}}},notice_send:{tool:"notice_send",args:{grades:[],text:"",kind:"n"}},exam_delete:{tool:"exam_delete",args:{}},notice_delete:{tool:"notice_delete",args:{}},group_delete:{tool:"group_delete",args:{}},sched_set:{tool:"sched_set",args:{days:[],time:""}}}[m];
+  var T={attendance:{tool:"attendance",args:{date:C.today}},payment:{tool:"payment",args:{date:C.today}},add_student:{tool:"add_student",args:{price:C.price,group:"1",sex:"m"},askGroup:1,askPrice:1},delete_student:{tool:"delete_student",args:{students:[]}},edit_student:{tool:"edit_student",args:{students:[],fields:{}}},notice_send:{tool:"notice_send",args:{grades:[],text:"",kind:"n"}},exam_delete:{tool:"exam_delete",args:{}},notice_delete:{tool:"notice_delete",args:{}},group_delete:{tool:"group_delete",args:{}},sched_set:{tool:"sched_set",args:{days:[],time:""}}}[m];
   return T?[JSON.parse(JSON.stringify(T))]:null};
 /* هل الخطة محتاجة تأكيد قبل التنفيذ؟ */
 A3.needsConfirm=function(steps,C){return steps.some(function(s){var T=A3.tools[s.tool];if(T&&T.danger)return true;var n=0;try{n=(s.args.students&&s.args.students.length)||A3.targets(s.args,C).length}catch(e){}return n>12})};
@@ -8853,7 +8873,7 @@ function execute(){var steps=work.steps,sn=snap(),out=[],hasChange=false;work=nu
   var b=d.querySelector("[data-a=un]");if(b)b.onclick=function(){b.remove();bot("<div>"+undoLast()+"</div>")}}
 /* ---------- عرض سؤال باختيارات ---------- */
 function showAsk(ask,cb,multi){var d=bot("<div style='font-weight:700'>"+esc(ask.q)+"</div>"),done=false;
-  function fin(v){if(done)return;done=true;d.querySelectorAll("button,input").forEach(function(x){x.disabled=true});cb(v)}
+  function fin(v){if(done)return;done=true;if(!Array.isArray(v)&&v!=="__cancel"){var lb=(ask.opts||[]).filter(function(o){return String(o.v)==String(v)})[0];me(lb?lb.l:(v==="__skip"?"تخطي":String(v)))}d.querySelectorAll("button,input").forEach(function(x){x.disabled=true});cb(v)}
   var cancel=function(){var b=doc.createElement("button");b.className="btn";b.innerHTML=a3i("x")+"إلغاء";b.onclick=function(){if(done)return;done=true;work=null;busy=false;bot("<div>تمام، لغيت.</div>")};return b};
   var hasList=ask.opts&&ask.opts.length;
   if(hasList&&(multi||ask.multi)){var sel={},wrap=doc.createElement("div");
@@ -8861,8 +8881,8 @@ function showAsk(ask,cb,multi){var d=bot("<div style='font-weight:700'>"+esc(ask
     d.appendChild(wrap);var r=doc.createElement("div");r.className="a3o";var ok=doc.createElement("button");ok.className="btn pr";ok.innerHTML=a3i("ok")+"تأكيد الاختيار";ok.onclick=function(){var v=Object.keys(sel).map(function(k){var o=ask.opts.filter(function(x){return String(x.v)==k})[0];return o?o.v:k});if(!v.length){alert("اختار واحد على الأقل");return}fin(v)};r.appendChild(ok);r.appendChild(cancel());d.appendChild(r)}
   else if(hasList){var w2=doc.createElement("div");w2.className="a3o";
     ask.opts.forEach(function(o){var b=doc.createElement("button");b.className="btn";b.textContent=o.l;b.onclick=function(){fin(o.v)};w2.appendChild(b)});w2.appendChild(cancel());d.appendChild(w2)}
-  if(ask.text){var i=doc.createElement("input");i.className="a3in";i.placeholder=ask.ph||"";i.dir="auto";d.appendChild(i);var r2=doc.createElement("div");r2.className="a3o";var ok2=doc.createElement("button");ok2.className="btn pr";ok2.textContent="تمام";ok2.onclick=function(){fin(i.value)};r2.appendChild(ok2);
-    if(ask.skip){var sk=doc.createElement("button");sk.className="btn";sk.textContent=ask.skip;sk.onclick=function(){fin("__skip")};r2.appendChild(sk)}r2.appendChild(cancel());d.appendChild(r2);i.onkeydown=function(e){if(e.key=="Enter"){e.preventDefault();fin(i.value)}};setTimeout(function(){try{i.focus()}catch(e){}},30)}
+  if(ask.text){var i=doc.createElement("input");i.className="a3in";i.placeholder=ask.ph||"";i.dir="auto";if(ask.num)i.setAttribute("inputmode","decimal");d.appendChild(i);var r2=doc.createElement("div");r2.className="a3o";var ok2=doc.createElement("button");ok2.className="btn pr";ok2.textContent="تمام";ok2.onclick=function(){fin(i.value)};r2.appendChild(ok2);
+    if(ask.skip){var sk=doc.createElement("button");sk.className="btn";sk.textContent=ask.skip;sk.onclick=function(){fin("__skip")};r2.appendChild(sk)}if(!hasList)r2.appendChild(cancel());d.appendChild(r2);i.onkeydown=function(e){if(e.key=="Enter"){e.preventDefault();fin(i.value)}};setTimeout(function(){try{i.focus()}catch(e){}},30)}
   if(ask.pick=="student"){var C=A3.ctx(),i2=doc.createElement("input");i2.className="a3in";i2.placeholder="ابحث باسم الطالب...";i2.dir="auto";var res=doc.createElement("div");d.appendChild(i2);d.appendChild(res);
     function draw2(){var q=A3.nz(i2.value),L=C.students.filter(function(s){return !q||A3.nz(s.name).indexOf(q)>=0}).slice(0,8);res.innerHTML="";L.forEach(function(s){var b=doc.createElement("button");b.className="a3c";b.textContent=s.name+" — "+s.grade+(s.group?" م"+s.group:"");b.onclick=function(){fin(ask.pickOk?s.id:[s.id])};res.appendChild(b)});if(!L.length)res.innerHTML="<div class='mu'>مفيش طالب بالاسم ده</div>"}
     i2.oninput=draw2;draw2();if(!hasList){var r3=doc.createElement("div");r3.className="a3o";r3.appendChild(cancel());d.appendChild(r3)}}
