@@ -1353,7 +1353,7 @@ function repView(){return '<div class="tabs2 cmp"><button class="btn '+(rtab=="s
 function homeView(){var td=ld(new Date()),a=0,b=0,n=0,owe=0,O=[];
 S.students.forEach(function(s){var r=rc(s.id,td);if(r.a===1)a++;else if(r.a===0)b++;else n++;var x=st(s);owe+=x.o||0;if(x.o>0)O.push({s:s,o:x.o})});
 O.sort(function(p,q){return q.o-p.o});
-var h='<div class="card" style="position:relative"><button type="button" class="calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div>';
+var h='<div class="card" style="position:relative"><button type="button" class="calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button><button type="button" class="demob" onclick="demoMenu(event)" aria-haspopup="true" aria-label="'+L2("حساب تجريبي للطالب","Student demo account")+'">'+(window.DEMO_ICO||"")+'</button><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div>';
 if(!S.students.length)return h+'<div class="row"><button class="btn ok" onclick="go(\'stu\')">'+t("add")+'</button></div>';
 
 return h}
@@ -1367,7 +1367,7 @@ function gearSvg(){var s='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.
 function draw(){RXon=true;RX=null;try{draw1()}finally{RXon=false;RX=null}}
 var _sgd=draw,_lt="";draw=function(){var b=document.querySelector(".gmb[data-sg]"),y=b?b.scrollTop:0,r=_sgd.apply(this,arguments),n=document.querySelector(".gmb[data-sg]");if(n&&y)n.scrollTop=y;
  _lt=tab;return r};
-function draw1(){var l=S.lang,on=AU.ready&&AU.user,sv=AU.ready&&ST.data;document.documentElement.lang=l;document.documentElement.dir=l=="ar"?"rtl":"ltr";document.title=t("title");
+function draw1(){var l=S.lang,on=AU.ready&&AU.user&&!ST.demo,sv=AU.ready&&ST.data;document.documentElement.lang=l;document.documentElement.dir=l=="ar"?"rtl":"ltr";document.title=t("title");
 var hdh=((sv||on)?logoHtml():'<div class="hn" role="button" tabindex="0" style="cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none" onclick="setMode(ST.mode==\'t\'?\'s\':\'t\')">ahmed khalifa</div>')+'<div class="ht"><span id="htt">'+t("title")+'</span> <span id="sy"></span></div>'+((on||sv)?'<button class="gear'+((on?tab=="set":ST.set)?" on":"")+'" onclick="'+(on?"gearT()":"stSet()")+'" aria-label="'+t("set")+'">'+gearSvg()+'</button>':'');
 hdh+=(window.calcBtn?calcBtn(sv&&!on):""); if(sv&&!on&&ST.data&&ST.data.av)hdh+='<img class="hav" src="'+ST.data.av+'" alt="" onclick="avTap()">';
 var hdE=document.getElementById("hd");if(hdE)hdE.classList.toggle("hasav",!!(sv&&!on&&ST.data&&ST.data.av));
@@ -9358,6 +9358,138 @@ window.addEventListener("pagehide",function(){close(true)});
   if(window.AU&&AU.user&&tab=="sch"){var f=window.GFR;go(f?"set":"home");window.GFR=null;return}
   return _gb.apply(this,arguments)};
 })();
+</script>
+
+<script>
+/* ===== حساب تجريبي للطالب (محلي بالكامل — مش بيتكتب في Firebase ومش بيتحسب في الطلاب/الحضور) ===== */
+(function(){
+if(window.__demoAcc)return;window.__demoAcc=1;
+var ICO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.6 18.6A1.7 1.7 0 0 0 6.1 21h11.8a1.7 1.7 0 0 0 1.5-2.4L14 9V3"/><path d="M7.6 15h8.8"/></svg>';
+window.DEMO_ICO=ICO;
+
+var st=document.createElement("style");st.textContent=[
+".demob{position:absolute;left:64px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:2px dashed var(--pr);background:var(--soft);color:var(--pr);padding:0;line-height:1;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .35s cubic-bezier(.3,1.6,.5,1),background .2s}",
+".demob svg{width:24px;height:24px;display:block;margin:auto}",
+".demob:active{transform:translateY(-50%) scale(.9)}",
+".demob.on{background:var(--pr);color:var(--on)}",
+"#demoMenu{position:fixed;z-index:60;width:252px;max-width:calc(100vw - 16px);padding:12px;border-radius:24px;background:var(--card);box-shadow:var(--sh),0 0 0 1px var(--bd);transform-origin:top left;animation:demoIn .28s cubic-bezier(.2,1.3,.4,1) both;direction:rtl}",
+"[dir=ltr] #demoMenu{direction:ltr}",
+"@keyframes demoIn{from{opacity:0;transform:translateY(-8px) scale(.94)}to{opacity:1;transform:none}}",
+"#demoMenu .dm-h{font-weight:700;font-size:15px;padding:2px 4px 8px}",
+"#demoMenu .dm-h small{display:block;font-weight:400;font-size:12px;color:var(--mu);margin-top:2px;line-height:1.5}",
+"#demoMenu .dm-i{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;margin-top:6px;padding:8px 14px;border:0;border-radius:14px;background:var(--soft);color:var(--tx);font:inherit;font-size:14px;font-weight:600;text-align:start;-webkit-tap-highlight-color:transparent;touch-action:manipulation}",
+"#demoMenu .dm-i:active{transform:scale(.97)}",
+"#demoMenu .dm-i i{font-style:normal;color:var(--mu);font-size:18px}",
+".demobn{display:flex;align-items:center;justify-content:space-between;gap:10px;border-inline-start:6px solid var(--sc)}",
+".demobn .btn{flex:0 0 auto;min-height:40px;padding:6px 18px}"
+].join("");document.head.appendChild(st);
+
+function e2(a,b){return L2(a,b)}
+var M=null;
+function closeM(){if(!M)return;M.remove();M=null;var b=document.querySelector(".demob");if(b)b.classList.remove("on");
+ document.removeEventListener("pointerdown",outside,true);window.removeEventListener("scroll",closeM,true);window.removeEventListener("resize",closeM)}
+function outside(ev){if(M&&!M.contains(ev.target)&&!(ev.target.closest&&ev.target.closest(".demob")))closeM()}
+window.demoMenu=function(ev){
+ if(ev)ev.stopPropagation();
+ if(M){closeM();return}
+ var b=(ev&&ev.currentTarget)||document.querySelector(".demob");if(!b)return;
+ var r=b.getBoundingClientRect(),W=252;
+ M=document.createElement("div");M.id="demoMenu";
+ M.innerHTML='<div class="dm-h">'+e2("حساب تجريبي للطالب","Student demo account")+'<small>'+e2("بيتفتح كأنك طالب فعلي · مش بيتحسب في عدد الطلاب ولا الحضور والغياب","Opens like a real student · not counted in students or attendance")+'</small></div>'
+  +GR.map(function(g,i){return '<button type="button" class="dm-i" onclick="demoEnter('+i+')"><span>'+esc(gn(g))+'</span><i>'+(S.lang=="en"?"›":"‹")+'</i></button>'}).join("");
+ document.body.appendChild(M);
+ var h=M.offsetHeight,left=Math.max(8,Math.min(r.left,innerWidth-Math.min(W,innerWidth-16)-8)),top=r.bottom+10;
+ if(top+h>innerHeight-8)top=Math.max(8,r.top-h-10);
+ M.style.left=left+"px";M.style.top=top+"px";
+ b.classList.add("on");
+ document.addEventListener("pointerdown",outside,true);window.addEventListener("scroll",closeM,true);window.addEventListener("resize",closeM)};
+
+/* ---------- بيانات الطالب التجريبي: حقيقية من بيانات المدرس (مجموعة 1 من الصف) ---------- */
+var GRP="1";
+function T(){return window.TD||{exams:[],times:{},sched:{},cancel:{},gdel:{}}}
+function cxOf(g){var c=(T().cancel||{})[g+"|"+GRP];if(!c||typeof c!=="object")return null;var o={},lim=ld(new Date(Date.now()-21*864e5));Object.keys(c).forEach(function(d){if(d>=lim&&c[d])o[d]=1});return Object.keys(o).length?o:null}
+function gtOf(){var gt={};(S.students||[]).forEach(function(s){gt[s.grade]=(gt[s.grade]||0)+1});return gt}
+function recOf(sch,cx){var rec=[],days=(sch&&sch.days)||[],a=0,b=0,u=0,n,d,key,r,cls=[];
+ for(n=-28;n<0;n++){d=new Date();d.setDate(d.getDate()+n);key=ld(d);if(days.indexOf(d.getDay())>-1&&!(cx&&cx[key]))cls.push(key)}
+ cls.forEach(function(key,j){
+  if(j==cls.length-3)r={a:0};else if(j==cls.length-5)r={a:1,p:0};else if(j==cls.length-6)r={a:1,p:1};else r={a:1};
+  rec.push([key,r]);if(r.a===0)b++;else{a++;if(r.p===0)u++}});
+ return {rec:rec,a:a,b:b,u:u}}
+/* بيحدّث الواجبات والإخطارات والجدول والحصص الملغية من بيانات المدرس الحالية (زي الطالب الفعلي بالظبط) */
+function demoSync(){var D=ST.demo,d=ST.data;if(!D||!d)return;
+ var g=d.grade;
+ ST.hw=(S.hw||[]).filter(function(w){return w.grade===g}).map(function(w){return Object.assign({},w,{uid:"demo"})}).sort(function(x,y){return String(y.id).localeCompare(String(x.id))});
+ ST.notes=(S.notices||[]).filter(function(n){return n.grade==g&&(!n.grp||String(n.grp)==GRP)});
+ d.sch=(T().sched||{})[g+"|"+GRP]||null;d.cx=cxOf(g);d.price=+S.price||50;d.gt=gtOf()}
+function build(i){
+ var g=GR[i],sch=(T().sched||{})[g+"|"+GRP]||null,cx=cxOf(g),R=recOf(sch,cx);
+ var data={name:"طالب تجريبي",grade:g,group:GRP,phone:"+20100000000"+i,parentPhone:"+20110000000"+i,uid:"demo",sid:"demo-"+i,
+  a:R.a,b:R.b,u:R.u,rec:R.rec,price:+S.price||50,av:"",note:"",cx:cx,sch:sch,exams:[],gt:gtOf()};
+ return {data:data}}
+
+/* ---------- دخول / خروج ---------- */
+window.demoEnter=function(i){
+ closeM();
+ if(ST.demo||!window.AU||!AU.user||!(i>=0&&i<GR.length))return;
+ var fc=document.getElementById("fcalc");if(fc&&fc.classList.contains("o")&&window.fcalcT)try{fcalcT()}catch(e){}
+ var b=build(i);
+ ST.demo={i:i,sid:b.data.sid,plays:{},best:{},lang:S.lang};
+ try{gmStop()}catch(e){}
+ ST.bd=null;ST.bg={};ST.bgl={};ST.lb={};ST.rp=null;ST.nOpen=false;ST.up=null;
+ try{GM.res=null;GM.open=""}catch(e){}
+ ST.data=b.data;ST.sol={};ST.msgs=[];ST.reps=[];demoSync();ST.pc="0000";ST.ph=b.data.phone;ST.set=false;ST.tab="home";ST.newN=hasNew();
+ window._apph=null;window._navh=null;window._hdh=null;
+ draw();try{window.scrollTo(0,0)}catch(e){}};
+window.demoExit=function(){
+ if(!ST.demo)return;
+ try{gmStop()}catch(e){}
+ var L=ST.demo.lang;ST.demo=null;
+ ST.data=null;ST.hw=[];ST.sol={};ST.notes=[];ST.msgs=[];ST.reps=[];ST.set=false;ST.tab="home";ST.pc="";ST.ph="";ST.newN=false;
+ ST.bd=null;ST.bg={};ST.bgl={};ST.lb={};ST.rp=null;ST.nOpen=false;ST.up=null;
+ try{GM.res=null;GM.open=""}catch(e){}
+ S.lang=L;
+ window._apph=null;window._navh=null;window._hdh=null;
+ draw();try{window.scrollTo(0,0)}catch(e){}};
+
+var _so=window.studentOut;
+window.studentOut=function(){if(ST.demo)return demoExit();return _so.apply(this,arguments)};
+var _sl=window.setL;
+window.setL=function(l){if(ST.demo){S.lang=l;draw();return}return _sl.apply(this,arguments)};
+var _dv=window.studentView;
+window.studentView=function(){if(ST.demo)demoSync();var h=_dv.apply(this,arguments);if(!ST.demo||!ST.data)return h;
+ return '<div class="card demobn"><div><div class="nm" style="margin:0">🧪 '+e2("حساب تجريبي","Demo account")+'</div><div class="mu" style="font-size:12px">'+esc(gn(ST.data.grade))+' · '+e2("مش بيتحسب في الطلاب ولا الحضور، وكل حاجة بتتمسح لما تخرج","Not counted anywhere · everything is cleared when you exit")+'</div></div><button type="button" class="btn no" onclick="demoExit()">'+e2("خروج","Exit")+'</button></div>'+h};
+
+/* لو الزرار اتشال من الصفحة (تغيير تاب) اقفل القايمة */
+var _dr=window.draw;
+window.draw=function(){var r=_dr.apply(this,arguments);if(M&&!document.querySelector(".demob"))closeM();return r};
+
+/* ---------- Firebase: في الوضع التجريبي كل حاجة محلية ---------- */
+function wrap(){
+ var F=window.FB;if(!F)return false;if(F.__demo)return true;F.__demo=1;
+ function W(n,fn){var o=F[n];F[n]=function(){if(ST.demo)return fn.apply(F,arguments);return o.apply(F,arguments)}}
+ function ok(v){return Promise.resolve(v)}
+ W("studentLogin",function(){demoSync();return ok({data:ST.data,hw:ST.hw,sol:ST.sol,notes:ST.notes,msgs:ST.msgs,reps:ST.reps})});
+ W("studentLogout",function(){return ok()});
+ W("watchStudent",function(){return function(){}});
+ W("submitSol",function(){return ok()});
+ W("sendRep",function(p,c,v,day){return ok({id:"demo_"+Date.now(),sid:ST.demo.sid,grade:ST.data.grade,day:day,v:+v,uid:"demo",at:Date.now()})});
+ W("sendMsg",function(p,c,ref,text){return ok({id:"demo_"+Date.now(),uid:"demo",sid:ST.demo.sid,grade:ST.data.grade,ref:ref||"",text:String(text||"").slice(0,600),at:Date.now()})});
+ W("sendNote",function(p,c,text){return ok(String(text||"").trim().slice(0,300))});
+ W("setAvatar",function(){return ok()});
+ W("startPlay",function(p,c,k){var D=ST.demo,cur=D.plays[k]||0;if(cur>=3)return Promise.reject({code:"limit"});D.plays[k]=cur+1;return ok({left:2-cur})});
+ W("sendScore",function(p,c,k,ms,w){var D=ST.demo;ms=Math.floor(+ms)||0;if(!D.best[k]||ms<D.best[k].ms)D.best[k]={ms:ms,w:Math.floor(+w)||0};return ok()});
+ var TB=F.teacherBoard;
+ W("getBoard",function(p,c,k,gr){var D=ST.demo,g=gr||ST.data.grade,oc=k=="t"?"k":"t";
+  return Promise.all([TB(k),TB(oc)]).then(function(R){
+   var both={};R[1].forEach(function(x){if(x.grade===g)both[x.sid]=1});
+   var all=R[0].filter(function(x){return x.grade===g}).sort(function(x,y){return x.ms-y.ms});
+   var rows=all.slice(0,50).map(function(x,j){return {sid:x.sid,name:String(x.name||"").split(" ")[0],ms:x.ms,w:x.w||0,rank:j+1,both:both[x.sid]?1:0}});
+   var total=(gtOf()[g])||0;
+   return {sid:D.sid,left:Math.max(0,3-(D.plays[k]||0)),gr:g,total:Math.max(total,all.length),done:all.length,rows:rows}})});
+ return true}
+if(!wrap()){var tm=setInterval(function(){if(wrap())clearInterval(tm)},100)}
+})();
+
 </script>
 
 </body>
