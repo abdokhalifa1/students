@@ -932,8 +932,9 @@ function lgdModal(){if(!LG2.open)return '';var g=LG2.open,an=LG2.anim,st=lgdStat
  return '<div class="gmo'+(an?' '+an:'')+'" id="lgo" onclick="lgBg(event)"><div class="gmd"><div class="gmh"><span class="gmsym">'+sgSym(g)+'</span><div class="gmt"><b>'+esc(gn(g))+'</b><small>'+L2("سجّلوا دخول: ","Signed in: ")+st.r+' / '+st.n+'</small></div><button class="gmx" type="button" aria-label="Close" onclick="lgClose()">\u2715</button></div><div class="gmb">'+(L.length?(function(){var no=L.filter(function(x){return !seenGet(x)}),yes=L.filter(function(x){return !!seenGet(x)}),row=function(x,rem){var ph=x.parentPhone||x.phone,msg=L2("السلام عليكم، ","Hello, ")+L2("تقدر تتابع "+x.name+" من التطبيق: ادخل برقم الموبايل ده وكود الدخول "+(x.code||""),"you can follow "+x.name+" in the app: sign in with this phone number and code "+(x.code||""));return '<div class="card cp"><div class="cpn"><span class="cpt"><b>'+esc(x.name)+'</b>'+(x.group?' <span class="mu">'+esc(gd(x.group))+'</span>':'')+'</span>'+(rem&&ph&&window.wa?'<a class="btn" style="flex:none;min-height:34px;padding:4px 10px;font-size:13px;text-decoration:none" target="_blank" rel="noopener" href="'+wa(ph,msg)+'">'+L2("ذكّره","Remind")+'</a>':'')+'</div><div class="mu" style="font-size:12px;margin-top:6px">'+seenHtml(x)+'</div></div>'};return (no.length?'<div class="mu" style="font-weight:700;margin:2px 4px 6px;color:var(--no)">'+L2("ما سجّلوش دخول ("+no.length+")","Not signed in ("+no.length+")")+'</div>'+no.map(function(x){return row(x,1)}).join(''):'')+(yes.length?'<div class="mu" style="font-weight:700;margin:8px 4px 6px">'+L2("سجّلوا دخول ("+yes.length+")","Signed in ("+yes.length+")")+'</div>'+yes.map(function(x){return row(x,0)}).join(''):'')})():'<div class="card mu">'+t("none")+'</div>')+'</div></div></div>'}
 function seenWarn(){var w="",all=S.students||[],der=all.filter(function(x){var v=seenGet(x);return v&&v.d}).length;
  if(window.SEEN_ERR)w=L2("⚠ مش قادر أقرا سجل الدخول من Firebase ("+window.SEEN_ERR+"). لازم قواعد Firestore تسمح بقراءة collection اسمها seen للمعلم.","Cannot read sign-in log ("+window.SEEN_ERR+"). Firestore rules must allow the teacher to read the seen collection.");
- else if(der>0&&!Object.keys(window.TSEEN||{}).length)w=L2("⚠ فيه طلاب ليهم نشاط بس سجل الدخول (seen) فاضي — يعني تسجيل الدخول مش بيتكتب في Firebase. راجع قواعد Firestore لـ seen.","Some students are active but the sign-in log (seen) is empty - sign-ins are not being written. Check the Firestore rules for seen.");
- return w?'<div class="mu" style="font-size:12.5px;margin-top:8px;color:var(--no)">'+w+'</div>':''}
+ else if(der>0&&!Object.keys(window.TSEEN||{}).length)w=L2("⚠ سجل الدخول (seen) لسه فاضي: التسجيل بيتكتب لما الطالب نفسه يفتح التطبيق، فاللي دخلوا قبل تظبيط القواعد لازم يفتحوه تاني. العدد الحالي محسوب من نشاطهم.","The sign-in log (seen) is still empty: a sign-in is recorded when the student opens the app, so students who opened it before the rules fix must open it again. The count shown comes from their activity.");
+ var tb=window.seenSelfTest?'<div class="row" style="margin-top:8px"><button class="btn" style="flex:none;min-height:36px;padding:4px 12px;font-size:13px" onclick="seenSelfTest()">'+L2("اختبار كتابة سجل الدخول","Test sign-in log write")+'</button></div>':'';
+ return w?'<div class="mu" style="font-size:12.5px;margin-top:8px;color:var(--no)">'+w+'</div>'+tb:tb}
 function lgdView(){var h='<div class="card"><div class="nm">'+L2("تسجيل دخول الطلاب","Student sign-ins")+'</div><div class="mu" style="font-size:13px">'+seenSum()+'</div>'+seenWarn()+'</div>';
  GR.forEach(function(g){var st=lgdStat(g);if(!st.n)return;
   h+='<div class="gb2" onclick="lgTog(\''+g+'\')"><span class="gsym">'+sgSym(g)+'</span><b>'+esc(gn(g))+'</b><span class="pill ok">'+st.r+' / '+st.n+'</span><span class="gchev">'+L2("\u2039","\u203a")+'</span></div>'});
@@ -7369,6 +7370,18 @@ window.FB={
     rows.sort((a,b)=>a.ms-b.ms);
     return rows;
   }
+};
+
+// ---- اختبار: يكتب ويقرا سجل seen بحساب المعلم ويقولك النتيجة الحقيقية ----
+window.seenSelfTest=async function(){
+  const u=auth.currentUser;if(!u||u.isAnonymous){alert("ادخل كمعلم الأول");return}
+  const ref=doc(db,"seen",u.uid+"_selftest");let step="الكتابة";
+  try{
+    await setDoc(ref,{uid:u.uid,sid:"selftest",first:Date.now(),last:Date.now(),n:1,secs:0});
+    step="القراءة";const g=await getDoc(ref);
+    if(!g.exists())throw {code:"not-found-after-write"};
+    alert("✅ الكتابة والقراءة على seen شغّالة. لو الطلاب لسه ما ظهروش، يبقى لازم يفتحوا التطبيق تاني (التسجيل بيحصل لما الطالب يفتح).");
+  }catch(e){alert("❌ فشل في "+step+": "+(e.code||e.message||e)+"\nراجع إن القواعد اتنشرت (Publish) وإن اسم المجموعة seen.")}
 };
 
 // ---- teacher: load ----
