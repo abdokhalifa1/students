@@ -629,7 +629,7 @@ function qScore(s){var qt=loose(q).replace(/(^| )ال/g,'$1').split(' ').filter(
 function flt(){return S.students.filter(function(s){return(!sg||s.grade==sg)&&(!sgr||s.group==sgr)&&(!ss||s.sex==ss)&&(!q||qScore(s)<1e9)})}
 function sp(s){return s&&+s.price>0?+s.price:S.price}
 var RXon=false,RX=null;function rxi(){if(!RX){RX={};for(var k in S.rec){var i=k.indexOf("|"),id=k.slice(i+1);(RX[id]||(RX[id]=[])).push([k.slice(0,i),S.rec[k]])}}return RX}
-function st(s,mon){var a=0,b=0,p=0,u=0;var E;if(RXon){E=rxi()[s.id]||[]}else{E=[];for(var k in S.rec){var x=k.split("|");if(x[1]==s.id)E.push([x[0],S.rec[k]])}}for(var j=0;j<E.length;j++){if(mon&&E[j][0].slice(0,mon.length)!=mon)continue;var r=E[j][1];if(r.a===1){a++;if(r.p===1)p++;else if(r.p===0)u++}else if(r.a===0)b++}return{a:a,b:b,p:p,u:u,o:u*sp(s)}}
+function st(s,mon){var a=0,b=0,p=0,u=0;var E;if(RXon){E=rxi()[s.id]||[]}else{E=[];for(var k in S.rec){var x=k.split("|");if(x[1]==s.id)E.push([x[0],S.rec[k]])}}for(var j=0;j<E.length;j++){if(mon&&E[j][0].slice(0,mon.length)!=mon)continue;var r=E[j][1];if(r.a===1){a++;if(r.p===0)u++;else p++}else if(r.a===0)b++}return{a:a,b:b,p:p,u:u,o:u*sp(s)}}
 function gOpts(v){return [1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(n==v?" selected":"")+'>'+t("grp")+" "+n+'</option>'}).join("")}
 function gFlt(v,g){var a=[];S.students.forEach(function(s){var x=String(s.group||"");if(x&&(!g||s.grade==g)&&a.indexOf(x)<0)a.push(x)});a.sort(function(p,q2){return p-q2});if(v&&a.indexOf(String(v))<0)v="";return a.map(function(n){return '<option value="'+n+'"'+(n==v?" selected":"")+'>'+t("grp")+" "+n+'</option>'}).join("")}
 function gHas(v,g){return !v||S.students.some(function(s){return String(s.group)==String(v)&&(!g||s.grade==g)})}
@@ -956,7 +956,7 @@ var L=sortSex(flt()).map(function(s){var x=day?null:st(s,yr||fmon);if(!x){var r=
 var lab=day?dayName(day)+' <bdi>'+day+'</bdi>':yr?(rt?"Year ":"سنة ")+'<bdi>'+yr+'</bdi>':new Date(+fmon.slice(0,4),+fmon.slice(5,7)-1,1).toLocaleDateString(rt?"en-US":"ar-u-nu-latn",{month:"long",year:"numeric"});
 var A1=0,B1=0,U1=0,N1=0;
 if(day)L.forEach(function(x){var r=x.r;if(r.a===1){A1++;if(r.p===0)U1++}else if(r.a===0)B1++;else N1++});else L.forEach(function(x){A1+=x.a;B1+=x.b;U1+=x.u});
-var PD=0;L.forEach(function(x){if(day){if(x.r.a===1&&x.r.p===1)PD+=sp(x.s)}else PD+=x.p*sp(x.s)});
+var PD=0;L.forEach(function(x){if(day){if(x.r.a===1&&x.r.p!==0)PD+=sp(x.s)}else PD+=x.p*sp(x.s)});
 var pl=day?L2("المدفوع في اليوم","Collected today"):yr?L2("المدفوع في السنة","Collected this year"):L2("المدفوع في الشهر","Collected this month");
 h+='<div class="card cp"><div class="btn dpb" role="button" tabindex="0" onclick="dpOpen(\'sum\')" style="min-height:40px;padding:6px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center"><b style="font-size:14px;font-weight:600">'+lab+'</b></div>';
 h+='<div class="sm-hero"><small>'+t("tot")+'</small><b class="'+(tot?"owe":"mu")+'">'+tot+' '+t("cur")+'</b></div>';
