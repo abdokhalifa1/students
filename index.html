@@ -9326,10 +9326,16 @@ window.addEventListener("pagehide",function(){close(true)});
  document.addEventListener("focusout",function(){if(AT){clearTimeout(AT);AT=0;autoEdit()}},true);
  window.addEventListener("pagehide",function(){if(AT){clearTimeout(AT);AT=0;autoEdit()}});
 
- function tools(){
+ /* إضافة طالب: جوه قسم الطالب في الترس */
+ function addBlock(){
   var h=row('+',t("add"),"wzGear()",'','<span class="gchev'+((GX.w||GX.full)?' up':'')+'">\u2304</span>');
   if(GX.full)h+='<div class="gx"><div class="row" style="margin-bottom:10px"><button class="btn" onclick="wzSlides()">'+L2("\u2190 شرائح سريعة","\u2190 Quick slides")+'</button></div>'+sform()+'</div>';
   else if(GX.w)h+='<div class="gx">'+wzHtml()+'</div>';
+  return h}
+ var _sts=window.stsView;
+ window.stsView=stsView=function(){return addBlock()+_sts.apply(this,arguments)+(window.xrHtml?xrHtml():'')};
+ function tools(){
+   var h="";
   h+=row(IS,L2("الجدول","Schedule"),"gOpenSch()");
   if(window.xlHtml||window.xaHtml){
    h+=row(IX,L2("استيراد من Excel","Excel import"),"gxTog()","",'<span class="gchev'+(GX.o?' up':'')+'">\u2304</span>');
@@ -9340,7 +9346,7 @@ window.addEventListener("pagehide",function(){close(true)});
  var _sv=window.setv;
  window.setv=function(){
   if(tab=="sch"||SDT||LGD||STS)return _sv.apply(this,arguments);
-  return acct()+tools()+stsCard()+(window.xrHtml?xrHtml():'')+themeCard()+langCard()+bkHtml()};
+  return acct()+tools()+stsCard()+themeCard()+langCard()+bkHtml()};
  /* الرجوع من الجدول لو اتفتح من الترس */
  var _go=window.go;
  window.go=function(x){var was=(tab=="sch");if(GX.full&&x!="set"){fromFull();GX.full=false}var r=_go.apply(this,arguments);
