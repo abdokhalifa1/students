@@ -606,7 +606,7 @@ function ph(id){var v=pn(document.getElementById(id).value);return v?"+20"+v:""}
 function rc(id,d){return S.rec[d+"|"+id]||{}}
 function setRec(id,k,v){var key=fdate+"|"+id,o=S.rec[key]||{};if(k=="p"&&o.a===0)return;o[k]=o[k]===v?undefined:v;if(k=="p"&&o.p===0&&o.a!==1)o.a=1;if(k=="a"&&o.a!==1)o.p=undefined;S.rec[key]=o;if(o.a===undefined&&o.p===undefined)delete S.rec[key];save();draw()}
 var prevTab="att";
-function go(x){if(x=="nt"){x="tasks"}if(x=="hw"){x="tasks"}if(x=="tasks"&&window.markTS){window._tmPrev=getTM();markTS()}if(x=="sum"||x=="an"){rtab="sum";x="rep"}if(x=="set"&&tab!="set")prevTab=tab;tab=x;edit=null;pd=null;draw()}
+function go(x){if(x=="nt"){x="tasks"}if(x=="hw"){x="tasks"}if(x=="home"){x="att"}if(x=="tasks"&&window.markTS){window._tmPrev=getTM();markTS()}if(x=="sum"||x=="an"){rtab="sum";x="rep"}if(x=="set"&&tab!="set")prevTab=tab;tab=x;edit=null;pd=null;draw()}
 function gearT(){if(tab=="set")goBack();else{LGD=false;STS=false;SDT=false;SDF={s:null,g:null,id:null};LG2.open="";LG2.anim="";LG2.busy=0;go("set")}}
 var LGD=false,STS=false,SDT=false,SDF={s:null,g:null,id:null};function goBack(){if(AU.user&&tab=="set"){if(SDT){if(LG2.open){lgClose();return}SDT=false;draw();return}if(LGD){if(LG2.open){lgClose();return}LGD=false;draw();return}if(STS){STS=false;draw();return}go(prevTab||"att")}else if(ST.data&&ST.set){ST.set=false;draw()}else if(edit){closeEdit()}}
 function grades(){var g=[];S.students.forEach(function(s){if(g.indexOf(s.grade)<0)g.push(s.grade)});return g.sort(function(a,b){return GR.indexOf(a)-GR.indexOf(b)})}
@@ -1314,7 +1314,7 @@ function themeCard(){var m=getTheme();return '<div class="card"><div class="nm">
 function langCard(){return '<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'}
 applyTheme();
 var AU={ready:false,user:null,err:"",busy:false,sync:"",email:""};
-function setData(o){S={students:o.students||[],rec:o.rec||{},price:o.price==null?50:o.price,lang:o.lang||"ar",hw:o.hw||[],notices:o.notices||[]};tab="home";edit=null;pd=null;dt=null}
+function setData(o){S={students:o.students||[],rec:o.rec||{},price:o.price==null?50:o.price,lang:o.lang||"ar",hw:o.hw||[],notices:o.notices||[]};tab="att";edit=null;pd=null;dt=null}
 function errMsg(x){var c=(x&&x.code)||"",m={"auth/invalid-credential":"e_cred","auth/wrong-password":"e_cred","auth/user-not-found":"e_cred","auth/invalid-email":"e_mail","auth/email-already-in-use":"e_used","auth/weak-password":"e_weak","auth/network-request-failed":"e_net","unavailable":"e_net","auth/too-many-requests":"e_many","auth/operation-not-allowed":"e_op","permission-denied":"e_perm","auth/unauthorized-domain":"e_dom","auth/invalid-api-key":"e_key","auth/api-key-not-valid.-please-pass-a-valid-api-key.":"e_key"};
 return m[c]?t(m[c]):t("e_gen")+(c||(x&&x.message)||"")}
 function loginView(){return '<div class="card"><div class="nm">'+t("lg")+'</div>'
@@ -1373,14 +1373,14 @@ hdh+=(window.calcBtn?calcBtn(sv&&!on):""); if(sv&&!on&&ST.data&&ST.data.av)hdh+=
 var hdE=document.getElementById("hd");if(hdE)hdE.classList.toggle("hasav",!!(sv&&!on&&ST.data&&ST.data.av));
 if(hdh!==window._hdh){window._hdh=hdh;document.getElementById("hd").innerHTML=hdh}
 var htE=document.getElementById("htt");if(htE){var htT=on&&{home:1,att:1,stu:1,tasks:1,rep:1,set:1}[tab]?t(tab):sv?(ST.set?t("set"):({home:t("home"),me:t("me"),rp:L2("الحصة","Lesson"),hw:t("mine"),nt:t("nt")})[ST.tab]||t("title")):t("title");if(htE.textContent!==htT){var htF=htE.textContent!=="";htE.textContent=htT;if(htF&&htE.animate)htE.animate([{opacity:0,transform:"translateY(-6px)"},{opacity:1,transform:"none"}],{duration:280,easing:"cubic-bezier(.2,.8,.2,1)"})}}
-var navH=on?["home","att","stu","tasks","rep"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" data-k="'+k+'" onclick="go(\''+k+'\')"><i>'+(IC[k]||IC.hw)+(k=="tasks"?bdgT(newSubs()):"")+'</i><span>'+t(k)+'</span></button>'}).join(""):(sv?studentNav():"");
+var navH=on?["att","stu","tasks","rep"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" data-k="'+k+'" onclick="go(\''+k+'\')"><i>'+(IC[k]||IC.hw)+(k=="tasks"?bdgT(newSubs()):"")+'</i><span>'+t(k)+'</span></button>'}).join(""):(sv?studentNav():"");
 var navE=document.getElementById("nav");if(sv&&!on){if(window._navh!==navH){window._navh=navH;navE.innerHTML=navH}}else{window._navh=null;navE.innerHTML=navH}
 var body;
 if(!AU.ready||ST.rs)body='<div class="card mu">'+t("ldg")+'</div>';
 else if(on)body=tab=="home"?homeView():tab=="att"?att():tab=="stu"?stu():tab=="tasks"?tasksView():tab=="rep"?repView():setv();
 else if(sv)body=studentView();
 else body=(ST.mode=="s"?studentLoginView():loginView())+gateLink();
-var bk=((on&&(tab=="set"||(tab=="stu"&&edit&&edit.id)))||(sv&&ST.set))?'<div class="row" style="margin-bottom:12px"><button class="btn" style="flex:0 0 auto;padding:8px 22px" onclick="goBack()">'+(l=="ar"?"→ رجوع":"← Back")+'</button></div>':'';
+var bk=((on&&(tab=="set"||tab=="sch"||(tab=="stu"&&edit&&edit.id)))||(sv&&ST.set))?'<div class="row" style="margin-bottom:12px"><button class="btn" style="flex:0 0 auto;padding:8px 22px" onclick="goBack()">'+(l=="ar"?"→ رجوع":"← Back")+'</button></div>':'';
 var appE=document.getElementById("app"),appH=bk+body;if(sv&&!on){if(window._apph!==appH){window._apph=appH;appE.innerHTML=appH}}else{window._apph=null;appE.innerHTML=appH}
 syncUI();if(adj)setTimeout(rlInit,0)}
 draw();
@@ -6942,7 +6942,7 @@ window.cxRow=function(n){var k=T3.g+"|"+n,o=D.sched[k]||{},ds=o.days||[],C=(D.ca
  return out?'<div class="lbl" style="margin-top:10px">'+L2("الحصص الجاية","Upcoming classes")+'</div>'+out:''};
 window.t3cx=function(n,key){var k=T3.g+"|"+n;D.cancel=D.cancel||{};if(typeof D.cancel[k]!="object"||!D.cancel[k])D.cancel[k]={};var C=D.cancel[k];if(C[key])delete C[key];else C[key]=1;persist();draw()};
 var ICS='<svg viewBox="0 0 24 24"><path pathLength="1" d="M4 8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path pathLength="1" d="M4 10h16"/><path pathLength="1" d="M8 3v3M16 3v3"/><path pathLength="1" d="M12 13v2.5l1.8 1" stroke="#F59E42"/></svg>';
-var _d3=window.draw;window.draw=function(){var r=_d3.apply(this,arguments);if(AU.ready&&AU.user){var nv=document.getElementById("nav");if(nv){var b=document.createElement("button");b.setAttribute("data-k","sch");if(tab=="sch")b.className="on";b.setAttribute("onclick","go('sch')");b.innerHTML='<i>'+ICS+'</i><span>'+L2("الجدول","Schedule")+'</span>';nv.appendChild(b)}if(tab=="sch"){var e=document.getElementById("htt");if(e)e.textContent=L2("الجدول","Schedule")}}return r};
+var _d3=window.draw;window.draw=function(){var r=_d3.apply(this,arguments);if(AU.ready&&AU.user){var nv=document.getElementById("nav");if(nv){var b=document.createElement("button");b.setAttribute("data-k","sch");if(tab=="sch")b.className="on";b.setAttribute("onclick","go('sch')");b.innerHTML='<i>'+ICS+'</i><span>'+L2("الجدول","Schedule")+'</span>';}if(tab=="sch"){var e=document.getElementById("htt");if(e)e.textContent=L2("الجدول","Schedule")}}return r};
 var _sv3=window.setv;window.setv=function(){return tab=="sch"?schView():_sv3()};
 
 })();
@@ -9203,5 +9203,50 @@ try{var _b=window.backStep;if(typeof _b==="function"){window.backStep=function()
 window.addEventListener("pagehide",function(){close(true)});
 })();
 </script>
+
+<script id="ak-nav-v2">
+/* ===== تبسيط تبويبات المعلم: 4 تبويبات + أدوات الاستخدام النادر جوه الترس =====
+   واجهة فقط: مفيش أي تعديل على بيانات الطلاب أو الحضور أو الدفع أو طريقة الحفظ. */
+(function(){
+ var GX={o:false};window.GFR=null;
+ function sv(p){return '<svg viewBox="0 0 24 24" style="width:24px;height:24px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" aria-hidden="true">'+p+'</svg>'}
+ var IS=sv('<path d="M4 8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 10h16"/><path d="M8 3v3M16 3v3"/><path d="M12 13v2.5l1.8 1"/>'),
+ IC2=sv('<rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/>'),
+ IX=sv('<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M3.5 15h17M9.5 10v9.5"/>');
+ function chev(){return '<span class="gchev">'+L2("\u2039","\u203a")+'</span>'}
+ function row(sym,title,on,extra,tail){return '<div class="gb2"'+(extra||'')+' onclick="'+on+'"><span class="gsym">'+sym+'</span><b>'+title+'</b>'+(tail||chev())+'</div>'}
+ window.gxTog=function(){GX.o=!GX.o;draw()};
+ window.gOpenSch=function(){window.GFR=prevTab;go("sch")};
+ function tools(){
+  var h=row(IS,L2("الجدول","Schedule"),"gOpenSch()");
+  /* مرساة الآلة الحاسبة: لازم تفضل موجودة في الصفحة عشان الآلة تفضل مفتوحة */
+  h+=row(IC2,L2("الآلة الحاسبة","Calculator"),"fcalcT()",' style="position:relative"','<span class="calcg" aria-hidden="true" style="visibility:hidden;pointer-events:none"></span>'+chev());
+  if(window.xlHtml||window.xaHtml){
+   h+=row(IX,L2("استيراد من Excel","Excel import"),"gxTog()","",'<span class="gchev'+(GX.o?' up':'')+'">\u2304</span>');
+   if(GX.o)h+=(window.xlHtml?xlHtml():'')+(window.xaHtml?xaHtml():'');
+  }
+  return h}
+ function langCard(){return '<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">\u0627\u0644\u0639\u0631\u0628\u064a\u0629</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'}
+ var _sv=window.setv;
+ window.setv=function(){
+  if(tab=="sch"||SDT||LGD||STS)return _sv.apply(this,arguments);
+  return acct()+tools()+stsCard()+(window.xrHtml?xrHtml():'')+themeCard()+langCard()+bkHtml()};
+ /* الرجوع من الجدول لو اتفتح من الترس */
+ var _go=window.go;
+ window.go=function(x){var was=(tab=="sch"),r=_go.apply(this,arguments);
+  if(x=="set"&&was){var p=window.GFR;prevTab=(p&&p!="sch"&&p!="set")?p:"att"}return r};
+ var _gb=window.goBack;
+ window.goBack=function(){
+  if(window.AU&&AU.user&&tab=="sch"){var f=window.GFR;go(f?"set":"att");window.GFR=null;return}
+  return _gb.apply(this,arguments)};
+ /* شاشة البداية لو مفيش طلاب لسه (كانت في الرئيسية) */
+ var _at=window.att;
+ window.att=att=function(){
+  if(!S.students.length){var td=ld(new Date());
+   return '<div class="card"><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div><div class="row"><button class="btn ok" onclick="go(\'stu\')">'+t("add")+'</button></div>'}
+  return _at.apply(this,arguments)};
+})();
+</script>
+
 </body>
 </html>
