@@ -559,7 +559,9 @@ function t(k){return D[S.lang][k]}
 function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function AV(s){return s&&s.av?'<img class="sav" src="'+s.av+'" alt="">':''}
 function avTap(){if(ST.set||ST.tab!="home"){ST.set=false;ST.tab="home";draw();setTimeout(function(){var i=document.getElementById("sinfo");if(i&&!i.classList.contains("show"))stuInfo()},80)}else stuInfo()}
-function avBtn(){var d=ST.data||{};return '<button type="button" class="btn avb" onclick="avPick(event)"><i><svg viewBox="0 0 24 24"><path class="bd" pathLength="1" d="M3 8.5a2 2 0 0 1 2-2h2.2l1.4-2h6.8l1.4 2H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle class="ln2" cx="12" cy="13" r="3.4"/><circle class="fl" cx="12" cy="13" r="8.5" stroke="#F59E42" stroke-width="1.6"/><path class="sp" pathLength="1" d="M21.5 1.5v3 M20 3h3" stroke="#F59E42" stroke-width="1.6" style="--sx:2px;--sy:-1px"/><path class="sp" pathLength="1" d="M2.5 1.5v3 M1 3h3" stroke="#F59E42" stroke-width="1.6" style="--sx:-2px;--sy:-1px"/></svg></i><span>'+L2(d.av?"\u062a\u063a\u064a\u064a\u0631 \u0635\u0648\u0631\u062a\u0643":"\u0627\u062e\u062a\u0627\u0631 \u0635\u0648\u0631\u062a\u0643",d.av?"Change your photo":"Choose your photo")+'</span></button>'}
+function avBtn(){var d=ST.data||{};return '<button type="button" class="btn avb" onclick="avPick(event)"><i><svg viewBox="0 0 24 24"><path class="bd" pathLength="1" d="M3 8.5a2 2 0 0 1 2-2h2.2l1.4-2h6.8l1.4 2H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle class="ln2" cx="12" cy="13" r="3.4"/><circle class="fl" cx="12" cy="13" r="8.5" stroke="#F59E42" stroke-width="1.6"/><path class="sp" pathLength="1" d="M21.5 1.5v3 M20 3h3" stroke="#F59E42" stroke-width="1.6" style="--sx:2px;--sy:-1px"/><path class="sp" pathLength="1" d="M2.5 1.5v3 M1 3h3" stroke="#F59E42" stroke-width="1.6" style="--sx:-2px;--sy:-1px"/></svg></i><span>'+L2(d.av?"\u062a\u063a\u064a\u064a\u0631 \u0635\u0648\u0631\u062a\u0643":"\u0627\u062e\u062a\u0627\u0631 \u0635\u0648\u0631\u062a\u0643",d.av?"Change your photo":"Choose your photo")+'</span></button>'+(d.av?'<button type="button" class="btn avb" onclick="avDel(event)"><i style="background:#C0392B"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></i><span>'+L2("\u062d\u0630\u0641 \u0635\u0648\u0631\u062a\u0643","Delete your photo")+'</span></button>':'')}
+function avDel(e){if(e){e.stopPropagation();e.preventDefault()}clearTimeout(SI_T);if(!ST.data||!ST.data.av)return;if(!confirm(L2("تحذف صورتك؟","Delete your photo?")))return;var prevAv=ST.data.av;ST.data.av="";draw();
+ if(window.FB&&FB.setAvatar)FB.setAvatar(pn(ST.data.phone),ST.pc,"").catch(function(x){if(ST.data){ST.data.av=prevAv;draw()}alert(errMsg(x))})}
 function avAnim(){var a=document.querySelector(".avb i");if(a){a.classList.remove("ani");void a.offsetWidth;a.classList.add("ani")}}
 function avPick(e){if(e){e.stopPropagation();e.preventDefault()}clearTimeout(SI_T);avAnim();var i=document.getElementById("avin");if(!i){i=document.createElement("input");i.type="file";i.accept="image/*";i.id="avin";i.style.display="none";i.onchange=avPicked;document.body.appendChild(i)}i.value="";i.click()}
 function avPicked(){var i=document.getElementById("avin"),f=i&&i.files&&i.files[0];if(!f||!ST.data)return;var u=URL.createObjectURL(f),im=new Image();
@@ -569,7 +571,7 @@ function avCrop(im,u){
  var old=document.getElementById("avc");if(old)old.remove();
  var W=im.naturalWidth||im.width,H=im.naturalHeight||im.height;if(!W||!H){URL.revokeObjectURL(u);return}
  var o=document.createElement("div");o.id="avc";
- o.innerHTML='<div class="avc-b"><div class="avc-t">'+L2("اختار الجزء اللي هيظهر للمدرس","Choose the part your teacher will see")+'</div><div class="avc-s">'+L2("حرّك الصورة وكبّر أو صغّر لحد ما تظبطها","Drag and zoom to frame your photo")+'</div><div class="avc-st" id="avcS"></div><div class="avc-z"><span>\u2212</span><input type="range" id="avcR" min="0" max="100" value="0"><span>+</span></div><div class="avc-r"><button type="button" class="btn" id="avcX">'+L2("إلغاء","Cancel")+'</button><button type="button" class="btn pr" id="avcOk">'+L2("تأكيد","Done")+'</button></div></div>';
+ o.innerHTML='<div class="avc-b"><div class="avc-t">'+L2("اختار الجزء اللي هيظهر للمدرس","Choose the part your teacher will see")+'</div><div class="avc-s">'+L2("حرّك الصورة وكبّر أو صغّر لحد ما تظبطها","Drag and zoom to frame your photo")+'</div><div class="avc-st" id="avcS"></div><div class="avc-z"><span>\u2212</span><input type="range" id="avcR" min="0" max="100" value="0"><span>+</span></div><div class="avc-r"><button type="button" class="btn" id="avcX">'+L2("إلغاء","Cancel")+'</button><button type="button" class="btn pr" id="avcOk">'+L2("حفظ","Save")+'</button></div></div>';
  document.body.appendChild(o);
  var st=document.getElementById("avcS"),rg=document.getElementById("avcR"),B=st.clientWidth||280,img=document.createElement("img");img.src=u;img.draggable=false;st.appendChild(img);
  var mn=B/Math.min(W,H),mx=mn*5,s=mn,ox=(B-W*s)/2,oy=(B-H*s)/2;
@@ -7236,7 +7238,7 @@ function cfgIn(c){
 function cfgOut(){const T=TDo();return {exams:T.exams||[],times:T.times||{},sched:T.sched||{},cancel:T.cancel||{},gdel:T.gdel||{}}}
 
 // ---- student photos (kept in their own docs, never inside the students array)
-function applyAv(){try{(S.students||[]).forEach(s=>{const a=AVS[s.id];if(a&&s.av!==a)s.av=a})}catch(e){}}
+function applyAv(clr){try{(S.students||[]).forEach(s=>{const a=AVS[s.id];if(a&&s.av!==a)s.av=a;else if(!a&&clr&&s.av)delete s.av})}catch(e){}}
 const _AV=window.AV;
 window.AV=function(s){if(s&&!s.av&&AVS[s.id])return '<img class="sav" src="'+AVS[s.id]+'" alt="">';return _AV?_AV(s):""};
 const _draw=window.draw;
@@ -7266,7 +7268,7 @@ function startListeners(uid){
   unsubAv=onSnapshot(query(collection(db,"avatars"),where("uid","==",uid)),snap=>{
     Object.keys(AVS).forEach(k=>delete AVS[k]);
     snap.forEach(d=>{const v=d.data();if(v&&v.av)AVS[v.sid]=v.av});
-    applyAv();draw();
+    applyAv(true);draw();
   },e=>console.error(e));
   unsubSeen=onSnapshot(query(collection(db,"seen"),where("uid","==",uid)),snap=>{
     const M={};snap.forEach(d=>{const v=d.data();if(v&&v.sid!=null)M[String(v.sid)]=v});window.TSEEN=M;try{window.seenRefresh()}catch(e){}
