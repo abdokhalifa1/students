@@ -797,11 +797,13 @@ dg:'<circle cx="12" cy="12" r="6" fill="currentColor"/>',dr:'<circle cx="12" cy=
 var ICSP='<path class="sp" d="M20.5 1.5v3M19 3h3" stroke="#F59E42" stroke-width="1.6" style="--sx:2px;--sy:-1px"/>';
 function icoH(k,c){c=c||'';return '<span class="ic '+c+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+ICO[k].replace(/<path /g,'<path pathLength="1" ')+(c.indexOf('dt')>-1?'':ICSP)+'</svg></span>'}
 document.addEventListener("pointerdown",function(e){var b=e.target.closest&&e.target.closest("button,.gb2,.btn");if(!b)return;var c=b.querySelector(".ic");if(!c)return;c.classList.remove("ani");void c.offsetWidth;c.classList.add("ani");setTimeout(function(){c.classList.remove("ani")},1500)},true);
-function seenHtml(s){var v=(window.TSEEN||{})[String(s.id)];
+/* الطالب "دخل" لو عنده سجل في seen، أو لو ظهر منه نشاط (رد فعل/رسالة/حل واجب/ملاحظة) — علشان العدّاد ما يفضلش صفر لو تسجيل seen ما وصلش */
+function seenGet(s){var v=(window.TSEEN||{})[String(s.id)];if(v)return v;var last=0;[window.TREPS,window.TMSGS,window.TSUBS,window.TNOTES].forEach(function(L){(L||[]).forEach(function(x){if(x&&String(x.sid)==String(s.id)&&(x.at||0)>last)last=x.at||0})});return last?{last:last,n:0,secs:0,d:1}:null}
+function seenHtml(s){var v=seenGet(s);
  if(!v)return '<span class="seen no">'+icoH('dr','dt r')+L2("ما سجّلش دخول","Not signed in yet")+'</span>';
  var on=Date.now()-(v.last||0)<150000,mn=Math.round((v.secs||0)/60);
- return '<span class="seen'+(on?' on':'')+'">'+(on?icoH('dg','dt g')+L2("متصل الآن","Online now"):icoH('dw','dt w')+L2("آخر دخول ","Last seen ")+seenAgo(v.last||0))+'</span><span class="mu"> · '+L2("دخل "+(v.n||1)+" مرة","opened "+(v.n||1)+"x")+(mn?' · '+L2("قعد "+mn+" د",mn+" min"):'')+'</span>'}
-function seenSum(){var T=window.TSEEN||{},a=S.students||[],r=0,o=0,now=Date.now();a.forEach(function(s){var v=T[String(s.id)];if(v){r++;if(now-(v.last||0)<150000)o++}});return L2("سجّلوا دخول: "+r+" من "+a.length+" · متصل الآن: "+o,"Signed in: "+r+" of "+a.length+" · Online now: "+o)}
+ return '<span class="seen'+(on?' on':'')+'">'+(on?icoH('dg','dt g')+L2("متصل الآن","Online now"):icoH('dw','dt w')+L2("آخر دخول ","Last seen ")+seenAgo(v.last||0))+'</span><span class="mu"> · '+(v.d?L2("اتحدد من نشاطه","from activity"):L2("دخل "+(v.n||1)+" مرة","opened "+(v.n||1)+"x"))+(mn?' · '+L2("قعد "+mn+" د",mn+" min"):'')+'</span>'}
+function seenSum(){var a=S.students||[],r=0,o=0,now=Date.now();a.forEach(function(s){var v=seenGet(s);if(v){r++;if(now-(v.last||0)<150000)o++}});return L2("سجّلوا دخول: "+r+" من "+a.length+" · متصل الآن: "+o,"Signed in: "+r+" of "+a.length+" · Online now: "+o)}
 function seenRefresh(){try{document.querySelectorAll("[data-seen]").forEach(function(e){var s=(S.students||[]).filter(function(x){return String(x.id)==e.getAttribute("data-seen")})[0];if(s)e.innerHTML=seenHtml(s)});if(LGD&&AU.user&&tab=="set")draw()}catch(x){}}
 setInterval(seenRefresh,30000);
 function scard(s){var open=dt==s.id,ed=!!(edit&&edit.id==s.id),x=st(s);
@@ -921,14 +923,18 @@ function bkHtml(){var sm='style="padding:5px 14px;font-size:12px;min-height:0;li
  +(BK=="show"?'<div class="card"><textarea id="bx" '+TA+'></textarea></div>':'')
  +(BK=="rest"?'<div class="card"><textarea id="rx" '+TA+'></textarea><div class="row" style="margin-top:8px"><button class="btn pr" onclick="restoreB()">'+t("rb")+'</button></div></div>':'')}
 var LG2={open:"",anim:"",busy:0};
-function lgdStat(g){var L=(S.students||[]).filter(function(x){return x.grade==g}),T=window.TSEEN||{},r=0;L.forEach(function(x){if(T[String(x.id)])r++});return {n:L.length,r:r}}
+function lgdStat(g){var L=(S.students||[]).filter(function(x){return x.grade==g}),r=0;L.forEach(function(x){if(seenGet(x))r++});return {n:L.length,r:r}}
 function lgTog(g){if(LG2.busy||LG2.open)return;LG2.open=g;LG2.anim="in";draw();setTimeout(function(){LG2.anim=""},1000)}
 function lgClose(){if(!LG2.open||LG2.busy)return;LG2.anim="out";LG2.busy=1;draw();setTimeout(function(){LG2.open="";LG2.anim="";LG2.busy=0;draw()},380)}
 function lgBg(e){if(e.target&&e.target.id=="lgo")lgClose()}
 document.addEventListener("keydown",function(e){if(e.key=="Escape"&&LG2.open)lgClose()});
 function lgdModal(){if(!LG2.open)return '';var g=LG2.open,an=LG2.anim,st=lgdStat(g),L=(S.students||[]).filter(function(x){return x.grade==g});
- return '<div class="gmo'+(an?' '+an:'')+'" id="lgo" onclick="lgBg(event)"><div class="gmd"><div class="gmh"><span class="gmsym">'+sgSym(g)+'</span><div class="gmt"><b>'+esc(gn(g))+'</b><small>'+L2("سجّلوا دخول: ","Signed in: ")+st.r+' / '+st.n+'</small></div><button class="gmx" type="button" aria-label="Close" onclick="lgClose()">\u2715</button></div><div class="gmb">'+(L.length?L.map(function(x){return '<div class="card cp"><div class="cpn"><span class="cpt"><b>'+esc(x.name)+'</b>'+(x.group?' <span class="mu">'+esc(gd(x.group))+'</span>':'')+'</span></div><div class="mu" style="font-size:12px;margin-top:6px">'+seenHtml(x)+'</div></div>'}).join(''):'<div class="card mu">'+t("none")+'</div>')+'</div></div></div>'}
-function lgdView(){var h='<div class="card"><div class="nm">'+L2("تسجيل دخول الطلاب","Student sign-ins")+'</div><div class="mu" style="font-size:13px">'+seenSum()+'</div></div>';
+ return '<div class="gmo'+(an?' '+an:'')+'" id="lgo" onclick="lgBg(event)"><div class="gmd"><div class="gmh"><span class="gmsym">'+sgSym(g)+'</span><div class="gmt"><b>'+esc(gn(g))+'</b><small>'+L2("سجّلوا دخول: ","Signed in: ")+st.r+' / '+st.n+'</small></div><button class="gmx" type="button" aria-label="Close" onclick="lgClose()">\u2715</button></div><div class="gmb">'+(L.length?(function(){var no=L.filter(function(x){return !seenGet(x)}),yes=L.filter(function(x){return !!seenGet(x)}),row=function(x,rem){var ph=x.parentPhone||x.phone,msg=L2("السلام عليكم، ","Hello, ")+L2("تقدر تتابع "+x.name+" من التطبيق: ادخل برقم الموبايل ده وكود الدخول "+(x.code||""),"you can follow "+x.name+" in the app: sign in with this phone number and code "+(x.code||""));return '<div class="card cp"><div class="cpn"><span class="cpt"><b>'+esc(x.name)+'</b>'+(x.group?' <span class="mu">'+esc(gd(x.group))+'</span>':'')+'</span>'+(rem&&ph&&window.wa?'<a class="btn" style="flex:none;min-height:34px;padding:4px 10px;font-size:13px;text-decoration:none" target="_blank" rel="noopener" href="'+wa(ph,msg)+'">'+L2("ذكّره","Remind")+'</a>':'')+'</div><div class="mu" style="font-size:12px;margin-top:6px">'+seenHtml(x)+'</div></div>'};return (no.length?'<div class="mu" style="font-weight:700;margin:2px 4px 6px;color:var(--no)">'+L2("ما سجّلوش دخول ("+no.length+")","Not signed in ("+no.length+")")+'</div>'+no.map(function(x){return row(x,1)}).join(''):'')+(yes.length?'<div class="mu" style="font-weight:700;margin:8px 4px 6px">'+L2("سجّلوا دخول ("+yes.length+")","Signed in ("+yes.length+")")+'</div>'+yes.map(function(x){return row(x,0)}).join(''):'')})():'<div class="card mu">'+t("none")+'</div>')+'</div></div></div>'}
+function seenWarn(){var w="",all=S.students||[],der=all.filter(function(x){var v=seenGet(x);return v&&v.d}).length;
+ if(window.SEEN_ERR)w=L2("⚠ مش قادر أقرا سجل الدخول من Firebase ("+window.SEEN_ERR+"). لازم قواعد Firestore تسمح بقراءة collection اسمها seen للمعلم.","Cannot read sign-in log ("+window.SEEN_ERR+"). Firestore rules must allow the teacher to read the seen collection.");
+ else if(der>0&&!Object.keys(window.TSEEN||{}).length)w=L2("⚠ فيه طلاب ليهم نشاط بس سجل الدخول (seen) فاضي — يعني تسجيل الدخول مش بيتكتب في Firebase. راجع قواعد Firestore لـ seen.","Some students are active but the sign-in log (seen) is empty - sign-ins are not being written. Check the Firestore rules for seen.");
+ return w?'<div class="mu" style="font-size:12.5px;margin-top:8px;color:var(--no)">'+w+'</div>':''}
+function lgdView(){var h='<div class="card"><div class="nm">'+L2("تسجيل دخول الطلاب","Student sign-ins")+'</div><div class="mu" style="font-size:13px">'+seenSum()+'</div>'+seenWarn()+'</div>';
  GR.forEach(function(g){var st=lgdStat(g);if(!st.n)return;
   h+='<div class="gb2" onclick="lgTog(\''+g+'\')"><span class="gsym">'+sgSym(g)+'</span><b>'+esc(gn(g))+'</b><span class="pill ok">'+st.r+' / '+st.n+'</span><span class="gchev">'+L2("\u2039","\u203a")+'</span></div>'});
  return h+lgdModal()}
@@ -7159,7 +7165,7 @@ function seenPing(d){
     const key=d.uid+"_"+d.sid,ref=doc(db,"seen",key),now=Date.now();
     if(!seenOn[key]){
       seenOn[key]=1;
-      updateDoc(ref,{last:now,n:increment(1)}).catch(()=>setDoc(ref,{uid:d.uid,sid:d.sid,first:now,last:now,n:1,secs:0}).catch(()=>{}));
+      updateDoc(ref,{last:now,n:increment(1)}).catch(()=>setDoc(ref,{uid:d.uid,sid:d.sid,first:now,last:now,n:1,secs:0}).catch(e=>{console.error('seen write failed',e);window.SEEN_WERR=e.code||String(e)}));
     }
     clearInterval(seenT);
     seenT=setInterval(()=>{if(document.visibilityState!=="visible")return;updateDoc(ref,{last:Date.now(),secs:increment(60)}).catch(()=>{})},60000);
@@ -7211,8 +7217,8 @@ function startListeners(uid){
     applyAv();draw();
   },e=>console.error(e));
   unsubSeen=onSnapshot(query(collection(db,"seen"),where("uid","==",uid)),snap=>{
-    const M={};snap.forEach(d=>{const v=d.data();if(v&&v.sid!=null)M[String(v.sid)]=v});window.TSEEN=M;try{window.seenRefresh()}catch(e){}
-  },e=>console.error(e));
+    const M={};snap.forEach(d=>{const v=d.data();if(v&&v.sid!=null)M[String(v.sid)]=v});window.TSEEN=M;window.SEEN_ERR="";try{window.seenRefresh()}catch(e){}try{if(tab=="set")draw()}catch(e){}
+  },e=>{console.error(e);window.SEEN_ERR=e.code||String(e);try{if(tab=="set")draw()}catch(x){}});
 }
 
 window.FB={
