@@ -1067,17 +1067,19 @@ function editS(id){if(edit&&edit.id==id){closeEdit();return}anchorSet(id);edit=S
 function sform(inl){var e=edit||{};return (inl?'<div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--bd)">':'<div class="card">')+'<div class="nm">'+(e.id?t("ed"):t("add"))+'</div>'
 +'<span class="lbl">'+t("name")+'</span><input id="f_n" value="'+esc(e.name)+'">'
 +'<div class="dys" style="margin-top:8px"><label><input type="radio" name="sx" value="m"'+(e.sex!="f"?" checked":"")+'>'+t("boy")+'</label><label><input type="radio" name="sx" value="f"'+(e.sex=="f"?" checked":"")+'>'+t("girl")+'</label></div>'
-+'<span class="lbl">'+t("grade")+'</span><select id="f_g" onchange="gRef(this.value)">'+GR.map(function(g){return '<option value="'+g+'"'+(g==(e.grade||fg)?" selected":"")+'>'+gn(g)+'</option>'}).join("")+'</select>'
-+'<span class="lbl">'+t("days")+'</span><select id="f_r">'+gOpts(e.group||1,e.grade||fg)+'</select>'
++'<div class="row" style="flex-wrap:nowrap;gap:8px;align-items:flex-start"><div style="flex:1.7 1 0;min-width:0"><span class="lbl">'+t("grade")+'</span><select id="f_g" onchange="gRef(this.value)">'+GR.map(function(g){return '<option value="'+g+'"'+(g==(e.grade||fg)?" selected":"")+'>'+gn(g)+'</option>'}).join("")+'</select></div>'
++'<div style="flex:1 1 0;min-width:0"><span class="lbl">'+t("days")+'</span><select id="f_r">'+gOpts(e.group||1,e.grade||fg)+'</select></div></div>'
 +'<span class="lbl">'+t("ph")+'</span><div class="ph"><span>+20</span><input id="f_p" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(pn(e.phone))+'"></div>'
 +'<span class="lbl">'+t("pph")+'</span><div class="ph"><span>+20</span><input id="f_pp" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(pn(e.parentPhone))+'"></div>'
-+'<span class="lbl">'+t("price")+'</span><div class="row" style="flex-wrap:nowrap"><button type="button" class="btn pc'+(e.price==20?' pr':'')+'" data-v="20" style="flex:0 0 64px" onclick="pickPrice(20)">20</button><button type="button" class="btn pc'+(e.price==25?' pr':'')+'" data-v="25" style="flex:0 0 64px" onclick="pickPrice(25)">25</button><input id="f_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" placeholder="'+L2("أو اكتب السعر","Or type a price")+'" value="'+(e.price?esc(String(e.price)):'')+'"></div>'
++'<div class="row" style="flex-wrap:nowrap;align-items:center;gap:10px;margin-top:12px"><span class="lbl" style="margin:0;flex:1 1 auto">'+t("price")+'</span><input id="f_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this);this.dataset.m=1" style="flex:0 0 96px;width:96px;text-align:center;font-weight:700"'+(e.id&&e.price?' data-m="1"':'')+' value="'+esc(String(e.price||defPrice(e.grade||fg)))+'"></div>'
 +'<div class="row" style="margin-top:12px"><button class="btn pr" onclick="addS()">'+t("save")+'</button>'+(e.id?'<button class="btn" onclick="closeEdit()">'+t("cancel")+'</button>':'')+'</div>'+codeBox(e)+'</div>'}
 function sbar(){if(!gHas(sgr,""))sgr="";return '<div class="card"><div class="row" style="flex-wrap:nowrap"><input id="qs" placeholder="'+t("search")+'" value="'+esc(q)+'" oninput="q=this.value;document.getElementById(\'sl\').innerHTML=listS()"><button class="btn sq" id="mic" type="button" aria-label="'+L2("بحث بالصوت","Voice search")+'" onclick="voiceS()">'+icoH('mic','bare')+'</button></div><div class="row" style="margin-top:8px"><select onchange="sgr=this.value;draw()"><option value="">'+t("allg")+'</option>'+gFlt(sgr,"")+'</select>'+sxSel()+'</div></div>'}
 function sAddH(){var op=!!SF.open,an=SF.anim;
  return '<div class="gb2'+(an?' jl':'')+'" onclick="sfTog()"><span class="gsym">+</span><b>'+t("add")+'</b><span class="gchev'+(op&&an!="out"?' up':'')+'">\u2304</span></div>'+(op?'<div class="gx'+(an?' '+an:'')+'">'+sform()+'</div>':'')}
 function stu(){return (edit&&edit.id?'':sAddH())+sbar()+'<div id="sl">'+listS()+'</div>'+sgModal()}
 function ndg(el){var v=el.value.replace(/[\u0660-\u0669]/g,function(c){return c.charCodeAt(0)-1632}).replace(/[\u06F0-\u06F9]/g,function(c){return c.charCodeAt(0)-1776}).replace(/[^0-9]/g,"");if(v!==el.value)el.value=v;if(el.id=="f_pr")syncPrice()}
+function defPrice(g){var i=GR.indexOf(g);return i<0?"":(i<3?20:25)}
+function autoPrice(g){var p=document.getElementById("f_pr");if(p&&p.dataset.m!="1")p.value=defPrice(g)}
 function pickPrice(v){document.getElementById("f_pr").value=v;syncPrice()}
 function syncPrice(){var v=+document.getElementById("f_pr").value;[].forEach.call(document.querySelectorAll(".pc"),function(b){b.classList.toggle("pr",+b.getAttribute("data-v")===v)})}
 function addS(){var n=document.getElementById("f_n").value.trim();if(!n)return;var pp=ph("f_p");if(!pp){alert(t("nophone"));return}var pr=+document.getElementById("f_pr").value;if(!(pr>0)){alert(L2("اختار أو اكتب سعر الحصة","Choose or type the class price"));return}if(S.students.some(function(x){return x.phone==pp&&String(x.name).trim()==n&&x.grade==document.getElementById("f_g").value&&!(edit&&edit.id==x.id)})){alert(t("dup"));return}var o={name:n,sex:document.querySelector('input[name=sx]:checked').value,grade:document.getElementById("f_g").value,group:document.getElementById("f_r").value,phone:ph("f_p"),parentPhone:ph("f_pp"),price:pr};
@@ -7171,7 +7173,7 @@ if(c>0){T3.dq=null;T3.dm={g:T3.g,n:n,t:L2("مينفعش تحذف "+t("grp")+" "+
 if(T3.dq!=k){T3.dq=k;T3.dm=null;draw();setTimeout(function(){if(T3.dq==k){T3.dq=null;draw()}},4000);return}
 T3.dq=null;T3.dm=null;D.gdel=D.gdel||{};D.gdel[k]=1;delete D.sched[k];if(D.cancel)delete D.cancel[k];persist();draw()};
 var TRSVG='<svg viewBox="0 0 24 24"><path class="lid" d="M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M5.5 6.5l1 13a2 2 0 0 0 2 1.8h7a2 2 0 0 0 2-1.8l1-13"/><path d="M10 11v6M14 11v6"/></svg>';
-function gRef(g){var r=document.getElementById("f_r");if(r)r.innerHTML=gOpts(+r.value,g)}
+function gRef(g){var r=document.getElementById("f_r");if(r)r.innerHTML=gOpts(+r.value,g);autoPrice(g)}
 window.cxRow=function(n){var k=T3.g+"|"+n,o=D.sched[k]||{},ds=o.days||[],C=(D.cancel&&typeof D.cancel[k]=="object"&&D.cancel[k])||{},now=new Date(),out='',c=0,tm=/^\d\d:\d\d$/.test(o.time||"")?o.time.split(":"):null;
  if(!ds.length)return '';
  for(var i=0;i<30&&c<3;i++){var dt=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);if(ds.indexOf(dt.getDay())<0)continue;if(!i&&tm&&new Date(now.getFullYear(),now.getMonth(),now.getDate(),+tm[0],+tm[1])<=now)continue;c++;var key=ld(dt),on=!!C[key];
@@ -8292,7 +8294,7 @@ function fillForm(r){
   setTimeout(function(){if(!$("f_n"))return;
     if(r.name)$("f_n").value=r.name;
     if(r.sex||!open)[].forEach.call(document.querySelectorAll("input[name=sx]"),function(x){x.checked=x.value==(r.sex=="f"?"f":"m")});
-    if(r.grade&&$("f_g")){$("f_g").value=r.grade;try{if($("f_r"))$("f_r").innerHTML=gOpts(+$("f_r").value||1,r.grade)}catch(e){}}
+    if(r.grade&&$("f_g")){$("f_g").value=r.grade;try{if($("f_r"))$("f_r").innerHTML=gOpts(+$("f_r").value||1,r.grade)}catch(e){};try{autoPrice(r.grade)}catch(e){}}
     if(r.group&&$("f_r")&&/^[1-5]$/.test(r.group))$("f_r").value=r.group;
     if(r.phone&&$("f_p"))$("f_p").value=pn(r.phone);
     if(r.pp&&$("f_pp"))$("f_pp").value=pn(r.pp);else if(r.noPar&&$("f_pp"))$("f_pp").value="";
