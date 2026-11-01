@@ -656,8 +656,8 @@ function rc(id,d){return S.rec[d+"|"+id]||{}}
 function setRec(id,k,v){var key=fdate+"|"+id,o=S.rec[key]||{};if(k=="p"&&o.a===0)return;o[k]=o[k]===v?undefined:v;if(k=="p"&&o.p===0&&o.a!==1)o.a=1;if(k=="a"&&o.a!==1)o.p=undefined;S.rec[key]=o;if(o.a===undefined&&o.p===undefined)delete S.rec[key];save();draw()}
 var prevTab="att";
 function go(x){if(x=="nt"){x="tasks"}if(x=="hw"){x="tasks"}if(x=="tasks"&&window.markTS){window._tmPrev=getTM();markTS()}if(x=="sum"||x=="an"){rtab="sum";x="rep"}if(x=="set"&&tab!="set")prevTab=tab;tab=x;edit=null;pd=null;draw()}
-function gearT(){if(tab=="set")goBack();else{APR=false;LGD=false;STS=false;SDT=false;SDF={s:null,g:null,id:null};LG2.open="";LG2.anim="";LG2.busy=0;go("set")}}
-var LGD=false,STS=false,SDT=false,SDF={s:null,g:null,id:null};function goBack(){if(AU.user&&tab=="set"){if(APR){APR=false;draw();return}if(SDT){if(LG2.open){lgClose();return}SDT=false;draw();return}if(LGD){if(LG2.open){lgClose();return}LGD=false;draw();return}if(STS){STS=false;draw();return}go(prevTab||"att")}else if(ST.data&&ST.set){if(APR){APR=false;draw();return}ST.set=false;draw()}else if(edit){closeEdit()}}
+function gearT(){if(tab=="set")goBack();else{APR=false;CHG=false;LGD=false;STS=false;SDT=false;SDF={s:null,g:null,id:null};LG2.open="";LG2.anim="";LG2.busy=0;go("set")}}
+var CHG=false,LGD=false,STS=false,SDT=false,SDF={s:null,g:null,id:null};function goBack(){if(AU.user&&tab=="set"){if(APR){APR=false;draw();return}if(SDT){if(LG2.open){lgClose();return}SDT=false;draw();return}if(LGD){if(LG2.open){lgClose();return}LGD=false;draw();return}if(CHG){CHG=false;draw();return}if(STS){STS=false;draw();return}go(prevTab||"att")}else if(ST.data&&ST.set){if(APR){APR=false;draw();return}ST.set=false;draw()}else if(edit){closeEdit()}}
 function grades(){var g=[];S.students.forEach(function(s){if(g.indexOf(s.grade)<0)g.push(s.grade)});return g.sort(function(a,b){return GR.indexOf(a)-GR.indexOf(b)})}
 function groups(g){var a=[];S.students.forEach(function(s){if(s.grade==g&&s.group&&a.indexOf(s.group)<0)a.push(s.group)});return a}
 var sg="",sgr="",ss="",q="",dt=null;
@@ -1072,8 +1072,21 @@ function sdtView(){
  GR.forEach(function(g){var n=(S.students||[]).filter(function(x){return x.grade==g}).length;
   h+='<div class="gb2" onclick="sdtOpen(\''+g+'\')"><span class="gsym">'+sgSym(g)+'</span><b>'+esc(gn(g))+'</b><span class="pill ok">'+n+'</span><span class="gchev">'+L2("\u2039","\u203a")+'</span></div>'});
  return h+sdtModal()}
-function setv(){if(APR)return aprView();if(SDT)return sdtView();if(LGD)return lgdView();if(STS)return stsView();return acct()+stsCard()+(window.xrHtml?xrHtml():'')+themeCard()+'<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'+(window.xlHtml?xlHtml():'')+(window.xaHtml?xaHtml():'')+bkHtml()}
+function setv(){if(APR)return aprView();if(CHG)return chgView();if(SDT)return sdtView();if(LGD)return lgdView();if(STS)return stsView();return acct()+stsCard()+chgCard()+(window.xrHtml?xrHtml():'')+themeCard()+'<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'+(window.xlHtml?xlHtml():'')+(window.xaHtml?xaHtml():'')+bkHtml()}
 function setL(l){S.lang=l;save();draw()}
+/* ===== التحديات (من الترس): عدد المحاولات اليومية لكل تحدي ===== */
+function gaLim(){var T=window.TD;return(T&&typeof T.ga=="number"&&T.ga>=0)?Math.floor(T.ga):3}
+function gaSet(v){v=Math.max(0,Math.min(99,Math.floor(+v)||0));var T=(window.TD=window.TD||{exams:[],times:{},sched:{},cancel:{},gdel:{}});T.ga=v;save();draw()}
+function gaStep(d){gaSet(gaLim()+d)}
+function chgCard(){return '<div class="card"><div class="nm">'+L2("التحديات","Challenges")+'</div><div class="row"><button class="btn pr" onclick="CHG=true;draw()">'+L2("فتح التحديات","Open Challenges")+'</button></div></div>'}
+function chgView(){var n=gaLim(),i,q=[1,3,5,10],ch=[["×÷",L2("تحدّي جدول الضرب","Times table challenge")],[CK_IC,L2("أشطر كتكوت","Smartest chick")]];
+ var h='<div class="card"><div class="nm">'+L2("عدد المحاولات في اليوم","Attempts per day")+'</div><div class="mu" style="font-size:calc(13px*var(--fs,1))">'+L2("بيتطبق على كل التحديات وكل الصفوف. التغيير بيوصل للطلبة تلقائيًا.","Applies to all challenges and all grades. Students get the change automatically.")+'</div>'
+  +'<div class="row" style="align-items:center;justify-content:center;gap:14px;margin-top:12px"><button class="btn" style="flex:0 0 56px;font-size:calc(22px*var(--fs,1))" onclick="gaStep(-1)" aria-label="-">\u2212</button><b style="min-width:56px;text-align:center;font-size:calc(34px*var(--fs,1))">'+n+'</b><button class="btn" style="flex:0 0 56px;font-size:calc(22px*var(--fs,1))" onclick="gaStep(1)" aria-label="+">+</button></div>'
+  +'<div class="row" style="margin-top:12px">'+q.map(function(v){return '<button class="btn '+(n==v?'pr':'')+'" onclick="gaSet('+v+')">'+v+'</button>'}).join('')+'</div>'
+  +(n==0?'<div class="gnote" style="margin-top:10px">'+L2("صفر = التحديات مقفولة على الطلبة.","Zero = challenges are closed for students.")+'</div>':'')+'</div>';
+ for(i=0;i<ch.length;i++)h+='<div class="gb2" style="cursor:default"><span class="gsym">'+ch[i][0]+'</span><b>'+ch[i][1]+'</b><span class="pill ok">'+n+' '+L2("محاولة","tries")+'</span></div>';
+ return h}
+
 function showB(){var x=document.getElementById("bx");x.value=JSON.stringify(S);x.focus();x.select();try{document.execCommand("copy")}catch(e){}}
 function restoreB(){try{var o=JSON.parse(document.getElementById("rx").value.trim());if(!o||!Array.isArray(o.students))throw 1;S={students:o.students,rec:o.rec||{},price:o.price||50,lang:S.lang,hw:S.hw||[],notices:S.notices||[]};save();tab="att";draw()}catch(e){var x=document.getElementById("rx");x.value="";x.placeholder=t("bad")}}
 
@@ -7322,9 +7335,9 @@ window.TMSGS=[];window.TREPS=[];window.TSUBS=[];window.TNOTES=[];
 function TDo(){return window.TD||(window.TD={exams:[],times:{},sched:{},cancel:{},gdel:{}})}
 function cfgIn(c){
   const T=TDo();c=c||{};
-  T.exams=c.exams||[];T.times=c.times||{};T.sched=c.sched||{};T.cancel=c.cancel||{};T.gdel=c.gdel||{};
+  T.exams=c.exams||[];T.times=c.times||{};T.sched=c.sched||{};T.cancel=c.cancel||{};T.gdel=c.gdel||{};T.ga=(typeof c.ga=="number"&&c.ga>=0)?Math.min(99,Math.floor(c.ga)):3;
 }
-function cfgOut(){const T=TDo();return {exams:T.exams||[],times:T.times||{},sched:T.sched||{},cancel:T.cancel||{},gdel:T.gdel||{}}}
+function cfgOut(){const T=TDo();return {exams:T.exams||[],times:T.times||{},sched:T.sched||{},cancel:T.cancel||{},gdel:T.gdel||{},ga:(typeof T.ga=="number"?T.ga:3)}}
 
 // ---- student photos (kept in their own docs, never inside the students array)
 function applyAv(clr){try{(S.students||[]).forEach(s=>{const a=AVS[s.id];if(a&&s.av!==a)s.av=a;else if(!a&&clr&&s.av)delete s.av})}catch(e){}}
@@ -7461,16 +7474,18 @@ window.FB={
   async startPlay(phone,code,c){
     const p=await portalOf(phone,code);
     const day=today(),pk=p.uid+"_"+p.sid+"_"+day+"_"+c;
+    const lim=(typeof p.ga=="number"&&p.ga>=0)?Math.floor(p.ga):3;
+    if(lim<1)throw {code:"limit"};
     const pref=doc(db,"plays",pk);
     const snap=await getDoc(pref);
     if(!snap.exists()){
       await setDoc(pref,{uid:p.uid,sid:p.sid,day,c,count:1});
-      return {left:2};
+      return {left:lim-1};
     }
     const cur=snap.data().count||0;
-    if(cur>=3)throw {code:"limit"};
+    if(cur>=lim)throw {code:"limit"};
     await updateDoc(pref,{count:increment(1)});
-    return {left:2-cur};
+    return {left:lim-1-cur};
   },
 
   async sendScore(phone,code,c,ms,w){
@@ -7486,8 +7501,9 @@ window.FB={
   async getBoard(phone,code,c,gr){
     const p=await portalOf(phone,code);
     const g=gr||p.grade,oc=c=="t"?"k":"t",day=today();
-    let left=3;
-    try{const pl=await getDoc(doc(db,"plays",p.uid+"_"+p.sid+"_"+day+"_"+c));if(pl.exists())left=Math.max(0,3-(pl.data().count||0))}catch(e){}
+    const lim=(typeof p.ga=="number"&&p.ga>=0)?Math.floor(p.ga):3;
+    let left=lim;
+    try{const pl=await getDoc(doc(db,"plays",p.uid+"_"+p.sid+"_"+day+"_"+c));if(pl.exists())left=Math.max(0,lim-(pl.data().count||0))}catch(e){}
     const rows=[];let done=0;
     try{
       const qs=await getDocs(query(collection(db,"games"),where("uid","==",p.uid),where("c","==",c),where("grade","==",g)));
@@ -7703,7 +7719,7 @@ async function flush(){
       for(const ph of pids){
         const pid=ph+"_"+String(s.code||"");live[pid]=1;
         const pj=JSON.parse(JSON.stringify({uid:u.uid,sid:s.id,name:s.name,sex:s.sex||"",grade:s.grade,group:s.group==null?"":s.group,phone:ownPh,parentPhone:parPh||"",sibs:(byPh[ph]||[]).length>1?byPh[ph].map(x=>({n:x.name,g:x.grade,r:x.group==null?"":x.group,c:String(x.code||"")})):[],...stat(s),
-          price:+s.price>0?+s.price:data.price,rc,exams:ex,sch:cfg.sched[s.grade+"|"+s.group]||null,cx:cxOf(s.grade,s.group),gt}));
+          price:+s.price>0?+s.price:data.price,rc,exams:ex,sch:cfg.sched[s.grade+"|"+s.group]||null,cx:cxOf(s.grade,s.group),gt,ga:(typeof cfg.ga=="number"?cfg.ga:3)}));
         const j=JSON.stringify(pj);
         if(lastPortal[pid]!==j){lastPortal[pid]=j;ps.push(setDoc(doc(db,"portal",pid),pj))}
         for(const w of (data.hw||[])){
@@ -9550,7 +9566,7 @@ function wrap(){
  W("sendMsg",function(p,c,ref,text){return ok({id:"demo_"+Date.now(),uid:"demo",sid:ST.demo.sid,grade:ST.data.grade,ref:ref||"",text:String(text||"").slice(0,600),at:Date.now()})});
  W("sendNote",function(p,c,text){return ok(String(text||"").trim().slice(0,300))});
  W("setAvatar",function(){return ok()});
- W("startPlay",function(p,c,k){var D=ST.demo,cur=D.plays[k]||0;if(cur>=3)return Promise.reject({code:"limit"});D.plays[k]=cur+1;return ok({left:2-cur})});
+ W("startPlay",function(p,c,k){var D=ST.demo,cur=D.plays[k]||0,lim=gaLim();if(cur>=lim)return Promise.reject({code:"limit"});D.plays[k]=cur+1;return ok({left:lim-1-cur})});
  W("sendScore",function(p,c,k,ms,w){var D=ST.demo;ms=Math.floor(+ms)||0;if(!D.best[k]||ms<D.best[k].ms)D.best[k]={ms:ms,w:Math.floor(+w)||0};return ok()});
  var TB=F.teacherBoard;
  W("getBoard",function(p,c,k,gr){var D=ST.demo,g=gr||ST.data.grade,oc=k=="t"?"k":"t";
@@ -9559,7 +9575,7 @@ function wrap(){
    var all=R[0].filter(function(x){return x.grade===g}).sort(function(x,y){return x.ms-y.ms});
    var rows=all.slice(0,50).map(function(x,j){return {sid:x.sid,name:String(x.name||"").split(" ")[0],ms:x.ms,w:x.w||0,rank:j+1,both:both[x.sid]?1:0}});
    var total=(gtOf()[g])||0;
-   return {sid:D.sid,left:Math.max(0,3-(D.plays[k]||0)),gr:g,total:Math.max(total,all.length),done:all.length,rows:rows}})});
+   return {sid:D.sid,left:Math.max(0,gaLim()-(D.plays[k]||0)),gr:g,total:Math.max(total,all.length),done:all.length,rows:rows}})});
  return true}
 if(!wrap()){var tm=setInterval(function(){if(wrap())clearInterval(tm)},100)}
 })();
