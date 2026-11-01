@@ -993,8 +993,12 @@ function seenHtml(s){var v=(window.TSEEN||{})[String(s.id)];
 function seenSum(){var T=window.TSEEN||{},a=S.students||[],r=0,o=0,now=Date.now();a.forEach(function(s){var v=T[String(s.id)];if(v){r++;if(now-(v.last||0)<150000)o++}});return L2("سجّلوا دخول: "+r+" من "+a.length+" · متصل الآن: "+o,"Signed in: "+r+" of "+a.length+" · Online now: "+o)}
 function seenRefresh(){try{document.querySelectorAll("[data-seen]").forEach(function(e){var s=(S.students||[]).filter(function(x){return String(x.id)==e.getAttribute("data-seen")})[0];if(s)e.innerHTML=seenHtml(s)});if(LGD&&AU.user&&tab=="set")draw()}catch(x){}}
 setInterval(seenRefresh,30000);
+var TRS='<svg viewBox="0 0 24 24" aria-hidden="true"><path class="lid" d="M3.5 6.5h17M9 6.5v-2a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M5.5 6.5l1 13a2 2 0 0 0 2 1.8h7a2 2 0 0 0 2-1.8l1-13"/><path d="M10 11v6M14 11v6"/></svg>';
+function sDelS(id){if(pd==id&&edit&&edit.id==id)edit=null;sdtDel(id)}
+function sDelX(){sdtKeep(function(){pd=null;draw()})}
+function sdelBtn(s){var c=pd==s.id;return '<span class="sdw">'+(c?'<button type="button" class="sdx" aria-label="'+L2("إلغاء","Cancel")+'" onclick="event.stopPropagation();sDelX()">\u2715</button>':'')+'<button type="button" class="sdel'+(c?' cf':'')+'" aria-label="'+t("del")+'" onclick="event.stopPropagation();sDelS('+s.id+')">'+TRS+(c?'<span>'+L2("تأكيد الحذف","Confirm")+'</span>':'')+'</button></span>'}
 function scard(s){var ed=!!(edit&&edit.id==s.id);
-var h='<div class="card" data-sid="'+s.id+'"><div class="nm">'+stuAv(s)+esc(s.name)+' <span class="mu">'+esc(gd(s.group))+'</span></div><div class="row"><button class="btn sbtn'+(ed?' pr jl':'')+'" onclick="editS('+s.id+')">'+t("edit")+'</button></div>';
+var h='<div class="card" data-sid="'+s.id+'"><div class="nm sdh"><span class="sdn">'+stuAv(s)+esc(s.name)+' <span class="mu">'+esc(gd(s.group))+'</span></span>'+sdelBtn(s)+'</div><div class="row"><button class="btn sbtn'+(ed?' pr jl':'')+'" onclick="editS('+s.id+')">'+t("edit")+'</button></div>';
 if(ed)h+=sform(1);return h+'</div>'}
 function toggleDt(id){anchorSet(id);if(dt==id){dt=null}else{dt=id;edit=null}pd=null;draw();anchorRestore()}
 function codeWa(s,par){var ph=par?s.parentPhone:s.phone,nm=par?L2("ولي أمر ","Parent of ")+s.name:s.name;return wa(ph,t("codeMsg")(nm,pn(ph)?("0"+pn(ph)):"",s.code||""))}
@@ -9507,7 +9511,7 @@ window.addEventListener("pagehide",function(){close(true)});
    h+='<span class="lbl">'+t("price")+'</span><div class="row" style="flex-wrap:nowrap"><button type="button" class="btn wpc'+(pv==20?' pr':'')+'" data-v="20" style="flex:0 0 64px" onclick="wzPrice(20)">20</button><button type="button" class="btn wpc'+(pv==25?' pr':'')+'" data-v="25" style="flex:0 0 64px" onclick="wzPrice(25)">25</button><input id="w_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this);wzSync()" placeholder="'+L2("أو اكتب السعر","Or type a price")+'" value="'+(d.price?esc(String(d.price)):'')+'" onkeydown="if(event.key==\'Enter\'){event.preventDefault();wzGo(1)}"></div>'}
   return h}
  function wzHtml(){
-  if(WZ.ok)return '<div class="card wzc"><div class="wzs"><div class="nm">\u2705 '+L2("اتضاف","Added")+': '+esc(WZ.ok)+'</div><div class="mu" style="margin-top:4px">'+L2("عدد اللي اتضافوا دلوقتي: ","Added in this session: ")+WZ.n+'</div><div class="row" style="margin-top:14px"><button class="btn pr" onclick="wzAgain()">'+L2("إضافة طالب آخر","Add another")+'</button><button class="btn ok" onclick="wzClose()">'+L2("تم","Done")+'</button></div></div></div>';
+  if(WZ.ok)return '<div class="card wzc"><div class="wzs"><div class="wzok"><span class="wzb" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="wzck" pathLength="1" d="M5 12.5l4.5 4.5L19 7.5"/><circle class="wzd" cx="12" cy="12" r="1.3" style="--sx:-14px;--sy:-12px"/><circle class="wzd" cx="12" cy="12" r="1.3" style="--sx:14px;--sy:-12px;animation-delay:.62s"/><circle class="wzd" cx="12" cy="12" r="1.3" style="--sx:-15px;--sy:9px;animation-delay:.68s"/><circle class="wzd" cx="12" cy="12" r="1.3" style="--sx:15px;--sy:10px;animation-delay:.74s"/></svg></span><div class="wzmsg"><div class="nm">'+L2("اتضاف","Added")+': '+esc(WZ.ok)+'</div><div class="mu" style="margin-top:2px">'+L2("عدد اللي اتضافوا دلوقتي: ","Added in this session: ")+WZ.n+'</div></div><button type="button" class="btn pr wzgo" onclick="wzGoStu()">'+L2("انتقل إلى \u2039","Go to \u203a")+'</button></div><div class="row" style="margin-top:16px"><button class="btn" onclick="wzAgain()">'+L2("إضافة طالب آخر","Add another")+'</button><button class="btn ok" onclick="wzClose()">'+L2("تم","Done")+'</button></div></div></div>';
   var i=WZ.i,dots='';for(var k=0;k<N;k++)dots+='<i'+(k<=i?' class="on"':'')+'></i>';
   return '<div class="card wzc"><div class="wzh"><div class="nm">'+t("add")+' <span class="mu">'+(i+1)+'/'+N+'</span></div><button class="btn" onclick="wzFull()">'+L2("عرض كامل","Full view")+'</button></div><div class="wzdots">'+dots+'</div>'
   +'<div class="wzs wzbig" id="wzb'+i+'">'+body()+'</div>'
@@ -9530,7 +9534,7 @@ window.addEventListener("pagehide",function(){close(true)});
   if(!(pr>0)){alert(L2("اختار أو اكتب سعر الحصة","Choose or type the class price"));return}
   var pp="+20"+p;
   if(S.students.some(function(x){return x.phone==pp&&String(x.name).trim()==n&&x.grade==g})){alert(t("dup"));return}
-  S.students.push({id:Date.now(),code:genCode(),name:n,sex:d.sex=="f"?"f":"m",grade:g,group:String(d.group||1),phone:pp,parentPhone:pa?"+20"+pa:"",price:pr});
+  S.students.push({id:(WZ.id=Date.now()),code:genCode(),name:n,sex:d.sex=="f"?"f":"m",grade:g,group:String(d.group||1),phone:pp,parentPhone:pa?"+20"+pa:"",price:pr});
   fg=g;d.grade=g;WZ.ok=n;WZ.n++;d.name="";d.phone="";d.pp="";WZ.i=0;persist();save();draw()}
  window.wzGo=function(k){stopV();rd();var d=WZ.d;
   if(k>0){
@@ -9538,6 +9542,13 @@ window.addEventListener("pagehide",function(){close(true)});
    if(WZ.i==2&&!pn(d.phone)){alert(t("nophone"));return}
    if(WZ.i==N-1){save1();return}}
   WZ.i=Math.max(0,Math.min(N-1,WZ.i+k));persist();draw();foc()};
+ window.wzGoStu=function(){var id=WZ.id,st=S.students.filter(function(x){return x.id==id})[0];if(!st)return;
+  stopV();WZ.ok="";WZ.i=0;WZ.n=0;GX.w=false;GX.full=false;persist();
+  q="";sgr="";go("stu");
+  try{SGL=""}catch(e){}
+  SG.open=st.grade;SG.tc=st.grade;SG.anim="";SG.busy=0;sgq="";
+  anchorSet(id);edit=st;dt=null;pd=null;draw();
+  setTimeout(function(){var c=document.querySelector('[data-sid="'+id+'"]');if(c&&c.scrollIntoView)c.scrollIntoView({block:"center",behavior:"smooth"})},90)};
  window.wzAgain=function(){WZ.ok="";WZ.i=0;draw();foc()};
  window.wzClose=function(){stopV();WZ.ok="";WZ.i=0;WZ.n=0;GX.w=false;GX.full=false;persist();draw()};
  /* نقل اللي في النموذج الكامل (إضافة جديدة) لمسودة الشرائح */
@@ -10057,6 +10068,32 @@ window.goBack=function(){if(ST.data&&ST.set&&!APR&&ST.sp&&!(AU&&AU.user&&tab=="s
 #kpad .kpx span{font-size:calc(10px*var(--fs,1));line-height:1.1}
 #kpad .kpx svg{width:20px;height:20px}
 @media (prefers-reduced-motion:reduce){#kpad .btn.hit::after{animation:none}#kpad .btn{transition:none}}
+/* success badge: same spring pop + cut ring + soft colour as the active nav tab */
+.wzok{display:flex;align-items:center;gap:16px;padding:10px 8px 6px}
+.wzmsg{flex:1;min-width:0}
+.wzgo{flex:none!important;min-height:44px;padding:0 18px;white-space:nowrap}
+.wzb{position:relative;flex:none;width:52px;height:46px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:var(--sc);color:var(--h2);box-shadow:0 0 0 6px var(--card),var(--sh);transform:translateY(-6px);animation:wzpop .75s cubic-bezier(.3,1.7,.5,1) both}
+.wzb::after{content:"";position:absolute;inset:0;border-radius:16px;border:2px solid var(--sc);opacity:0;pointer-events:none;animation:wzrp .9s ease-out .3s}
+.wzb svg{width:26px;height:26px;overflow:visible;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.wzck{stroke-dasharray:1;stroke-dashoffset:1;animation:wzdr .45s ease-out .35s forwards}
+.wzd{fill:currentColor;stroke:none;opacity:0;transform-box:fill-box;transform-origin:center;animation:wzsp .85s ease-out .56s}
+@keyframes wzpop{0%{opacity:0;transform:translateY(0) scale(.2)}55%{opacity:1}100%{transform:translateY(-6px) scale(1)}}
+@keyframes wzdr{to{stroke-dashoffset:0}}
+@keyframes wzrp{0%{opacity:.9;transform:scale(.85)}100%{opacity:0;transform:scale(1.6)}}
+@keyframes wzsp{0%{opacity:0;transform:translate(0,0) scale(0)}25%{opacity:1;transform:translate(0,0) scale(1.4)}100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(.4)}}
+@media (prefers-reduced-motion:reduce){.wzb,.wzb::after,.wzd{animation:none}.wzck{animation:none;stroke-dashoffset:0}}
+/* student card: trash button beside the name, tap once to arm, tap again to delete */
+.sdh{display:flex;align-items:center;gap:8px}
+.sdn{flex:1;min-width:0}
+.sdw{flex:none;display:flex;align-items:center;gap:6px}
+.sdel,.sdx{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;min-width:40px;padding:0 10px;border:0;border-radius:14px;background:var(--soft);color:var(--mu);font:inherit;font-size:calc(13px*var(--fs,1));font-weight:700;cursor:pointer;box-shadow:var(--out);-webkit-tap-highlight-color:transparent;transition:transform .55s cubic-bezier(.3,1.7,.5,1),background .25s,color .25s,box-shadow .3s}
+.sdel svg{width:22px;height:22px;display:block;overflow:visible;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sdel .lid{transform-box:fill-box;transform-origin:left bottom;transition:transform .3s cubic-bezier(.3,.7,.4,1)}
+.sdel:active,.sdx:active{transform:scale(.92);box-shadow:var(--in)}
+.sdel.cf{background:var(--no);color:var(--onn);box-shadow:0 0 0 4px var(--card),var(--sh);animation:sdpop .55s cubic-bezier(.3,1.7,.5,1)}
+.sdel.cf .lid{transform:rotate(-16deg) translateY(-1.5px)}
+@keyframes sdpop{0%{transform:scale(.8)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.sdel.cf{animation:none}.sdel,.sdx{transition:none}}
 .ph input[readonly]{cursor:pointer}
 .ph input.kpf{outline:2.5px solid var(--pr);outline-offset:-2px}
 .ph input.kpg2{animation:kpglow 1s ease-out}
@@ -10065,11 +10102,11 @@ window.goBack=function(){if(ST.data&&ST.set&&!APR&&ST.sp&&!(AU&&AU.user&&tab=="s
 <script>
 (function(){
 var KP={el:null,inp:null,pad:null,pel:null};
-var IC={ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',del:'<path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M13 10l4 4M17 10l-4 4"/>',cp:'<rect x="8" y="8" width="11.5" height="11.5" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H16"/>'};
+var IC={ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',del:'<path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M13 10l4 4M17 10l-4 4"/>',pa:'<rect x="6" y="5" width="12" height="15.5" rx="2.5"/><path d="M9.5 5V4.2A1.2 1.2 0 0 1 10.7 3h2.6a1.2 1.2 0 0 1 1.2 1.2V5M9.5 11h5M9.5 14.5h5"/>',cp:'<rect x="8" y="8" width="11.5" height="11.5" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H16"/>'};
 function ico(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[k]+'</svg>'}
 function build(){if(KP.el)return;var d=document.createElement("div");d.id="kpad";d.setAttribute("onpointerdown","event.preventDefault()");
  var k="";for(var i=1;i<=9;i++)k+='<button type="button" class="btn sbtn" onclick="kpKey(\''+i+'\')">'+i+'</button>';
- d.innerHTML='<div class="kph"><div class="kpt"><small id="kpl"></small><b id="kpv" dir="ltr"></b></div><button type="button" class="btn sbtn kpb" aria-label="Delete" onclick="kpDel()">'+ico("del")+'</button></div><div class="kpg">'+k+'<button type="button" class="btn sbtn kpx" id="kpc" onclick="kpCopy()"></button><button type="button" class="btn sbtn" onclick="kpKey(\'0\')">0</button><button type="button" class="btn sbtn pr" aria-label="OK" onclick="kpOk()">'+ico("ok")+'</button></div>';
+ d.innerHTML='<div class="kph"><div class="kpt"><small id="kpl"></small><b id="kpv" dir="ltr"></b></div><button type="button" class="btn sbtn kpb" aria-label="Paste" onclick="kpPaste()">'+ico("pa")+'</button><button type="button" class="btn sbtn kpb" aria-label="Delete" onclick="kpDel()">'+ico("del")+'</button></div><div class="kpg">'+k+'<button type="button" class="btn sbtn kpx" id="kpc" onclick="kpCopy()"></button><button type="button" class="btn sbtn" onclick="kpKey(\'0\')">0</button><button type="button" class="btn sbtn pr" aria-label="OK" onclick="kpOk()">'+ico("ok")+'</button></div>';
  document.body.appendChild(d);KP.el=d}
 function isPar(){return KP.inp&&(KP.inp.id=="f_pp"||KP.inp.id=="w_pp")}
 function isW(){return KP.inp&&/^w_/.test(KP.inp.id)}
@@ -10091,6 +10128,10 @@ window.kpOpen=function(inp){if(!inp)return;build();if(KP.inp&&KP.inp!==inp)KP.in
  KP.inp=inp;inp.classList.add("kpf");KP.pad=null;show();KP.el.classList.add("on");pad(true);setTimeout(reveal,380);setTimeout(reveal,60)};
 window.kpClose=function(){if(!KP.el||!KP.el.classList.contains("on"))return;KP.el.classList.remove("on");if(KP.inp)KP.inp.classList.remove("kpf");KP.inp=null;pad(false);KP.pad=null;if(document.activeElement&&document.activeElement.blur)try{document.activeElement.blur()}catch(e){}};
 window.kpKey=function(c){if(!KP.inp)return;var v=digits();var mx=(v.charAt(0)=="0")?11:10;if(v.length==0&&false)return;if(v.length>=mx)return;KP.inp.value=v+c;fire(KP.inp);show()};
+function setNum(el,tx){if(!el)return;var v=pn(String(tx||"").replace(/[\u0660-\u0669]/g,function(c){return c.charCodeAt(0)-1632}).replace(/[\u06F0-\u06F9]/g,function(c){return c.charCodeAt(0)-1776})).slice(0,10);if(!v)return;el.value=v;fire(el);if(KP.inp===el)show()}
+window.kpPaste=function(){var el=KP.inp;if(!el)return;var ask=function(){var t=prompt(L2("الصق الرقم هنا","Paste the number here"),"");if(t)setNum(el,t)};
+ if(navigator.clipboard&&navigator.clipboard.readText)navigator.clipboard.readText().then(function(t){setNum(el,t)}).catch(ask);else ask()};
+document.addEventListener("paste",function(e){var t=e.target;if(t&&t.closest&&t.closest(".ph")&&t.readOnly){e.preventDefault();setNum(t,(e.clipboardData||window.clipboardData).getData("text"))}},true);
 window.kpDel=function(){if(!KP.inp)return;KP.inp.value=digits().slice(0,-1);fire(KP.inp);show()};
 window.kpCopy=function(){var w=isW(),s=document.getElementById(w?"w_p":"f_p"),p=document.getElementById(w?"w_pp":"f_pp");if(!s||!p||!KP.inp)return;
  if(isPar()){var v=String(s.value||"").replace(/\D/g,"");if(!v)return;p.value=v;fire(p);show();return}
