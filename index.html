@@ -1069,9 +1069,9 @@ function sform(inl){var e=edit||{};return (inl?'<div style="margin-top:12px;padd
 +'<div class="dys" style="margin-top:8px"><label><input type="radio" name="sx" value="m"'+(e.sex!="f"?" checked":"")+'>'+t("boy")+'</label><label><input type="radio" name="sx" value="f"'+(e.sex=="f"?" checked":"")+'>'+t("girl")+'</label></div>'
 +'<div class="row" style="flex-wrap:nowrap;gap:8px;align-items:flex-start"><div style="flex:1.7 1 0;min-width:0"><span class="lbl">'+t("grade")+'</span><select id="f_g" onchange="gRef(this.value)">'+GR.map(function(g){return '<option value="'+g+'"'+(g==(e.grade||fg)?" selected":"")+'>'+gn(g)+'</option>'}).join("")+'</select></div>'
 +'<div style="flex:1 1 0;min-width:0"><span class="lbl">'+t("days")+'</span><select id="f_r">'+gOpts(e.group||1,e.grade||fg)+'</select></div></div>'
-+'<span class="lbl">'+t("ph")+'</span><div class="ph"><span>+20</span><input id="f_p" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(pn(e.phone))+'"></div>'
-+'<span class="lbl">'+t("pph")+'</span><div class="ph"><span>+20</span><input id="f_pp" type="tel" inputmode="numeric" placeholder="1012345678" value="'+esc(pn(e.parentPhone))+'"></div>'
-+'<div class="row" style="flex-wrap:nowrap;align-items:center;gap:10px;margin-top:12px"><span class="lbl" style="margin:0;flex:1 1 auto">'+t("price")+'</span><input id="f_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this);this.dataset.m=1" style="flex:0 0 96px;width:96px;text-align:center;font-weight:700"'+(e.id&&e.price?' data-m="1"':'')+' value="'+esc(String(e.price||defPrice(e.grade||fg)))+'"></div>'
++'<span class="lbl">'+t("ph")+'</span><div class="ph"><span>+20</span><input id="f_p" type="tel" inputmode="none" readonly onclick="kpOpen(this)" onfocus="kpOpen(this)" placeholder="1012345678" value="'+esc(pn(e.phone))+'"></div>'
++'<span class="lbl">'+t("pph")+'</span><div class="ph"><span>+20</span><input id="f_pp" type="tel" inputmode="none" readonly onclick="kpOpen(this)" onfocus="kpOpen(this)" placeholder="1012345678" value="'+esc(pn(e.parentPhone))+'"></div>'
++'<div class="row" style="flex-wrap:nowrap;align-items:center;gap:10px;margin-top:12px"><span class="lbl" style="margin:0;flex:1 1 auto">'+t("price")+'</span><input id="f_pr" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this);this.dataset.m=1" style="flex:0 0 96px;width:96px;text-align:center;font-weight:700"'+(e.id&&e.price?' data-m="1"':'')+' value="'+esc(String(e.price||defPrice(e.grade||fg||GR[0])))+'"></div>'
 +'<div class="row" style="margin-top:12px"><button class="btn pr" onclick="addS()">'+t("save")+'</button>'+(e.id?'<button class="btn" onclick="closeEdit()">'+t("cancel")+'</button>':'')+'</div>'+codeBox(e)+'</div>'}
 function sbar(){if(!gHas(sgr,""))sgr="";return '<div class="card"><div class="row" style="flex-wrap:nowrap"><input id="qs" placeholder="'+t("search")+'" value="'+esc(q)+'" oninput="q=this.value;document.getElementById(\'sl\').innerHTML=listS()"><button class="btn sq" id="mic" type="button" aria-label="'+L2("بحث بالصوت","Voice search")+'" onclick="voiceS()">'+icoH('mic','bare')+'</button></div><div class="row" style="margin-top:8px"><select onchange="sgr=this.value;draw()"><option value="">'+t("allg")+'</option>'+gFlt(sgr,"")+'</select>'+sxSel()+'</div></div>'}
 function sAddH(){var op=!!SF.open,an=SF.anim;
@@ -10028,6 +10028,61 @@ window.studentView=function(){
  return _svp.apply(this,arguments)};
 var _gbp=window.goBack;
 window.goBack=function(){if(ST.data&&ST.set&&!APR&&ST.sp&&!(AU&&AU.user&&tab=="set")){ST.sp="";draw();return}return _gbp.apply(this,arguments)};
+})();
+</script>
+<style>
+#kpad{position:fixed;left:0;right:0;bottom:0;z-index:60;direction:ltr;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 12px);background:var(--card);border-top:1px solid var(--bd);border-radius:26px 26px 0 0;box-shadow:0 -12px 34px rgba(0,0,0,.2);transform:translateY(110%);visibility:hidden;transition:transform .38s cubic-bezier(.3,1.35,.5,1),visibility 0s .38s;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#kpad.on{transform:none;visibility:visible;transition:transform .38s cubic-bezier(.3,1.35,.5,1)}
+#kpad .kph{display:flex;align-items:center;gap:8px;margin:0 2px 10px}
+#kpad .kpt{flex:1;min-width:0;padding:6px 14px;border-radius:16px;background:var(--soft);box-shadow:var(--in)}
+#kpad .kpt small{display:block;font-size:calc(11px*var(--fs,1));color:var(--mu);font-weight:600;direction:rtl;text-align:start}
+#kpad .kpt b{display:block;min-height:30px;line-height:30px;font-size:calc(22px*var(--fs,1));letter-spacing:2px;color:var(--tx);overflow:hidden;white-space:nowrap}
+#kpad .kpg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#kpad .btn{min-height:54px;flex:none;font-size:calc(22px*var(--fs,1));padding:0;transition:transform .38s cubic-bezier(.34,1.8,.64,1),background-color .2s,color .2s;-webkit-tap-highlight-color:transparent}
+#kpad .btn:active{transform:scale(1.06,.86)}
+#kpad .btn svg{width:26px;height:26px;display:block}
+#kpad .kpx{flex-direction:column;gap:2px;font-size:calc(11px*var(--fs,1));line-height:1.1}
+#kpad .kpx svg{width:22px;height:22px}
+#kpad .kpb{flex:0 0 54px;width:54px}
+.ph input[readonly]{cursor:pointer}
+.ph input.kpf{outline:2.5px solid var(--pr);outline-offset:-2px}
+.ph input.kpg2{animation:kpglow 1s ease-out}
+@keyframes kpglow{0%{box-shadow:0 0 0 0 var(--pr)}40%{box-shadow:0 0 0 5px var(--pr)}100%{box-shadow:0 0 0 0 transparent}}
+</style>
+<script>
+(function(){
+var KP={el:null,inp:null,pad:null,pel:null};
+var IC={ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',del:'<path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z"/><path d="M13 10l4 4M17 10l-4 4"/>',cp:'<rect x="8" y="8" width="11.5" height="11.5" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H16"/>'};
+function ico(k){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[k]+'</svg>'}
+function build(){if(KP.el)return;var d=document.createElement("div");d.id="kpad";d.setAttribute("onpointerdown","event.preventDefault()");
+ var k="";for(var i=1;i<=9;i++)k+='<button type="button" class="btn sbtn" onclick="kpKey(\''+i+'\')">'+i+'</button>';
+ d.innerHTML='<div class="kph"><div class="kpt"><small id="kpl"></small><b id="kpv" dir="ltr"></b></div><button type="button" class="btn sbtn kpb" aria-label="Delete" onclick="kpDel()">'+ico("del")+'</button></div><div class="kpg">'+k+'<button type="button" class="btn sbtn kpx" id="kpc" onclick="kpCopy()"></button><button type="button" class="btn sbtn" onclick="kpKey(\'0\')">0</button><button type="button" class="btn sbtn pr" aria-label="OK" onclick="kpOk()">'+ico("ok")+'</button></div>';
+ document.body.appendChild(d);KP.el=d}
+function isPar(){return KP.inp&&KP.inp.id=="f_pp"}
+function digits(){return KP.inp?String(KP.inp.value||"").replace(/\D/g,""):""}
+function show(){var v=digits();document.getElementById("kpv").textContent=v||"\u00a0";document.getElementById("kpl").textContent=isPar()?L2("رقم ولي الأمر","Parent number"):L2("رقم الطالب","Student number");
+ var c=document.getElementById("kpc");c.innerHTML=ico("cp")+'<span>'+(isPar()?L2("من الطالب","From student"):L2("لولي الأمر","To parent"))+'</span>'}
+function pad(on){var h=KP.el.offsetHeight||340,a=KP.pad;
+ if(a&&a!==KP.pel){a.style.paddingBottom=a._pb||"";}
+ if(!on){if(KP.pel){KP.pel.style.paddingBottom=KP.pel._pb||"";KP.pel=null}return}
+ if(!a){var n=KP.inp.parentNode;while(n&&n!==document.body){var o=getComputedStyle(n).overflowY;if((o=="auto"||o=="scroll")&&n.scrollHeight>n.clientHeight-1){a=n;break}n=n.parentNode}}
+ if(!a)a=document.body;
+ if(KP.pel&&KP.pel!==a)KP.pel.style.paddingBottom=KP.pel._pb||"";
+ if(KP.pel!==a){a._pb=a.style.paddingBottom;KP.pel=a}
+ a.style.paddingBottom=(h+24)+"px";KP.pad=a}
+function reveal(){var h=KP.el.offsetHeight||340,r=KP.inp.getBoundingClientRect(),lim=window.innerHeight-h-16;if(r.bottom>lim||r.top<60){var a=KP.pel,dy=r.bottom-lim;if(r.top<60)dy=r.top-90;if(a&&a!==document.body&&a!==document.documentElement)a.scrollTop+=dy;else window.scrollBy(0,dy)}}
+window.gRef=function(g){var r=document.getElementById("f_r");if(r)r.innerHTML=gOpts(+r.value,g);autoPrice(g)};
+window.kpOpen=function(inp){if(!inp)return;build();if(KP.inp&&KP.inp!==inp)KP.inp.classList.remove("kpf");
+ KP.inp=inp;inp.classList.add("kpf");KP.pad=null;show();KP.el.classList.add("on");pad(true);setTimeout(reveal,380);setTimeout(reveal,60)};
+window.kpClose=function(){if(!KP.el||!KP.el.classList.contains("on"))return;KP.el.classList.remove("on");if(KP.inp)KP.inp.classList.remove("kpf");KP.inp=null;pad(false);KP.pad=null;if(document.activeElement&&document.activeElement.blur)try{document.activeElement.blur()}catch(e){}};
+window.kpKey=function(c){if(!KP.inp)return;var v=digits();var mx=(v.charAt(0)=="0")?11:10;if(v.length==0&&false)return;if(v.length>=mx)return;KP.inp.value=v+c;show()};
+window.kpDel=function(){if(!KP.inp)return;KP.inp.value=digits().slice(0,-1);show()};
+window.kpCopy=function(){var s=document.getElementById("f_p"),p=document.getElementById("f_pp");if(!s||!p||!KP.inp)return;
+ if(isPar()){var v=String(s.value||"").replace(/\D/g,"");if(!v)return;p.value=v;show();return}
+ var v2=digits();if(!v2)return;p.value=v2;kpClose();p.classList.remove("kpg2");void p.offsetWidth;p.classList.add("kpg2")};
+window.kpOk=function(){if(!KP.inp)return;if(KP.inp.id=="f_p"){var p=document.getElementById("f_pp");if(p){kpOpen(p);return}}kpClose();var b=document.querySelector('button[onclick="addS()"]');if(b&&b.scrollIntoView)b.scrollIntoView({block:"nearest",behavior:"smooth"})};
+document.addEventListener("pointerdown",function(e){if(!KP.el||!KP.el.classList.contains("on"))return;var t=e.target;if(t.closest&&(t.closest("#kpad")||t.closest(".ph")))return;kpClose()},true);
+var _kd=window.draw;if(typeof _kd=="function"){window.draw=draw=function(){var r=_kd.apply(this,arguments);try{if(KP.el&&KP.el.classList.contains("on")){var n=KP.inp&&document.getElementById(KP.inp.id);if(!n||!document.body.contains(n)){KP.inp=null;KP.el.classList.remove("on");pad(false);KP.pad=null}else{KP.inp=n;n.classList.add("kpf");show()}}}catch(e){}return r}}
 })();
 </script>
 </body>
