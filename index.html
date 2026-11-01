@@ -9604,6 +9604,120 @@ window.avsSave=function(){
 })();
 
 </script>
+<script>
+/* ===== التقارير ← الحصص: دايرة بـ 6 قطاعات (واحد لكل صف) + نافذة بيانات منبثقة ===== */
+(function(){
+if(window.__lsDonut)return;window.__lsDonut=1;
+var LD={sel:-1,seen:false};
+var CX=150,CY=150,RO=142,RI=74,GAP=5.5;
+var st=document.createElement("style");st.textContent=[
+".lsgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 6px;padding:10px 0 4px}",
+".lsr{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;padding:6px 0 2px;color:var(--tx);font:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer;outline:none}",
+".lsw{position:relative;width:min(100%,104px);aspect-ratio:1;border-radius:50%;background:var(--soft);box-shadow:var(--out);transition:transform .55s cubic-bezier(.3,1.7,.5,1),box-shadow .4s}",
+".lsw svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}",
+".lsw .tk{fill:none;stroke:var(--bd);stroke-width:3.2}",
+".lsw .pg{fill:none;stroke-width:3.2;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%}",
+".lsn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.15}",
+".lsn b{font-size:15px}.lsn small{font-size:11px;color:var(--mu);margin-top:1px}",
+".lsr.e .lsn{opacity:.5}",
+".lsq{display:flex;flex-direction:column;align-items:center;line-height:1.2;transition:transform .55s cubic-bezier(.3,1.7,.5,1)}",
+".lsq b{font-size:18px}.lsq small{font-size:11px;color:var(--mu)}",
+".lsr:hover .lsw{transform:translateY(-4px)}",
+".lsr.pr .lsw{transform:scale(.92);transition-duration:.12s}",
+".lsr.on .lsw{transform:translateY(-9px) scale(1.05);box-shadow:0 0 0 6px var(--bg),var(--sh)}",
+".lsr.on .lsq{transform:translateY(-6px)}",
+".lsgrid.in .lsr{animation:lsin .7s cubic-bezier(.2,1.3,.4,1) both;animation-delay:calc(var(--i)*.07s)}",
+".lsgrid.in .pg{animation:lsarc 1.1s cubic-bezier(.3,1,.4,1) both;animation-delay:calc(var(--i)*.07s + .15s)}",
+"@keyframes lsin{from{opacity:0;transform:translateY(14px) scale(.6)}to{opacity:1;transform:none}}",
+"@keyframes lsarc{from{stroke-dashoffset:var(--c)}}",
+".lsl{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12px;color:var(--mu)}",
+".lsl span{display:inline-flex;align-items:center;gap:5px}.lsl i{width:10px;height:10px;border-radius:50%;display:inline-block}",
+"#lso{position:fixed;inset:0;z-index:99995;background:rgba(15,12,35,.55);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 14px) 12px calc(env(safe-area-inset-bottom,0px) + 14px);animation:lsf .2s ease-out}",
+"#lso.out{animation:lsfo .24s ease-in both}",
+"@keyframes lsf{from{opacity:0}to{opacity:1}}@keyframes lsfo{to{opacity:0}}",
+".lsp{width:100%;max-width:440px;max-height:100%;overflow-y:auto;background:var(--card);border-radius:28px;padding:16px;box-shadow:var(--sh),0 0 0 1px var(--bd);color:var(--tx);animation:lsp .55s cubic-bezier(.2,1.3,.4,1) both}",
+"#lso.out .lsp{animation:lspo .24s ease-in both}",
+"@keyframes lsp{from{opacity:0;transform:scale(.35)}to{opacity:1;transform:none}}@keyframes lspo{to{opacity:0;transform:scale(.6)}}",
+".lsh{display:flex;align-items:center;gap:12px;margin-bottom:12px}",
+".lsh .bd{flex:none;width:54px;height:54px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:700;line-height:1}",
+".lsh .bd b{font-size:24px}.lsh .bd small{font-size:10px;margin-top:2px;opacity:.9}",
+".lsh .tt{flex:1;min-width:0;font-weight:700;font-size:18px}.lsh .tt small{display:block;font-size:12px;color:var(--mu);font-weight:600;margin-top:2px}",
+".lsh .x{flex:none;width:40px;height:40px;border:0;border-radius:14px;background:var(--soft);color:var(--tx);font-size:20px;line-height:1;padding:0}",
+".lsa{display:flex;gap:8px;margin-top:14px}.lsa .btn{flex:1}",
+".lsp .chp{cursor:pointer}"
+].join("");document.head.appendChild(st);
+
+function T(){return {C:[[3,L2("فاهمين","Got it"),"var(--lg)"],[2,L2("نص نص","Half"),"var(--lo)"],[1,L2("ما فهموش","Didn't get it"),"var(--lr)"]]}}
+function bar(cn,n,ht){var C=T().C;return'<div style="display:flex;height:'+ht+'px;border-radius:8px;overflow:hidden;background:var(--soft)">'+(n?C.map(function(c){return cn[c[0]]?'<div style="flex:'+cn[c[0]]+';background:'+c[2]+'"></div>':''}).join(""):'')+'</div>'}
+function dot(c){return'<span style="flex:none;width:10px;height:10px;border-radius:50%;background:'+c+'"></span>'}
+function reps(){var d=dayK();return {R:(window.cloudReps?cloudReps():[]).filter(function(r){var s=S.students.filter(function(x){return x.id==r.sid})[0];return s&&r.day==stuKey(s)}),NT0:window.cloudNotes?cloudNotes(d):[]}}
+function gst(g,D){var ss=S.students.filter(function(s){return s.grade==g}),ids={},cn={1:0,2:0,3:0},by={};ss.forEach(function(s){ids[s.id]=s});
+ var rs=D.R.filter(function(r){return ids[r.sid]});rs.forEach(function(r){cn[r.v]++;by[r.sid]=r.v});
+ return {g:g,ss:ss,ids:ids,n:rs.length,cn:cn,by:by,NN:D.NT0.filter(function(x){return ids[x.sid]})}}
+function col(x){if(!x.ss.length)return "";if(!x.n)return "color-mix(in srgb,var(--pr) 30%,var(--card))";var r=x.cn[3]/x.n;return r>=.6?"var(--lg)":r>=.35?"var(--lo)":"var(--lr)"}
+function dn(i){return i<3?i+4:i-2}
+function pol(a,r){var q=a*Math.PI/180;return [(CX+r*Math.cos(q)).toFixed(2),(CY+r*Math.sin(q)).toFixed(2)]}
+function sector(a0,a1){var p0=pol(a0,RO),p1=pol(a1,RO),p2=pol(a1,RI),p3=pol(a0,RI);return 'M'+p0+' A'+RO+' '+RO+' 0 0 1 '+p1+' L'+p2+' A'+RI+' '+RI+' 0 0 0 '+p3+'Z'}
+function sub(i){return i<3?L2("ابتدائي","Primary"):L2("إعدادي","Prep")}
+
+window.lsView=function(){
+ var D=reps(),C=T().C,gs=GR.filter(function(g){return S.students.some(function(s){return s.grade==g})});
+ var h='<div class="card cp"><b>'+L2("ردود الحصة الأخيرة","Latest lesson replies")+'</b></div>';
+ if(!gs.length)return h+'<div class="card mu">'+t("nostd")+'</div>';
+ var all=D.R.filter(function(r){return S.students.some(function(s){return s.id==r.sid})}),N=all.length,TT={1:0,2:0,3:0};all.forEach(function(r){TT[r.v]++});
+ var an=!LD.seen;LD.seen=true;
+ h+='<div class="card"><div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:32px;line-height:1;color:var(--lg)">'+(N?pct(TT[3],N):'\u2014')+'</b><span class="mu">'+L2("نسبة الفهم","Understood")+'</span><span class="pill" style="margin-inline-start:auto">'+N+'/'+S.students.length+' '+L2("ردّوا","replied")+'</span></div><div style="margin:12px 0">'+bar(TT,N,12)+'</div><div style="display:flex;gap:8px">'+C.map(function(c){return'<div style="flex:1;text-align:center;padding:8px 2px;border-radius:14px;background:var(--soft)"><div style="display:flex;justify-content:center;align-items:center;gap:5px">'+dot(c[2])+'<b style="font-size:18px">'+TT[c[0]]+'</b></div><div class="mu" style="font-size:12px">'+c[1]+'</div></div>'}).join("")+'</div></div>';
+ var R=44,CC=(2*Math.PI*R).toFixed(2),cells=GR.map(function(g,i){var x=gst(g,D),e=!x.ss.length,c=col(x),rate=x.n?x.cn[3]/x.n:0,off=(CC*(1-rate)).toFixed(2),nm=gn(g).split(" ");
+  var short=S.lang=="en"?"G"+dn(i):nm[0];
+  return '<button type="button" class="lsr'+(e?' e':'')+(LD.sel===i?' on':'')+'" data-i="'+i+'" style="--i:'+i+'" aria-label="'+esc(gn(g))+'" onclick="lsOpen('+i+',event)">'
+   +'<span class="lsw"><svg viewBox="0 0 100 100"><circle class="tk" cx="50" cy="50" r="'+R+'"/>'+(x.n?'<circle class="pg" cx="50" cy="50" r="'+R+'" stroke="'+c+'" style="--c:'+CC+'" stroke-dasharray="'+CC+'" stroke-dashoffset="'+off+'"/>':'')+'</svg>'
+   +'<span class="lsn"><b>'+esc(short)+'</b><small>'+sub(i)+'</small></span></span>'
+   +'<span class="lsq"><b style="color:'+(x.n?c:'var(--mu)')+'">'+(e?'\u2014':x.n?pct(x.cn[3],x.n):'0%')+'</b><small>'+(e?L2("مفيش طلاب","No students"):x.n+'/'+x.ss.length+' '+L2("ردّوا","replied"))+'</small></span></button>'}).join("");
+ h+='<div class="card"><div class="lsgrid'+(an?' in':'')+'">'+cells+'</div>'
+  +'<div class="lsl"><span><i style="background:var(--lg)"></i>'+L2("فهم عالي","High")+'</span><span><i style="background:var(--lo)"></i>'+L2("متوسط","Medium")+'</span><span><i style="background:var(--lr)"></i>'+L2("يحتاج مراجعة","Needs review")+'</span></div>'
+  +'<div class="mu" style="text-align:center;font-size:12px;margin-top:6px">'+L2("دوس على أي صف عشان تشوف تفاصيله","Tap a grade to see its details")+'</div></div>';
+ return h};
+
+function popHtml(i){
+ var g=GR[i],D=reps(),x=gst(g,D),C=T().C,c=col(x)||"var(--soft)",ss=x.ss,n=x.n;
+ var h='<div class="lsh"><div class="bd" style="background:'+(ss.length?c:'var(--soft)')+';'+(ss.length?'':'color:var(--mu)')+'"><b>'+dn(i)+'</b><small>'+sub(i)+'</small></div><div class="tt">'+esc(gn(g))+'<small>'+(ss.length?ss.length+' '+L2("طالب","students")+' · '+n+' '+L2("ردّوا","replied"):L2("مفيش طلاب في الصف ده","No students in this grade"))+'</small></div><button type="button" class="x" onclick="lsClose()" aria-label="close">×</button></div>';
+ if(!ss.length)return h;
+ h+='<div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:32px;line-height:1;color:var(--lg)">'+(n?pct(x.cn[3],n):'—')+'</b><span class="mu">'+L2("نسبة الفهم","Understood")+'</span></div><div style="margin:10px 0">'+bar(x.cn,n,12)+'</div>'
+  +'<div style="display:flex;gap:8px">'+C.map(function(k){return'<div style="flex:1;text-align:center;padding:8px 2px;border-radius:14px;background:var(--soft)"><div style="display:flex;justify-content:center;align-items:center;gap:5px">'+dot(k[2])+'<b style="font-size:18px">'+x.cn[k[0]]+'</b></div><div class="mu" style="font-size:12px">'+k[1]+'</div></div>'}).join("")+'</div>';
+ if(!n)h+='<div class="mu" style="margin-top:8px">'+L2("لسه مفيش تقارير","No reports yet")+'</div>';
+ var gp=[];ss.forEach(function(s){if(gp.indexOf(s.group)<0)gp.push(s.group)});gp.sort();
+ h+='<div class="lbl">'+L2("حسب المجموعة","By group")+'</div>'+gp.map(function(y){var m=ss.filter(function(s){return s.group==y}),c2={1:0,2:0,3:0},k=0;m.forEach(function(s){if(x.by[s.id]){c2[x.by[s.id]]++;k++}});return'<div style="display:flex;align-items:center;gap:8px;padding:3px 0"><span style="width:76px;flex:none;font-size:13px">'+esc(gd(y))+'</span><div style="flex:1">'+bar(c2,k,6)+'</div><span class="mu" style="width:84px;flex:none;text-align:end;font-size:12px">'+k+'/'+m.length+(k?' · '+pct(c2[3],k):'')+'</span></div>'}).join("");
+ var chip=function(m){return m.map(function(s){return'<span class="pill chp" style="margin:0" onclick="lsStu('+s.id+')">'+AV(s)+esc(s.name)+'</span>'}).join("")};
+ C.slice().reverse().concat([[0,L2("لم يردّوا","No reply"),"var(--bd)"]]).forEach(function(k){var m=ss.filter(function(s){return(x.by[s.id]||0)==k[0]});if(!m.length)return;h+='<div style="display:flex;align-items:center;gap:6px;margin-top:12px">'+dot(k[2])+'<b style="font-size:14px">'+k[1]+'</b><span class="mu">'+m.length+'</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+chip(m)+'</div>'});
+ if(x.NN.length)h+='<div class="lbl" style="margin-top:14px">'+L2("ملاحظات الطلاب","Student notes")+'</div>'+x.NN.map(function(z){var s0=x.ids[z.sid],rv=x.by[z.sid],cc=rv?C.filter(function(k){return k[0]==rv})[0][2]:'var(--bd)';return'<div class="v3n"><div style="display:flex;align-items:center;gap:6px">'+dot(cc)+'<b style="font-size:14px">'+AV(s0)+esc(s0.name)+'</b></div><div class="rnb">'+esc(z.text)+'</div></div>'}).join("");
+ h+='<div class="lsa"><button type="button" class="btn pr" onclick="lsStu(0)">'+L2("قائمة طلاب الصف","Open students list")+'</button><button type="button" class="btn" onclick="lsClose()">'+L2("إغلاق","Close")+'</button></div>';
+ return h}
+
+window.lsOpen=function(i,ev){
+ if(document.getElementById("lso"))return;
+ LD.sel=i;
+ var o=document.createElement("div");o.id="lso";o.innerHTML='<div class="lsp">'+popHtml(i)+'</div>';document.body.appendChild(o);
+ var p=o.firstChild;
+ if(ev&&ev.clientX!=null){var r=p.getBoundingClientRect();p.style.transformOrigin=(ev.clientX-r.left)+"px "+(ev.clientY-r.top)+"px"}
+ o.addEventListener("click",function(e){if(e.target===o)lsClose()});
+ document.querySelectorAll(".lsr").forEach(function(g){g.classList.toggle("on",+g.getAttribute("data-i")===i)})};
+window.lsClose=function(){var o=document.getElementById("lso");LD.sel=-1;document.querySelectorAll(".lsr.on").forEach(function(g){g.classList.remove("on")});if(!o||o.classList.contains("out"))return;o.classList.add("out");setTimeout(function(){if(o.parentNode)o.remove()},240)};
+window.lsStu=function(id){var i=LD.sel;if(i<0)return;var g=GR[i];lsClose();sg=g;sgr="";if(window.q!==undefined)q="";go("stu");if(id){dt=id;draw()}};
+
+/* مؤثر اللمس (زي الشريط السفلي) */
+document.addEventListener("pointerdown",function(e){var g=e.target.closest&&e.target.closest(".lsr");if(g)g.classList.add("pr")},true);
+["pointerup","pointercancel","pointerleave"].forEach(function(n){document.addEventListener(n,function(){document.querySelectorAll(".lsr.pr").forEach(function(g){g.classList.remove("pr")})},true)});
+document.addEventListener("keydown",function(e){if(e.key=="Escape")lsClose()});
+
+/* تحديث النافذة لو البيانات اتغيرت، وإعادة الأنيميشن عند الدخول من جديد */
+var _dr=window.draw;
+window.draw=function(){var r=_dr.apply(this,arguments);
+ if(typeof tab!="undefined"&&(tab!="rep"||rtab!="ls")){LD.seen=false;if(document.getElementById("lso"))lsClose()}
+ var o=document.getElementById("lso");if(o&&!o.classList.contains("out")&&LD.sel>=0){var p=o.firstChild,y=p.scrollTop;p.innerHTML=popHtml(LD.sel);p.scrollTop=y}
+ return r};
+})();
+
+</script>
 
 </body>
 </html>
