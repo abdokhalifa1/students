@@ -30,13 +30,13 @@
 [data-pal="purple"]{--bg:#F6F4FB;--card:#E8E3F4;--tx:#231D36;--mu:#6B6385;--pr:#6C57C4;--on:#FFFFFF}
 
 /* 2) ألوان مشتقة من الستة (تتغير تلقائيًا مع الثيم) */
-:root{--h1:var(--pr);--h2:color-mix(in srgb,var(--pr) 78%,var(--tx));--sc:color-mix(in srgb,var(--pr) 26%,var(--card));--bd:color-mix(in srgb,var(--tx) 12%,transparent);--soft:color-mix(in srgb,var(--pr) 9%,var(--card))}
+:root{--h1:var(--pr);--h2:color-mix(in srgb,var(--pr) 78%,var(--tx));--sc:color-mix(in srgb,var(--pr) 26%,var(--card));--bd:color-mix(in srgb,var(--tx) 20%,transparent);--soft:color-mix(in srgb,var(--pr) 14%,var(--card))}
 :root{--oh:var(--on);--oa:color-mix(in srgb,var(--oh) 82%,var(--h2))}
 :root[data-pal="brand"],:root:not([data-pal]){--oh:#fff;--oa:#F0C38E;--sc:#F0C38E;--h1:#48426D;--h2:#312C51;--bd:#DCD6CC;--soft:color-mix(in srgb,var(--pr) 7%,var(--card))}
 :root[data-pal="brandn"]{--oh:#fff;--oa:#F0C38E;--sc:#F1AA9B;--h1:#48426D;--h2:#3A3560;--bd:rgba(255,255,255,.08);--soft:#3D3860}
 @media (prefers-color-scheme:dark){:root:not([data-pal]){--sc:#F1AA9B;--h2:#3A3560;--bd:rgba(255,255,255,.08);--soft:#3D3860}}
 /* 3) ألوان الحالات والظلال (نهاري / ليلي) */
-:root{--no:#D9604A;--onn:#fff;--am:#F1AA9B;--gn:#2E8B57;--lg:#1E9E5A;--lo:#F28C1B;--lr:#E02B2B;--sh:0 8px 20px rgba(0,0,0,.10);--out:6px 6px 14px rgba(0,0,0,.14),-5px -5px 12px rgba(255,255,255,.7);--in:inset 3px 3px 8px rgba(0,0,0,.16),inset -3px -3px 8px rgba(255,255,255,.65)}
+:root{--no:#D9604A;--onn:#fff;--am:#F1AA9B;--gn:#2E8B57;--lg:#1E9E5A;--lo:#F28C1B;--lr:#E02B2B;--sh:0 8px 20px rgba(0,0,0,.14);--out:6px 6px 14px rgba(0,0,0,.14),-5px -5px 12px rgba(255,255,255,.7);--in:inset 3px 3px 8px rgba(0,0,0,.16),inset -3px -3px 8px rgba(255,255,255,.65)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--no:#FF8A78;--onn:#0B1020;--gn:#7FD6A5;--lg:#4ADE80;--lo:#FFA53D;--lr:#FF5757;--sh:0 10px 24px rgba(0,0,0,.35);--out:6px 6px 14px rgba(0,0,0,.5),-4px -4px 12px rgba(255,255,255,.05);--in:inset 3px 3px 8px rgba(0,0,0,.5),inset -3px -3px 8px rgba(255,255,255,.05)}}
 :root[data-theme="dark"]{--no:#FF8A78;--onn:#0B1020;--gn:#7FD6A5;--lg:#4ADE80;--lo:#FFA53D;--lr:#FF5757;--sh:0 10px 24px rgba(0,0,0,.35);--out:6px 6px 14px rgba(0,0,0,.5),-4px -4px 12px rgba(255,255,255,.05);--in:inset 3px 3px 8px rgba(0,0,0,.5),inset -3px -3px 8px rgba(255,255,255,.05)}
 /* 4) تكبير الخط */
@@ -61,6 +61,9 @@ html.thx *,html.thx *::before,html.thx *::after{transition-property:background-c
 .thsw.au span:first-child{inset-inline-start:0}.thsw.au span:last-child{inset-inline-end:0}
 .thsw.au span::after{content:"";position:absolute;inset-inline:6px;top:15px;height:10px;border-radius:4px;background:var(--pr)}
 .thfs{margin-top:16px}
+.thsel{width:100%;margin-top:10px}
+.thpv{margin-top:12px}
+.thpv .thsw{width:100%;height:64px;border-radius:16px}
 
 
 *{box-sizing:border-box}
@@ -653,8 +656,8 @@ function rc(id,d){return S.rec[d+"|"+id]||{}}
 function setRec(id,k,v){var key=fdate+"|"+id,o=S.rec[key]||{};if(k=="p"&&o.a===0)return;o[k]=o[k]===v?undefined:v;if(k=="p"&&o.p===0&&o.a!==1)o.a=1;if(k=="a"&&o.a!==1)o.p=undefined;S.rec[key]=o;if(o.a===undefined&&o.p===undefined)delete S.rec[key];save();draw()}
 var prevTab="att";
 function go(x){if(x=="nt"){x="tasks"}if(x=="hw"){x="tasks"}if(x=="tasks"&&window.markTS){window._tmPrev=getTM();markTS()}if(x=="sum"||x=="an"){rtab="sum";x="rep"}if(x=="set"&&tab!="set")prevTab=tab;tab=x;edit=null;pd=null;draw()}
-function gearT(){if(tab=="set")goBack();else{LGD=false;STS=false;SDT=false;SDF={s:null,g:null,id:null};LG2.open="";LG2.anim="";LG2.busy=0;go("set")}}
-var LGD=false,STS=false,SDT=false,SDF={s:null,g:null,id:null};function goBack(){if(AU.user&&tab=="set"){if(SDT){if(LG2.open){lgClose();return}SDT=false;draw();return}if(LGD){if(LG2.open){lgClose();return}LGD=false;draw();return}if(STS){STS=false;draw();return}go(prevTab||"att")}else if(ST.data&&ST.set){ST.set=false;draw()}else if(edit){closeEdit()}}
+function gearT(){if(tab=="set")goBack();else{APR=false;LGD=false;STS=false;SDT=false;SDF={s:null,g:null,id:null};LG2.open="";LG2.anim="";LG2.busy=0;go("set")}}
+var LGD=false,STS=false,SDT=false,SDF={s:null,g:null,id:null};function goBack(){if(AU.user&&tab=="set"){if(APR){APR=false;draw();return}if(SDT){if(LG2.open){lgClose();return}SDT=false;draw();return}if(LGD){if(LG2.open){lgClose();return}LGD=false;draw();return}if(STS){STS=false;draw();return}go(prevTab||"att")}else if(ST.data&&ST.set){if(APR){APR=false;draw();return}ST.set=false;draw()}else if(edit){closeEdit()}}
 function grades(){var g=[];S.students.forEach(function(s){if(g.indexOf(s.grade)<0)g.push(s.grade)});return g.sort(function(a,b){return GR.indexOf(a)-GR.indexOf(b)})}
 function groups(g){var a=[];S.students.forEach(function(s){if(s.grade==g&&s.group&&a.indexOf(s.group)<0)a.push(s.group)});return a}
 var sg="",sgr="",ss="",q="",dt=null;
@@ -1069,7 +1072,7 @@ function sdtView(){
  GR.forEach(function(g){var n=(S.students||[]).filter(function(x){return x.grade==g}).length;
   h+='<div class="gb2" onclick="sdtOpen(\''+g+'\')"><span class="gsym">'+sgSym(g)+'</span><b>'+esc(gn(g))+'</b><span class="pill ok">'+n+'</span><span class="gchev">'+L2("\u2039","\u203a")+'</span></div>'});
  return h+sdtModal()}
-function setv(){if(SDT)return sdtView();if(LGD)return lgdView();if(STS)return stsView();return acct()+stsCard()+(window.xrHtml?xrHtml():'')+themeCard()+'<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'+(window.xlHtml?xlHtml():'')+(window.xaHtml?xaHtml():'')+bkHtml()}
+function setv(){if(APR)return aprView();if(SDT)return sdtView();if(LGD)return lgdView();if(STS)return stsView();return acct()+stsCard()+(window.xrHtml?xrHtml():'')+themeCard()+'<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">العربية</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'+(window.xlHtml?xlHtml():'')+(window.xaHtml?xaHtml():'')+bkHtml()}
 function setL(l){S.lang=l;save();draw()}
 function showB(){var x=document.getElementById("bx");x.value=JSON.stringify(S);x.focus();x.select();try{document.execCommand("copy")}catch(e){}}
 function restoreB(){try{var o=JSON.parse(document.getElementById("rx").value.trim());if(!o||!Array.isArray(o.students))throw 1;S={students:o.students,rec:o.rec||{},price:o.price||50,lang:S.lang,hw:S.hw||[],notices:S.notices||[]};save();tab="att";draw()}catch(e){var x=document.getElementById("rx");x.value="";x.placeholder=t("bad")}}
@@ -1329,13 +1332,13 @@ function stGo(k){ST.set=false;ST.tab=k;draw();clearTimeout(window._srT);window._
 function studentNav(){var NN=ST.tab=="nt"&&!ST.set?[]:newNts(),NH=ST.tab=="hw"&&!ST.set?0:newHw();
  var T=[["home",IC.home,t("home"),""],["me",IC.stu,t("me"),""],["rp",IC_RP,L2("الحصة","Lesson"),""],["hw",IC.hw,t("mine"),bdg(NH,false)]];
  return T.map(function(x){return '<button class="'+(!ST.set&&ST.tab==x[0]?"on":"")+'" data-k="'+x[0]+'" onclick="stGo(\''+x[0]+'\')"><i>'+x[1]+x[3]+'</i><span>'+x[2]+'</span></button>'}).join("")}
-function stSet(){ST.set=!ST.set;draw()}
+function stSet(){APR=false;ST.set=!ST.set;draw()}
 var SI_T=null;
 function fmtP(x){x=String(x||"");if(!x)return "-";return x.charAt(0)=="+"?x:"+20"+x}
 function stuInfo(){var g=document.querySelector(".sgreet"),i=document.getElementById("sinfo");if(!g||!i)return;clearTimeout(SI_T);if(i.classList.contains("show")){if(i.classList.contains("out"))return;stuHide(g,i);return}i.classList.remove("out");g.classList.remove("jl");void i.offsetWidth;i.classList.add("show");g.classList.add("jl");setTimeout(avAnim,350);SI_T=setTimeout(function(){stuHide(g,i)},4500)}
 function stuHide(g,i){i.classList.add("out");setTimeout(function(){i.classList.remove("show","out");g.classList.remove("jl")},380)}
 function studentView(){var d=ST.data;
- if(ST.set)return langCard()+themeCard()+'<div class="card"><div class="row"><button class="btn no" onclick="studentOut()">'+t("lo")+'</button></div></div>';
+ if(ST.set&&APR)return aprView();if(ST.set)return langCard()+themeCard()+'<div class="card"><div class="row"><button class="btn no" onclick="studentOut()">'+t("lo")+'</button></div></div>';
  if(ST.tab=="nt"){markSeen();ST.newN=false}if(ST.tab=="hw")markSeenH();var NN=newNts(),NH=newHw();
  var h='';
  if(ST.tab=="home"){h+='<div class="card sgreet" onclick="stuInfo()"><div class="nm">'+t("hello")+' '+esc(d.name)+'</div><div class="mu">'+gn(d.grade)+(d.group?' · '+esc(gd(d.group)):'')+'</div><div class="sinfo" id="sinfo"><span><small>'+L2("الطالب","Student")+'</small>'+esc(fmtP(d.phone))+'</span><span><small>'+L2("ولي الأمر","Parent")+'</small>'+esc(fmtP(d.parentPhone))+'</span>'+avBtn()+'</div></div><!--gend-->'+sibCard()+gameCard()}
@@ -1362,12 +1365,14 @@ function applyTheme(){var m=getTheme(),r=document.documentElement;if(m=="auto"){
 function thSync(){var m=getTheme(),f=getFS(),a=document.querySelectorAll(".thr[data-t]"),i;for(i=0;i<a.length;i++)a[i].classList.toggle("on",a[i].getAttribute("data-t")==m);a=document.querySelectorAll(".thf[data-f]");for(i=0;i<a.length;i++)a[i].classList.toggle("pr",a[i].getAttribute("data-f")==f)}
 function setTheme(m){THM=m;try{localStorage.setItem("thm2",m)}catch(e){}var r=document.documentElement;r.classList.add("thx");applyTheme();thSync();clearTimeout(window._thx);window._thx=setTimeout(function(){r.classList.remove("thx")},350);draw()}
 function setFS(v){FSZ=v;try{localStorage.setItem("fsz",v)}catch(e){}applyTheme();thSync();draw()}
-function themeCard(){var m=getTheme(),f=getFS(),h='<div class="card"><div class="nm">'+t("theme")+'</div><div class="thl">';
-THS.forEach(function(x){h+='<button type="button" class="thr'+(m==x[0]?' on':'')+'" data-t="'+x[0]+'" onclick="setTheme(\''+x[0]+'\')"><span class="thsw" data-pal="'+x[0]+'"><i></i><u></u><s></s></span><b>'+L2(x[1],x[2])+'</b><em></em></button>'});
-h+='<button type="button" class="thr'+(m=="auto"?' on':'')+'" data-t="auto" onclick="setTheme(\'auto\')"><span class="thsw au"><span data-pal="light"></span><span data-pal="dark"></span></span><b>'+L2("تلقائي حسب النظام","Auto (follow system)")+'</b><em></em></button></div>';
-h+='<div class="nm thfs">'+L2("حجم الخط","Font size")+'</div><div class="row">';
-[["n","عادي","Normal"],["l","كبير","Large"],["xl","كبير جدًا","Extra large"]].forEach(function(x){h+='<button type="button" class="btn thf'+(f==x[0]?' pr':'')+'" data-f="'+x[0]+'" onclick="setFS(\''+x[0]+'\')">'+L2(x[1],x[2])+'</button>'});
-return h+'</div></div>'}
+var APR=false;
+function themeCard(){return '<div class="gb2" onclick="APR=true;draw()"><span class="gsym"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2.2-1 2.2-2.2 0-.7-.3-1.1-.6-1.5-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.8" cy="11" r="1"/><circle cx="10.5" cy="7.3" r="1"/><circle cx="15" cy="7.8" r="1"/></svg></span><b>'+t("theme")+'</b><span class="gchev">'+L2("\u2039","\u203a")+'</span></div>'}
+function aprView(){var m=getTheme(),f=getFS(),o='',fo='';
+THS.forEach(function(x){o+='<option value="'+x[0]+'"'+(m==x[0]?' selected':'')+'>'+L2(x[1],x[2])+'</option>'});
+o+='<option value="auto"'+(m=="auto"?' selected':'')+'>'+L2("تلقائي حسب النظام","Auto (follow system)")+'</option>';
+[["n","عادي","Normal"],["l","كبير","Large"],["xl","كبير جدًا","Extra large"]].forEach(function(x){fo+='<option value="'+x[0]+'"'+(f==x[0]?' selected':'')+'>'+L2(x[1],x[2])+'</option>'});
+var pv=m=="auto"?'<span class="thsw au"><span data-pal="brand"></span><span data-pal="brandn"></span></span>':'<span class="thsw" data-pal="'+m+'"><i></i><u></u><s></s></span>';
+return '<div class="card"><div class="nm">'+t("theme")+'</div><select class="thsel" onchange="setTheme(this.value)">'+o+'</select><div class="thpv">'+pv+'</div><div class="nm thfs">'+L2("حجم الخط","Font size")+'</div><select class="thsel" onchange="setFS(this.value)">'+fo+'</select></div>'}
 
 
 
@@ -8333,7 +8338,7 @@ window.aiOpen=function(){_open();var x=document.getElementById("aitx");if(x){x.p
     return 1}
    if($(".gmo.out"))return 1;   /* نافذة بتقفل دلوقتي */
    if(isT()){
-    if(tab==="set"&&(SDT||LGD||STS)){goBack();return 1}
+    if(tab==="set"&&(APR||SDT||LGD||STS)){goBack();return 1}
     if(inlineOpen())return closeInline();
     if(popView())return 1;
    }else if(isS()){
@@ -9414,7 +9419,7 @@ window.addEventListener("pagehide",function(){close(true)});
  function langCard(){return '<div class="card"><div class="nm">'+t("lang")+'</div><div class="row"><button class="btn '+(S.lang=="ar"?"pr":"")+'" onclick="setL(\'ar\')">\u0627\u0644\u0639\u0631\u0628\u064a\u0629</button><button class="btn '+(S.lang=="en"?"pr":"")+'" onclick="setL(\'en\')">English</button></div></div>'}
  var _sv=window.setv;
  window.setv=function(){
-  if(tab=="sch"||SDT||LGD||STS)return _sv.apply(this,arguments);
+  if(tab=="sch"||APR||SDT||LGD||STS)return _sv.apply(this,arguments);
   return acct()+tools()+stsCard()+themeCard()+langCard()+bkHtml()};
  /* الرجوع من الجدول لو اتفتح من الترس */
  var _go=window.go;
