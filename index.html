@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#312D52">
-<script>(function(){try{var d=document.documentElement,m=localStorage.getItem("thm2"),f=localStorage.getItem("fsz"),ok={brandn:1,brand:1,mocha:1,rose:1,violet:1,berry:1,lagoon:1,forest:1,ocean:1},mp={light:"brand",green:"brand",blue:"brand",beige:"brand",purple:"brand",dark:"brandn"};if(!m){var o=localStorage.getItem("thm");m=o=="light"?"brand":"brandn"}if(mp[m])m=mp[m];if(m!="auto"){if(!ok[m])m="brandn";d.setAttribute("data-pal",m);d.setAttribute("data-theme",m=="brand"?"light":"dark")}d.setAttribute("data-fs",f=="l"||f=="xl"?f:"n")}catch(e){}})()</script>
+<script>(function(){try{var d=document.documentElement,m=localStorage.getItem("thm2"),f=localStorage.getItem("fsz"),ok={brandn:1,brand:1,rose:1,violet:1,berry:1,lagoon:1,forest:1,ocean:1},mp={light:"brand",green:"brand",blue:"brand",beige:"brand",purple:"brand",dark:"brandn"};if(!m){var o=localStorage.getItem("thm");m=o=="light"?"brand":"brandn"}if(mp[m])m=mp[m];if(m!="auto"){if(!ok[m])m="brandn";d.setAttribute("data-pal",m);d.setAttribute("data-theme",m=="brand"?"light":"dark")}d.setAttribute("data-fs",f=="l"||f=="xl"?f:"n")}catch(e){}})()</script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="AK">
@@ -22,7 +22,6 @@
 [data-pal="brandn"]{--bg:#0E0B1D;--card:#2A1E4D;--tx:#C9C2E3;--mu:#9486CB;--pr:#8B7CC7;--on:#0E0B1D}
 @media (prefers-color-scheme:dark){:root:not([data-pal]){--bg:#0E0B1D;--card:#2A1E4D;--tx:#C9C2E3;--mu:#9486CB;--pr:#8B7CC7;--on:#0E0B1D}}
 /* 1) الألوان الأساسية لكل ثيم: الخلفية / الكروت / النص / النص الثانوي / الأساسي / النص فوق الأساسي */
-[data-pal="mocha"]{--bg:#1A120E;--card:#3A2418;--tx:#D5C4AE;--mu:#AF8E6D;--pr:#A88462;--on:#1A120E}
 [data-pal="rose"]{--bg:#121212;--card:#1F2937;--tx:#F1F5F9;--mu:#8794A6;--pr:#EC4899;--on:#121212}
 [data-pal="violet"]{--bg:#1A1A1F;--card:#2D2B55;--tx:#F0D9B5;--mu:#B58BB8;--pr:#F4A62A;--on:#1A1A1F}
 [data-pal="berry"]{--bg:#1A0F2E;--card:#3B1B4F;--tx:#F4D7D4;--mu:#DC729D;--pr:#FF6B6B;--on:#1A0F2E}
@@ -35,7 +34,6 @@
 :root{--oh:var(--on);--oa:color-mix(in srgb,var(--oh) 82%,var(--h2))}
 :root[data-pal="brand"],:root:not([data-pal]){--oh:#fff;--oa:#C9C2E3;--sc:#C9C2E3;--h1:#5A3B8C;--h2:#2A1E4D;--bd:#CFCCDD;--soft:color-mix(in srgb,var(--pr) 7%,var(--card))}
 :root[data-pal="brandn"]{--oh:#fff;--oa:#C9C2E3;--sc:#C9C2E3;--h1:#2A1E4D;--h2:#0E0B1D;--bd:rgba(255,255,255,.08);--soft:#1C1435}
-:root[data-pal="mocha"]{--oh:#fff;--oa:#D5C4AE;--sc:#D5C4AE;--h1:#3A2418;--h2:#1A120E;--bd:rgba(255,255,255,.08);--soft:#2A1B13}
 :root[data-pal="rose"]{--oh:#fff;--oa:#F1F5F9;--sc:#F1F5F9;--h1:#1F2937;--h2:#121212;--bd:rgba(255,255,255,.08);--soft:#181E24}
 :root[data-pal="violet"]{--oh:#fff;--oa:#F4A62A;--sc:#A678B9;--h1:#2D2B55;--h2:#1A1A1F;--bd:rgba(255,255,255,.08);--soft:#24223A}
 :root[data-pal="berry"]{--oh:#fff;--oa:#FF6B6B;--sc:#D6598F;--h1:#3B1B4F;--h2:#1A0F2E;--bd:rgba(255,255,255,.08);--soft:#2A153E}
@@ -1542,7 +1540,7 @@ function studentView(){var d=ST.data;
  if(nx)window._dt=setTimeout(function(){if(ST.data&&!ST.up&&!ST.set)draw()},Math.min(nx,2147000000)+500);
  return h}
 
-var THS=[["brandn","الأساسي (ليلي)","Original (night)"],["brand","الأساسي (نهاري)","Original (day)"],["mocha","موكا","Mocha"],["rose","ليل وردي","Rose night"],["violet","بنفسجي وعنبر","Violet amber"],["berry","توت وكورال","Berry coral"],["lagoon","فيروزي ونحاسي","Teal copper"],["forest","غابة وذهب","Forest gold"],["ocean","محيط وعنبر","Ocean amber"]];
+var THS=[["brandn","الأساسي (ليلي)","Original (night)"],["brand","الأساسي (نهاري)","Original (day)"],["rose","ليل وردي","Rose night"],["violet","بنفسجي وعنبر","Violet amber"],["berry","توت وكورال","Berry coral"],["lagoon","فيروزي ونحاسي","Teal copper"],["forest","غابة وذهب","Forest gold"],["ocean","محيط وعنبر","Ocean amber"]];
 var THM=null,FSZ=null;
 function getTheme(){if(THM)return THM;var v=null;try{v=localStorage.getItem("thm2");if(!v){var o=localStorage.getItem("thm");v=o=="light"?"brand":"brandn"}}catch(e){}var mp={light:"brand",green:"brand",blue:"brand",beige:"brand",purple:"brand",dark:"brandn"};if(mp[v])v=mp[v];if(v=="auto")return v;for(var i=0;i<THS.length;i++)if(THS[i][0]==v)return v;return "brandn"}
 function getFS(){if(FSZ)return FSZ;var v=null;try{v=localStorage.getItem("fsz")}catch(e){}return v=="l"||v=="xl"?v:"n"}
@@ -9308,7 +9306,6 @@ background-repeat:no-repeat;background-size:16px 16px;background-position:right 
 :root[dir="rtl"] select:not([multiple]){background-position:left 9px center}
 :root[data-pal="brandn"] select:not([multiple]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B7CC7' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
 :root[data-pal="brand"] select:not([multiple]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A3B8C' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
-:root[data-pal="mocha"] select:not([multiple]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A88462' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
 :root[data-pal="rose"] select:not([multiple]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EC4899' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
 :root[data-pal="violet"] select:not([multiple]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F4A62A' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
 :root[data-pal="berry"] select:not([multiple]){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF6B6B' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
