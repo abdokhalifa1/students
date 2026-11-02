@@ -9569,7 +9569,7 @@ window.addEventListener("pagehide",function(){close(true)});
  /* بعد أي إضافة ناجحة بالنموذج الكامل: صفّر المسودة وقفل العرض الكامل */
  var _addS=window.addS;
  window.addS=addS=function(){var n0=S.students.length,r=_addS.apply(this,arguments);
-  if(S.students.length>n0){var d=WZ.d;d.name="";d.phone="";d.pp="";WZ.i=0;persist();if(GX.full){GX.full=false;GX.w=false;draw()}}
+  if(S.students.length>n0){var d=WZ.d;d.name="";d.phone="";d.pp="";WZ.i=0;persist();if(GX.full){var ns=S.students[S.students.length-1];GX.full=false;GX.w=true;WZ.ok=ns.name;WZ.id=ns.id;WZ.n=(WZ.n||0)+1;draw();try{window.scrollTo(0,0)}catch(e){}}}
   return r};
 
  /* ===== حفظ فوري: أي تعديل على بيانات طالب بيتحفظ لوحده بعد ثانية تقريباً، وكل ما تكتب في الإضافة بيتحفظ كمسودة ===== */
