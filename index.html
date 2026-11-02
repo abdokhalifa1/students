@@ -6568,7 +6568,7 @@ function ckQ(){var gi=gmGi(),q,i,g,B;for(i=0;i<6;i++){var nn=GM.n||0,ed=nn<7||nn
 
 /* ----- محرّك المسابقة ----- */
 var CK_IC='<svg class="ckic" viewBox="0 0 24 24"><g class="ck-bd"><circle cx="12" cy="16.7" r="5.4" fill="#FFD54A"/><path class="ck-wl" pathLength="1" d="M6.9 16.2c-1.5.1-2.2 1.2-2 2.4"/><path class="ck-wr" pathLength="1" d="M17.1 16.2c1.5.1 2.2 1.2 2 2.4"/><circle class="ck-ey" cx="9.8" cy="15.5" r=".95" fill="#312C51" stroke="none"/><circle class="ck-ey" cx="14.2" cy="15.5" r=".95" fill="#312C51" stroke="none"/><path d="M10.9 17.1h2.2L12 18.7z" fill="#E8590C" stroke="#E8590C" stroke-width="1" stroke-linejoin="round"/><path d="M10 22.1v1.3M14 22.1v1.3" stroke="#E8590C"/></g><g class="ck-cap"><path pathLength="1" d="M12 2.4l8.2 3.3-8.2 3.3-8.2-3.3z"/><path pathLength="1" d="M8 7.6v1.9c0 1.1 1.8 1.8 4 1.8s4-.7 4-1.8V7.6"/><g class="ck-ts"><path d="M20.2 5.7v4" stroke="var(--ka)"/><circle cx="20.2" cy="10.4" r="1" fill="var(--ka)" stroke="none"/></g></g><path class="ck-sp" d="M2 3.2v2.4M.8 4.4h2.4" stroke="var(--ka)" stroke-width="1.5" style="--sx:-2px;--sy:-2px"/><path class="ck-sp ck-sp2" d="M21.5 11.5v2.4M20.3 12.7h2.4" stroke="var(--ka)" stroke-width="1.5" style="--sx:2px;--sy:-2px"/></svg>';
-var CT={t:{nm:["تحدّي جدول الضرب","Times table challenge"],sy:"×÷",n:50,pen:10000,gen:gmQ},k:{nm:["أشطر كتكوت","Smartest chick"],sy:CK_IC,n:20,pen:10000,gen:ckQ}};
+var CT={t:{nm:["تحدّي جدول الضرب","Times table challenge"],sy:"×÷",n:50,pen:30000,mx:10,gen:gmQ},k:{nm:["أشطر كتكوت","Smartest chick"],sy:CK_IC,n:20,pen:30000,gen:ckQ}};
 function gmStart(c){if(GM.wait||GM.run||!ST.data||!window.FB||!FB.startPlay)return;GM.wait=1;
  FB.startPlay(ST.data.phone,ST.pc,c).then(function(r){GM.wait=0;if(ST.bd&&ST.bd[c])ST.bd[c].left=r.left;gmGo(c)}).catch(function(e){GM.wait=0;if(e&&e.code=="limit"){if(ST.bd)ST.bd[c]=null;draw()}})}
 function gmGo(c){GM.cx=0;clearTimeout(GM.cxt);GM.run=1;GM.c=c;GM.t0=Date.now();GM.n=0;GM.w=0;GM.res=null;GM.anim="";GM.rec=[];GM.q=CT[c].gen();clearInterval(GM.tm);GM.tm=setInterval(gmTick,100);draw()}
@@ -6585,10 +6585,11 @@ function gmTog(c){if(GM.run||GM.busy)return;GM.tc=c;
 function gmTick(){if(!ST.data||ST.tab!="home"||ST.set){gmStop();draw();return}var t=document.getElementById("gm_t");if(t)t.textContent=gmEl()}
 function gmQHtml(){var q=GM.q,lg=q.o.some(function(v){return String(v).replace(/<[^>]*>/g,'').length>6});return '<div class="gq'+(q.tx?' tx':'')+'">'+(q.tx?q.t:'<bdi dir="ltr">'+String(q.t).replace(/\u061F/g,'<bdi dir="ltr">\u061F</bdi>')+'</bdi>')+'</div><div class="go'+(lg?' sm':'')+'">'+q.o.map(function(v,i){return q.x&&q.x[i]?'<button class="btn no" disabled style="opacity:.45">'+v+'</button>':'<button class="btn" onclick="gmPick('+i+')">'+v+'</button>'}).join('')+'</div>'}
 function gmPick(i){if(!GM.run)return;window._apph=null;var q=GM.q,N=CT[GM.c].n,good=q.o[i]==q.c,p=document.getElementById("gm_p");
- if(good){GM.n++;if(GM.n>=N){gmFinish();return}GM.q=CT[GM.c].gen()}else{GM.w++;q.x=q.x||{};q.x[i]=1}
+ if(good){GM.n++;if(GM.n>=N){gmFinish();return}GM.q=CT[GM.c].gen()}else{GM.w++;if(CT[GM.c].mx&&GM.w>=CT[GM.c].mx){gmFail();return}q.x=q.x||{};q.x[i]=1}
  var e=document.getElementById("gm_q"),s=document.getElementById("gm_s"),b=document.getElementById("gm_b"),t=document.getElementById("gm_t");
  if(e)e.innerHTML=gmQHtml();if(s)s.textContent=GM.n;if(b)b.style.width=(GM.n/N*100)+"%";if(t)t.textContent=gmEl();
  if(p){p.className=good?"good":"bad";clearTimeout(GM.ft);GM.ft=setTimeout(function(){p.className=""},220)}}
+function gmFail(){var c=GM.c;gmStop();GM.q=null;GM.res={c:c,fail:1,w:GM.w,ms:0};GM.open=c;draw()}
 function gmFinish(){var c=GM.c,ms=Date.now()-GM.t0+GM.w*CT[c].pen;gmStop();GM.res={c:c,ms:ms,w:GM.w};GM.open=c;draw();
  if(window.FB&&FB.sendScore&&ST.data)FB.sendScore(ST.data.phone,ST.pc,c,ms,GM.w).then(function(){if(ST.bd)ST.bd[c]=null;ST.bg={};ST.lb={};gmArr(c)}).catch(function(){})}
 function gmSec(ms){return (ms/1000).toFixed(1)+L2("ث","s")}
@@ -6631,10 +6632,12 @@ function gmBar(c){var C=CT[c],N=C.n,an=GM.anim,op=GM.open==c,run=!!(GM.run&&GM.c
   b='<div id="gm_p"><div class="gt"><span class="gpill">\u23f1 <b id="gm_t">'+gmEl()+'</b></span><span class="gpill">\u2713 <b id="gm_s">'+GM.n+'</b>/'+N+'</span></div><div class="gbar"><i id="gm_b" style="width:'+(GM.n/N*100)+'%"></i></div></div><div id="gm_q">'+gmQHtml()+'</div><button type="button" class="btn gcx'+(GM.cx?' arm':'')+'" id="gm_x" onclick="gmCancel()">'+(GM.cx?L2("اضغط تاني للتأكيد","Tap again to confirm"):L2("حذف التحدي","Delete challenge"))+'</button>';
  }else{
   var lf=ST.bd&&ST.bd[c]?ST.bd[c].left:null,pn=C.pen/1000,res=GM.res&&GM.res.c==c;b+=pzBox(c);
-  if(res){
+  if(res&&GM.res.fail){
+   b+='<div class="gres"><div class="gtro">\U0001f6d1</div><b>'+L2("انتهى التحدي","Challenge over")+'</b><span class="mu">'+L2("وصلت لـ"+C.mx+" غلطات وده الحد الأقصى. المحاولة دي اتحسبت، ركّز وجرّب تاني.","You reached "+C.mx+" mistakes, the maximum. This attempt counted, so focus and try again.")+'</span></div>';
+  }else if(res){
    b+='<div class="gres">'+(GM.res.cf||(GM.res.cf=gmConf()))+'<div class="gtro">'+(GM.res.w?'\U0001f4aa':'\U0001f3c6')+'</div><span class="mu">'+L2("\u0648\u0642\u062a\u0643 \u0641\u064a "+N+" \u0633\u0624\u0627\u0644","Your time for "+N+" questions")+'</span><b>'+gmSec(GM.res.ms)+'</b><span class="mu">'+(GM.res.w?L2("\u063a\u0644\u0637\u0627\u062a: ","Mistakes: ")+GM.res.w+L2(" (+"+pn+"\u062b \u0644\u0643\u0644 \u063a\u0644\u0637\u0629)"," (+"+pn+"s each)"):L2("\u0645\u0646 \u063a\u064a\u0631 \u0648\u0644\u0627 \u063a\u0644\u0637\u0629 \U0001f44f","No mistakes \U0001f44f"))+'</span></div>';
   }else{
-   var st=[[L2("\u062d\u0644\u0651 "+N+" \u0633\u0624\u0627\u0644 \u0635\u062d","Solve "+N+" questions correctly"),L2("\u0623\u0633\u0631\u0639 \u0645\u0627 \u062a\u0642\u062f\u0631","as fast as you can")],[L2("\u0643\u0644 \u063a\u0644\u0637\u0629 \u0628\u062a\u0632\u0648\u0651\u062f "+pn+" \u062b\u0648\u0627\u0646\u064a","Each mistake adds "+pn+"s"),L2("\u0641\u0627\u0646\u062a\u0628\u0647 \u0644\u0625\u062c\u0627\u0628\u062a\u0643","so stay sharp")],[L2("\u0623\u0633\u0631\u0639 \u0648\u0642\u062a \u0644\u0643 \u0647\u0648 \u0627\u0644\u0644\u064a \u0628\u064a\u062a\u0633\u062c\u0651\u0644","Your fastest attempt counts"),L2("\u0648\u0628\u062a\u0638\u0647\u0631 \u0641\u064a \u0644\u0648\u062d\u0629 \u0635\u0641\u0643","and shows on your leaderboard")]];
+   var st=[[L2("\u062d\u0644\u0651 "+N+" \u0633\u0624\u0627\u0644 \u0635\u062d","Solve "+N+" questions correctly"),L2("\u0623\u0633\u0631\u0639 \u0645\u0627 \u062a\u0642\u062f\u0631","as fast as you can")],[L2("\u0643\u0644 \u063a\u0644\u0637\u0629 \u0628\u062a\u0632\u0648\u0651\u062f "+pn+" \u062b\u0648\u0627\u0646\u064a","Each mistake adds "+pn+"s"),(C.mx?L2("ولو غلطت "+C.mx+" مرات التحدي بيتقفل","and "+C.mx+" mistakes ends the challenge"):L2("\u0641\u0627\u0646\u062a\u0628\u0647 \u0644\u0625\u062c\u0627\u0628\u062a\u0643","so stay sharp"))],[L2("\u0623\u0633\u0631\u0639 \u0648\u0642\u062a \u0644\u0643 \u0647\u0648 \u0627\u0644\u0644\u064a \u0628\u064a\u062a\u0633\u062c\u0651\u0644","Your fastest attempt counts"),L2("\u0648\u0628\u062a\u0638\u0647\u0631 \u0641\u064a \u0644\u0648\u062d\u0629 \u0635\u0641\u0643","and shows on your leaderboard")]];
    b+='<div class="gstp">'+st.map(function(x,i){return '<div class="gsr" style="--i:'+i+'"><span class="gn">'+(i+1)+'</span><div><b>'+x[0]+'</b><small>'+x[1]+'</small></div></div>'}).join('')+'</div>';
   }
   if(ST.bd&&ST.bd[c]&&ST.bd[c].cl)b+='<div class="gnote">'+L2("\u0627\u0644\u062a\u062d\u062f\u064a\u0627\u062a \u0645\u0642\u0641\u0648\u0644\u0629 \u062f\u0644\u0648\u0642\u062a\u064a.","Challenges are closed right now.")+'</div>';else if(lf===0)b+='<div class="gnote">'+L2("\u062e\u0644\u0651\u0635\u062a \u0645\u062d\u0627\u0648\u0644\u0627\u062a\u0643 \u0627\u0644\u0646\u0647\u0627\u0631\u062f\u0629. \u0627\u0631\u062c\u0639 \u0628\u0643\u0631\u0629 \u0648\u0643\u0645\u0651\u0644 \u0645\u0630\u0627\u0643\u0631\u062a\u0643.","You've used today's attempts. Come back tomorrow.")+'</div>';
@@ -7549,6 +7552,8 @@ function startListeners(uid){
   },e=>console.error(e));
 }
 
+const _pen=c=>(typeof CT!="undefined"&&CT[c]&&CT[c].pen)||10000;
+const _eff=(x,c)=>(x.ms||0)+(x.w||0)*(_pen(c)-(x.pn||10000));
 window.FB={
   login:(e,p)=>signInWithEmailAndPassword(auth,e,p),
   logout:()=>signOut(auth),
@@ -7665,8 +7670,8 @@ window.FB={
     ms=Math.floor(+ms)||0;w=Math.floor(+w)||0;
     const gref=doc(db,"games",p.uid+"_"+c+"_"+p.sid);
     const gsnap=await getDoc(gref);
-    if(!gsnap.exists()||ms<gsnap.data().ms){
-      await setDoc(gref,{uid:p.uid,c,sid:p.sid,grade:p.grade,name:p.name,ms,w,at:Date.now()});
+    if(!gsnap.exists()||ms<_eff(gsnap.data(),c)){
+      await setDoc(gref,{uid:p.uid,c,sid:p.sid,grade:p.grade,name:p.name,ms,w,pn:_pen(c),at:Date.now()});
     }
   },
 
@@ -7679,7 +7684,7 @@ window.FB={
     const rows=[];let done=0;
     try{
       const qs=await getDocs(query(collection(db,"games"),where("uid","==",p.uid),where("c","==",c),where("grade","==",g)));
-      const all=[];qs.forEach(d=>all.push(d.data()));all.sort((x,y)=>(x.ms||0)-(y.ms||0));done=all.length;
+      const all=[];qs.forEach(d=>all.push(d.data()));all.forEach(x=>{x.ms=_eff(x,c)});all.sort((x,y)=>(x.ms||0)-(y.ms||0));done=all.length;
       const both={};
       try{const q2=await getDocs(query(collection(db,"games"),where("uid","==",p.uid),where("c","==",oc),where("grade","==",g)));q2.forEach(d=>{both[d.data().sid]=1})}catch(e){}
       all.slice(0,50).forEach((x,i)=>rows.push({sid:x.sid,name:String(x.name||"").split(" ")[0],ms:x.ms,w:x.w||0,rank:i+1,both:both[x.sid]?1:0}));
@@ -7696,7 +7701,7 @@ window.FB={
     const u=auth.currentUser;if(!u||u.isAnonymous)throw {code:"auth"};
     const qs=await getDocs(query(collection(db,"games"),where("uid","==",u.uid),where("c","==",c)));
     let rows=[];
-    qs.forEach(d=>{const g=d.data();rows.push({sid:g.sid,name:String(g.name||""),grade:g.grade,ms:g.ms||0,w:g.w||0})});
+    qs.forEach(d=>{const g=d.data();rows.push({sid:g.sid,name:String(g.name||""),grade:g.grade,ms:_eff(g,c),w:g.w||0})});
     try{if(typeof S!="undefined"&&S&&Array.isArray(S.students)&&S.students.length){const ok={};S.students.forEach(x=>{ok[x.id]=1});rows=rows.filter(r=>ok[r.sid])}}catch(e){}
     rows.sort((a,b)=>a.ms-b.ms);
     return rows;
