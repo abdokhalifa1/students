@@ -875,9 +875,9 @@ function lpDown(id,k){clearTimeout(lpT);if(k!="u")return;lpT=setTimeout(function
 function lpUp(){clearTimeout(lpT)}
 function lpClick(id,k){if(Date.now()-lpTime<900)return;if(adj&&adj.id==id)return;showD(id,k)}
 function rlOk(){var el=document.getElementById("rl");if(el){var tr=el.querySelector(".rlt"),i=Math.max(0,Math.min(Math.round(el.scrollLeft/56),tr.children.length-1));setCnt(+el.dataset.id,el.dataset.k,i,el.dataset.m||undefined)}adj=null;draw()}
-function curCnt(id,k,mon){var x=st({id:id},mon&&mon!="*"?mon:undefined);return k=="a"?x.a:k=="b"?x.b:x.u}
+function curCnt(id,k,mon){if(k=="u")mon="*";var x=st({id:id},mon&&mon!="*"?mon:undefined);return k=="a"?x.a:k=="b"?x.b:x.u}
 function setCnt(id,k,target,mon){
-  mon=mon||fdate.slice(0,7);var all=mon=="*",cm=all?fdate.slice(0,7):mon;
+  if(k=="u")mon="*";mon=mon||fdate.slice(0,7);var all=mon=="*",cm=all?fdate.slice(0,7):mon;
   var cur=curCnt(id,k,mon);
   while(cur<target){
     var d=ld(new Date());if(d.slice(0,7)!=cm)d=cm+"-01";
@@ -894,7 +894,7 @@ function setCnt(id,k,target,mon){
   }
   while(cur>target){
     var L=Object.keys(S.rec).filter(function(key){var x=key.split("|"),r=S.rec[key];return x[1]==id&&(all||x[0].slice(0,7)==mon)&&(k=="a"?r.a===1:k=="b"?r.a===0:(r.a===1&&r.p===0))}).sort();
-    var kk=L[L.length-1];if(!kk)break;
+    var kk=L[0];if(!kk)break;
     if(k=="u")S.rec[kk].p=1;else delete S.rec[kk];
     cur--;
   }
@@ -910,10 +910,10 @@ function rlInit(){
   el.scrollLeft=cur*W;mark();
   el.addEventListener("scroll",mark,{passive:true});
 }
-function cnt(s,mon,amt){var x=st(s,mon),h='<div class="cnt">'+(amt?[['b','ab',x.b,1],['u','np',x.u,1]]:[['a','pr',x.a,0],['b','ab',x.b,1],['u','np',x.u,1]]).map(function(c){return '<button class="'+(cd&&cd.id==s.id&&cd.k==c[0]?'on':'')+(adj&&adj.id==s.id&&adj.k==c[0]?' adj':'')+'" style="touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none" oncontextmenu="return false" onpointerdown="lpDown('+s.id+',\''+c[0]+'\')" onpointerup="lpUp()" onpointerleave="lpUp()" onpointercancel="lpUp()" onclick="lpClick('+s.id+',\''+c[0]+'\')">'+t(c[1])+' <b'+(c[3]&&c[2]?' class="owe"':'')+'>'+c[2]+'</b></button>'}).join('')+(amt?'<span class="cam">'+L2("المبلغ","Amount")+' <b'+(x.o?' class="owe"':'')+'>'+x.o+' '+t("cur")+'</b></span>':'')+'</div>';
+function cnt(s,mon,amt){var x=st(s,mon),xa=st(s);x.u=xa.u;x.o=xa.o;var h='<div class="cnt">'+(amt?[['b','ab',x.b,1],['u','np',x.u,1]]:[['a','pr',x.a,0],['b','ab',x.b,1],['u','np',x.u,1]]).map(function(c){return '<button class="'+(cd&&cd.id==s.id&&cd.k==c[0]?'on':'')+(adj&&adj.id==s.id&&adj.k==c[0]?' adj':'')+'" style="touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none" oncontextmenu="return false" onpointerdown="lpDown('+s.id+',\''+c[0]+'\')" onpointerup="lpUp()" onpointerleave="lpUp()" onpointercancel="lpUp()" onclick="lpClick('+s.id+',\''+c[0]+'\')">'+t(c[1])+' <b'+(c[3]&&c[2]?' class="owe"':'')+'>'+c[2]+'</b></button>'}).join('')+(amt?'<span class="cam">'+L2("المبلغ","Amount")+' <b'+(x.o?' class="owe"':'')+'>'+x.o+' '+t("cur")+'</b></span>':'')+'</div>';
 if(adj&&adj.id==s.id){var mm=mon||"",N=rlMax(s.id,adj.k,mon),items="";for(var i=0;i<=N;i++)items+='<i>'+i+'</i>';
 h+='<div class="rlw"><div class="rlm"></div><div id="rl" class="rl" data-id="'+s.id+'" data-k="'+adj.k+'" data-m="'+mm+'"><div class="rlt">'+items+'</div></div><button class="btn pr" onclick="rlOk()">✓</button></div>'}
-if(cd&&cd.id==s.id){var L=datesOf(s.id,cd.k).filter(function(d){return !mon||d.slice(0,mon.length)==mon});h+='<div class="dl">'+(L.length?L.map(function(d){return '<span>'+dayName(d)+' <bdi>'+d+'</bdi></span>'}).join(''):'<span>-</span>')+'</div>'}return h}
+if(cd&&cd.id==s.id){var L=datesOf(s.id,cd.k).filter(function(d){return cd.k=="u"||!mon||d.slice(0,mon.length)==mon});h+='<div class="dl">'+(L.length?L.map(function(d){return '<span>'+dayName(d)+' <bdi>'+d+'</bdi></span>'}).join(''):'<span>-</span>')+'</div>'}return h}
 function att(){var gs=grades(),h='';
 if(!gs.length)return '';
 if(gs.indexOf(fg)<0)fg=gs[0];
@@ -10178,6 +10178,65 @@ window.kpOk=function(){if(!KP.inp)return;if(isW()){kpClose();if(window.wzGo)wzGo
 document.addEventListener("pointerdown",function(e){var b=e.target.closest&&e.target.closest("#kpad .btn");if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");clearTimeout(b._ht);b._ht=setTimeout(function(){b.classList.remove("hit")},430)}},true);
 document.addEventListener("pointerdown",function(e){if(!KP.el||!KP.el.classList.contains("on"))return;var t=e.target;if(t.closest&&(t.closest("#kpad")||t.closest(".ph")))return;kpClose()},true);
 var _kd=window.draw;if(typeof _kd=="function"){window.draw=draw=function(){var r=_kd.apply(this,arguments);try{if(KP.el&&KP.el.classList.contains("on")){var n=KP.inp&&document.getElementById(KP.inp.id);if(!n||!document.body.contains(n)){KP.inp=null;KP.el.classList.remove("on");pad(false);KP.pad=null}else{KP.inp=n;n.classList.add("kpf");show()}}}catch(e){}return r}}
+})();
+</script>
+<script id="ak-dup-students">
+/* ===== الطلاب المتشابهة: جوه قسم الطالب في الترس (عرض فقط، مفيش أي تعديل في البيانات) ===== */
+(function(){
+ var DUPO=false;
+ function ar(s){return String(s==null?"":s).replace(/[\u0660-\u0669]/g,function(c){return c.charCodeAt(0)-1632}).replace(/[\u06F0-\u06F9]/g,function(c){return c.charCodeAt(0)-1776})}
+ function nn(s){return ar(s).toLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/[^a-z0-9\u0621-\u064A ]/g," ").replace(/\s+/g," ").trim()}
+ function np(p){var d=ar(p).replace(/[^0-9]/g,"");if(d.indexOf("00")==0)d=d.slice(2);if(d.indexOf("20")==0&&d.length>=11)d=d.slice(2);d=d.replace(/^0+/,"");return d.length>=7?d:""}
+ function lev(a,b,mx){if(Math.abs(a.length-b.length)>mx)return mx+1;var p=[],i,j;for(j=0;j<=b.length;j++)p[j]=j;for(i=1;i<=a.length;i++){var c=[i],mn=i;for(j=1;j<=b.length;j++){c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]==b[j-1]?0:1));if(c[j]<mn)mn=c[j]}if(mn>mx)return mx+1;p=c}return p[b.length]}
+ function near(a,b){if(a==b)return false;var A=a.split(" "),B=b.split(" ");
+  if(A.slice().sort().join(" ")==B.slice().sort().join(" "))return true;
+  var sh=A.length<=B.length?A:B,lo=A.length<=B.length?B:A;
+  if(sh.length>=2&&sh.length<lo.length&&sh.every(function(w){return lo.indexOf(w)>=0}))return true;
+  var mx=Math.min(a.length,b.length)>=12?2:(Math.min(a.length,b.length)>=5?1:0);
+  return mx>0&&lev(a,b,mx)<=mx}
+ function groupsBy(L,keyf){var m={},o=[];L.forEach(function(s){var k=keyf(s);if(!k)return;(m[k]=m[k]||[]).push(s)});for(var k in m)if(m[k].length>1)o.push(m[k]);return o}
+ function scan(){
+  var L=(window.S&&S.students)||[],R={};
+  R.sameName=groupsBy(L,function(s){return nn(s.name)});
+  var names=[],byN={};L.forEach(function(s){var k=nn(s.name);if(!k)return;if(!byN[k]){byN[k]=[];names.push(k)}byN[k].push(s)});
+  var par={};names.forEach(function(k){par[k]=k});function f(x){while(par[x]!=x){par[x]=par[par[x]];x=par[x]}return x}
+  for(var i=0;i<names.length;i++)for(var j=i+1;j<names.length;j++)if(near(names[i],names[j])){par[f(names[i])]=f(names[j])}
+  var cl={};names.forEach(function(k){(cl[f(k)]=cl[f(k)]||[]).push(k)});
+  R.nearName=[];for(var r in cl)if(cl[r].length>1){var g=[];cl[r].forEach(function(k){g=g.concat(byN[k])});R.nearName.push(g)}
+  R.phone=groupsBy(L,function(s){return np(s.phone)});
+  R.parent=groupsBy(L,function(s){return np(s.parentPhone)});
+  var pm={};L.forEach(function(s){var k=np(s.phone);if(k)(pm[k]=pm[k]||[]).push(s)});
+  R.cross=[];L.forEach(function(s){var k=np(s.parentPhone);if(!k||!pm[k])return;var o=pm[k].filter(function(x){return x.id!=s.id});if(o.length)R.cross.push([s].concat(o))});
+  R.own=L.filter(function(s){var a=np(s.phone);return a&&a==np(s.parentPhone)}).map(function(s){return [s]});
+  R.code=groupsBy(L,function(s){return s.code?String(s.code):""});
+  return R}
+ function line(s){var x=window.st?st(s):{a:0,b:0};return '<div style="padding:6px 0;border-top:1px solid var(--bd)"><b>'+esc(s.name)+'</b> <span class="mu">'+esc(gn(s.grade))+' · '+esc(gd(s.group))+'</span><div class="mu" dir="ltr" style="text-align:start">'+esc(s.phone||"-")+' | '+esc(s.parentPhone||"-")+'</div><div class="mu">'+L2("حصص مسجّلة","Recorded classes")+': '+(x.a+x.b)+'</div><div class="row" style="margin-top:6px"><button class="btn pr" onclick="dupFile('+s.id+')">'+L2("ملف الطالب","Student file")+'</button><button class="btn" onclick="dupEdit('+s.id+')">'+t("edit")+'</button></div></div>'}
+ function sec(title,note,G){var h='<div class="card"><div class="nm">'+title+' <span class="pill'+(G.length?'':' ok')+'">'+G.length+'</span></div>'+(note?'<div class="mu" style="margin-bottom:6px">'+note+'</div>':'');
+  if(!G.length)h+='<div class="mu">'+L2("لا يوجد","None found")+'</div>';
+  G.forEach(function(g,i){h+='<div style="margin-top:8px;padding:8px 10px;border-radius:14px;background:var(--soft)"><div class="mu" style="font-size:calc(12px*var(--fs,1))">'+L2("مجموعة","Group")+' '+(i+1)+' · '+g.length+'</div>'+g.map(line).join("")+'</div>'});
+  return h+'</div>'}
+ function total(R){return R.sameName.length+R.nearName.length+R.phone.length+R.parent.length+R.cross.length+R.own.length+R.code.length}
+ window.dupTog=function(){DUPO=!DUPO;draw()};
+ function sById(id){return(S.students||[]).filter(function(x){return x.id==id})[0]}
+ window.dupFile=function(id){var s=sById(id);if(!s)return;LG2.open="";LG2.anim="";LG2.busy=0;SDT=true;SDF.id=s.id;lgTog(s.grade);
+  setTimeout(function(){var e=document.querySelector(".sdt-r.on");if(e)e.scrollIntoView({block:"center"})},500)};
+ window.dupEdit=function(id){var s=sById(id);if(!s)return;SG.open="";SG.anim="";SG.busy=0;go("stu");
+  setTimeout(function(){sgTog(s.grade);setTimeout(function(){editS(s.id)},60)},30)};
+ function block(){var R=scan(),n=total(R);
+  var h='<div class="gb2" onclick="dupTog()"><span class="gsym"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3 2.7-5 6-5s6 2 6 5M16 5.5a3 3 0 010 5.5M18 15c2 .6 3 2.2 3 5"/></svg></span><b>'+L2("الطلاب المتشابهة","Similar students")+(n?' <span class="pill">'+n+'</span>':'')+'</b><span class="gchev'+(DUPO?' up':'')+'">\u2304</span></div>';
+  if(!DUPO)return h;
+  h+='<div class="gx">'
+   +sec(L2("نفس الاسم","Same name"),L2("الأسماء متطابقة بعد تجاهل الهمزات والتاء المربوطة والمسافات.","Identical after ignoring hamza, ta marbuta and spacing."),R.sameName)
+   +sec(L2("أسماء متقاربة","Similar names"),L2("ترتيب مختلف، أو اسم ناقص، أو فرق حرف في الكتابة.","Different order, shorter form, or a one-letter typo."),R.nearName)
+   +sec(L2("نفس رقم الطالب","Same student phone"),"",R.phone)
+   +sec(L2("نفس رقم ولي الأمر","Same parent phone"),L2("غالبًا إخوة، راجعهم.","Often siblings, review them."),R.parent)
+   +sec(L2("رقم طالب = رقم ولي أمر لطالب آخر","Student phone = another's parent phone"),"",R.cross)
+   +sec(L2("رقم الطالب = رقم ولي أمره","Student phone = own parent phone"),L2("غالبًا خطأ في إدخال الرقم.","Likely a data-entry mistake."),R.own)
+   +sec(L2("نفس كود الدخول","Same login code"),L2("المفروض كل طالب له كود مختلف.","Every student should have a unique code."),R.code)
+   +'</div>';
+  return h}
+ var _s=window.stsView;
+ if(typeof _s=="function")window.stsView=stsView=function(){return _s.apply(this,arguments)+block()};
 })();
 </script>
 </body>
