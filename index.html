@@ -563,7 +563,7 @@ var last=null,n=0;setInterval(function(){var b=document.querySelector(".aig");if
 #avc .avc-r{display:flex;gap:8px;margin-top:12px}
 #avc .avc-r .btn{flex:1}
 </style>
-<style id="pm-css">.pmg{position:absolute;left:168px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:var(--soft);color:var(--pr);padding:0;line-height:1;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}.pmg svg{width:24px;height:24px}.pmg:active{transform:translateY(-50%) scale(.9)}.card:has(>.pmg)>.calcg,.card:has(>.pmg)>.demob,.card:has(>.pmg)>.aig,.card:has(>.pmg)>.pmg{width:40px;height:40px;right:auto}.card:has(>.pmg)>.calcg{left:12px}.card:has(>.pmg)>.demob{left:56px}.card:has(>.pmg)>.aig{left:100px}.card:has(>.pmg)>.pmg{left:144px}html[dir=ltr] .card:has(>.pmg)>.calcg,html[dir=ltr] .card:has(>.pmg)>.demob,html[dir=ltr] .card:has(>.pmg)>.aig,html[dir=ltr] .card:has(>.pmg)>.pmg{left:auto}html[dir=ltr] .card:has(>.pmg)>.calcg{right:12px}html[dir=ltr] .card:has(>.pmg)>.demob{right:56px}html[dir=ltr] .card:has(>.pmg)>.aig{right:100px}html[dir=ltr] .card:has(>.pmg)>.pmg{right:144px}.card:has(>.pmg)>.aig svg,.card:has(>.pmg)>.aig i{max-width:100%}</style>
+<style id="pm-css">.pmg{position:absolute;left:168px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:var(--soft);color:var(--pr);padding:0;line-height:1;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}.pmg svg{width:24px;height:24px}.pmg:active{transform:translateY(-50%) scale(.9)}.lbm{flex:none;width:32px;height:32px;border-radius:50%;border:0;background:var(--card);color:var(--pr);padding:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}.lbm svg{width:18px;height:18px}.card:has(>.pmg)>.calcg,.card:has(>.pmg)>.demob,.card:has(>.pmg)>.aig,.card:has(>.pmg)>.pmg{width:40px;height:40px;right:auto}.card:has(>.pmg)>.calcg{left:12px}.card:has(>.pmg)>.demob{left:56px}.card:has(>.pmg)>.aig{left:100px}.card:has(>.pmg)>.pmg{left:144px}html[dir=ltr] .card:has(>.pmg)>.calcg,html[dir=ltr] .card:has(>.pmg)>.demob,html[dir=ltr] .card:has(>.pmg)>.aig,html[dir=ltr] .card:has(>.pmg)>.pmg{left:auto}html[dir=ltr] .card:has(>.pmg)>.calcg{right:12px}html[dir=ltr] .card:has(>.pmg)>.demob{right:56px}html[dir=ltr] .card:has(>.pmg)>.aig{right:100px}html[dir=ltr] .card:has(>.pmg)>.pmg{right:144px}.card:has(>.pmg)>.aig svg,.card:has(>.pmg)>.aig i{max-width:100%}</style>
 <style id="attrail-css">
 .attbox{position:relative;padding-right:40px}
 .attcol{position:absolute;right:0;top:0;bottom:0;width:30px}
@@ -1198,13 +1198,13 @@ function sdtKeep(f){var b=document.querySelector(".gmb"),y=b?b.scrollTop:0;f();v
 function sdtSettle(id){var e=document.getElementById("sn"+id),v=+(e&&e.value)||0;sdtKeep(function(){settle(id,v)})}
 function sdtDel(id){sdtKeep(function(){delS(id)})}
 Object.assign(D.ar,{msg:"الرسائل"});Object.assign(D.en,{msg:"Messages"});
-var PM={m:"p",g:"",r:"",sid:"",q:"",ok:0},PMD={},PMK={},PMV=null;
+var PM={m:"p",g:"",r:"",sid:"",q:"",ok:0,ref:null},PMD={},PMK={},PMV=null;
 function pmNorm(x){return String(x||"").toLowerCase().replace(/[ً-ْـ]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").trim()}
 function pmKey(){return PM.m=="p"?"p"+PM.sid:"g"}
 function pmStu(){var ws=pmNorm(PM.q).split(/\s+/).filter(Boolean);
 return (S.students||[]).filter(function(s){if(PM.g&&s.grade!=PM.g)return false;if(PM.r&&String(s.group)!=String(PM.r))return false;var n=pmNorm(s.name);return ws.every(function(w){return n.indexOf(w)>-1})}).sort(function(a,b){return String(a.name).localeCompare(String(b.name),"ar")})}
 function pmRows(){var L=pmStu();return L.length?L.map(function(s){var o=String(PM.sid)==String(s.id);return '<div class="card sdt-r'+(o?' on':'')+'" style="margin:0 0 8px;cursor:pointer" onclick="pmPick(\''+s.id+'\')"><b>'+esc(s.name)+'</b> <span class="mu">'+esc(gn(s.grade))+' · '+esc(gd(s.group))+'</span></div>'}).join(''):'<div class="mu">'+t("none")+'</div>'}
-function pmPick(id){PM.sid=String(PM.sid)==String(id)?"":String(id);PM.ok=0;draw()}
+function pmPick(id){PM.sid=String(PM.sid)==String(id)?"":String(id);PM.ok=0;PM.ref=null;draw()}
 function pmRefresh(){var e=document.getElementById("pml");if(e)e.innerHTML=pmRows()}
 function pmVoice(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SR){alert(L2("البحث بالصوت مش مدعوم في المتصفح ده. جرّب Chrome أو Safari.","Voice search isn't supported in this browser. Try Chrome or Safari."));return}
@@ -1221,7 +1221,7 @@ function pmCompose(){var k=pmKey(),v=PMD[k]||"",kd=PMK[k]||"n",tg;
   tg=L2("رسالة خاصة إلى: ","Private message to: ")+s.name}
  else{if(!PM.g)return '<div class="card mu">'+L2("اختار الصف الأول","Choose a grade first")+'</div>';
   tg=L2("رسالة عامة إلى: ","Public message to: ")+gn(PM.g)+" · "+(PM.r?gd(PM.r):L2("كل المجموعات","all groups"))}
- return '<div class="card"><div class="nm">'+esc(tg)+'</div>'
+ return '<div class="card"><div class="nm">'+esc(tg)+'</div>'+(PM.ref?'<div style="margin-top:8px">'+pmRefH(PM.ref)+'<button type="button" class="btn" style="min-height:34px" onclick="PM.ref=null;draw()">\u2715 '+L2("إزالة المرفق","Remove attachment")+'</button></div>':'')
  +'<div class="row" style="margin-top:8px"><button type="button" class="btn '+(kd=="n"?"pr":"")+'" onclick="PMK[\''+k+'\']=\'n\';draw()">'+L2("رسالة","Message")+'</button><button type="button" class="btn no" style="'+(kd=="w"?"box-shadow:0 0 0 3px color-mix(in srgb,var(--no) 35%,transparent)":"opacity:.55")+'" onclick="PMK[\''+k+'\']=\'w\';draw()">'+t("ntwarn")+'</button></div>'
  +'<textarea id="pmt" rows="4" maxlength="600" placeholder="'+L2("اكتب رسالتك هنا...","Type your message here...")+'" oninput="PMD[\''+k+'\']=this.value;PM.ok=0" style="width:100%;box-sizing:border-box;resize:vertical;min-height:90px;margin-top:8px;font:inherit;font-size:calc(15px*var(--fs,1));padding:10px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx)">'+esc(v)+'</textarea>'
  +(PM.ok?'<div class="mu" style="margin-top:8px">✓ '+L2("الرسالة اتبعتت","Message sent")+'</div>':'')
@@ -1233,19 +1233,33 @@ function pmSend(){var k=pmKey(),el=document.getElementById("pmt"),m=((el?el.valu
  else{if(!PM.g){alert(L2("اختار الصف الأول","Choose a grade first"));return}
   var has=(S.students||[]).some(function(x){return x.grade==PM.g&&(!PM.r||String(x.group)==String(PM.r))});if(!has){alert(t("nostud"));return}
   n.grade=PM.g;if(PM.r)n.grp=/^\d+$/.test(PM.r)?+PM.r:PM.r}
+ if(PM.ref)n.ref=PM.ref;
  S.notices=S.notices||[];S.notices.push(n);if(window.cloudSendNt)cloudSendNt(n);
- PMD[k]="";PM.ok=1;draw()}
+ PMD[k]="";PM.ref=null;PM.ok=1;draw()}
 function pmView(){if(!gHas(PM.r,PM.g))PM.r="";
  var pv=PM.m=="p",h='<div class="card"><div class="nm">'+L2("الرسائل","Messages")+'</div><div class="mu" style="font-size:calc(13px*var(--fs,1))">'+L2("رسالة خاصة لطالب، أو رسالة عامة لصف أو مجموعة","A private message to one student, or a public message to a grade or group")+'</div>'
- +'<div class="row" style="margin-top:10px"><button type="button" class="btn '+(pv?"pr":"")+'" onclick="PM.m=\'p\';PM.ok=0;draw()">'+L2("رسالة خاصة","Private")+'</button><button type="button" class="btn '+(!pv?"pr":"")+'" onclick="PM.m=\'g\';PM.ok=0;draw()">'+L2("رسالة عامة","Public")+'</button></div>'
+ +'<div class="row" style="margin-top:10px"><button type="button" class="btn '+(pv?"pr":"")+'" onclick="PM.m=\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة خاصة","Private")+'</button><button type="button" class="btn '+(!pv?"pr":"")+'" onclick="PM.m=\'g\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة عامة","Public")+'</button></div>'
  +'<div class="mu" style="margin-top:8px;font-size:calc(13px*var(--fs,1))">'+(pv?L2("خاصة: بتوصل لطالب واحد بس.","Private: reaches one student only."):L2("عامة: بتوصل لكل طلاب الصف أو المجموعة.","Public: reaches the whole grade or group."))+'</div>'
- +'<div class="row" style="margin-top:10px"><select onchange="PM.g=this.value;PM.r=\'\';PM.sid=\'\';PM.ok=0;draw()"><option value="">'+(pv?L2("كل الصفوف","All grades"):L2("اختار الصف","Choose grade"))+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==PM.g?" selected":"")+'>'+esc(gn(g))+'</option>'}).join("")+'</select>'
- +'<select onchange="PM.r=this.value;PM.sid=\'\';PM.ok=0;draw()"><option value="">'+L2("كل المجموعات","All groups")+'</option>'+gFlt(PM.r,PM.g)+'</select></div>';
+ +'<div class="row" style="margin-top:10px"><select onchange="PM.g=this.value;PM.r=\'\';PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+(pv?L2("كل الصفوف","All grades"):L2("اختار الصف","Choose grade"))+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==PM.g?" selected":"")+'>'+esc(gn(g))+'</option>'}).join("")+'</select>'
+ +'<select onchange="PM.r=this.value;PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+L2("كل المجموعات","All groups")+'</option>'+gFlt(PM.r,PM.g)+'</select></div>';
  if(pv)h+='<div class="row" style="margin-top:10px;flex-wrap:nowrap"><input id="pmq" placeholder="'+t("search")+'" value="'+esc(PM.q)+'" oninput="PM.q=this.value;pmRefresh()"><button class="btn sq" id="pmmic" type="button" aria-label="'+L2("بحث بالصوت","Voice search")+'" onclick="pmVoice()">'+(typeof icoH=="function"?icoH('mic','bare'):"🎤")+'</button></div><div id="pml" style="margin-top:10px;max-height:260px;overflow:auto">'+pmRows()+'</div>';
  h+='</div>'+pmCompose();
  var L=(S.notices||[]).slice().sort(function(a,b){return b.at-a.at}).slice(0,40);
  if(L.length){h+='<div class="mu" style="margin:10px 4px 4px">'+L2("الرسائل المرسلة","Sent messages")+'</div>';L.forEach(function(n){h+=ntCard(n,true,true)})}
  return h}
+var PMIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg>';
+function pmOpen(o){PM.m=o.m;PM.g=o.g||"";PM.r=o.r||"";PM.sid=o.sid!=null?String(o.sid):"";PM.q="";PM.ok=0;PM.ref=o.ref||null;PM.from={tab:tab,rtab:rtab};var k=pmKey();PMD[k]=o.text||"";PMK[k]=o.kind||"n";go("msg")}
+function pmBack(){var b=PM.from;PM.from=null;if(b&&b.tab=="rep")gOpenTab("rep",b.rtab);else if(b&&b.tab&&b.tab!="msg")go(b.tab);else go("home")}
+function pmLbBtn(r,rk){return '<button type="button" class="lbm" onclick="event.stopPropagation();pmFromLb(\''+r.sid+'\','+rk+',\''+TL.open+'\')" aria-label="'+L2("رسالة","Message")+'">'+PMIC+'</button>'}
+function pmFromLb(sid,rk,c){var R=(TL.bd&&TL.bd[c])||[],r=R.filter(function(x){return String(x.sid)==String(sid)})[0],st=(S.students||[]).filter(function(x){return String(x.id)==String(sid)})[0];
+ if(!r||!st)return;pmOpen({m:"p",g:r.grade,sid:sid,ref:{t:"lb",c:c,rk:rk,nm:String(st.name||r.name).split(" ")[0],gr:r.grade,ms:r.ms||0,w:r.w||0}})}
+function pmFromHw(id){var w=(S.hw||[]).filter(function(x){return String(x.id)==String(id)})[0];if(!w)return;
+ pmOpen({m:"g",g:w.grade,ref:{t:"hw",title:w.title||"",gr:w.grade,due:w.due||0}})}
+function pmRefH(r){if(!r)return '';var h;
+ if(r.t=="lb"){var C=CT[r.c];h=(C?'<small class="mu">'+L2(C.nm[0],C.nm[1])+'</small>':'')+lbRowH({ms:r.ms,w:r.w},r.rk,false,r.nm,r.gr,1)}
+ else if(r.t=="hw"){h='<div class="gbr"><span class="rk">\ud83d\udcda</span><b>'+esc(r.title||t("hw"))+(r.gr?' <small style="direction:rtl">'+esc(gn(r.gr))+'</small>':'')+'</b>'+(r.due?'<small>'+esc(ld(new Date(r.due)))+'</small>':'')+'</div>'}
+ else return '';
+ return '<div style="margin:0 0 8px;padding-inline-start:8px;border-inline-start:4px solid var(--pr)">'+h+'</div>'}
 function sdtSend(s,x){var m=anaMsg(s,x),pw=wa(s.parentPhone,m),sw=wa(s.phone,m);function b(u,lb,no){return u?'<a class="btn pr" target="_blank" rel="noopener" href="'+u+'">'+lb+'</a>':'<span class="btn mu">'+no+'</span>'}
 return '<div class="row" style="margin-top:8px">'+b(pw,L2("إرسال التقرير لولي الأمر","Send report to parent"),t("nopp"))+b(sw,L2("إرسال التقرير للطالب","Send report to student"),L2("لا يوجد رقم الطالب","No student number"))+'</div>'}
 function sdtBody(s){var x=st(s);return '<div onclick="event.stopPropagation()" style="margin-top:10px;border-top:1px solid var(--bd);padding-top:10px;font-size:calc(14px*var(--fs,1))"><div>'+gn(s.grade)+', '+esc(gd(s.group))+'</div><div dir="ltr" style="text-align:start">'+esc(s.phone||"-")+' | '+esc(s.parentPhone||"-")+'</div><div class="stat"><div><b>'+x.a+'</b>'+t("pr")+'</div><div><b>'+x.b+'</b>'+t("ab")+'</div><div><b>'+x.p+'</b>'+t("pd")+'</div><div><b class="'+(x.u?"owe":"")+'">'+x.u+'</b>'+t("np")+'</div></div><div class="mu" style="margin-top:6px">'+t("owed")+': '+x.o+' '+t("cur")+' | '+L2("سعر الحصة","Price")+': '+sp(s)+'</div>'+sdtSend(s,x)+'<div class="row" style="margin-top:8px"><input id="sn'+s.id+'" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" placeholder="'+t("howm")+'" style="flex:1 1 40%"><button class="btn" onclick="sdtSettle('+s.id+')">'+t("setn")+'</button></div>'+rsBtn(s)+frBtn(s)+'<div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><button class="btn no" onclick="sdtDel('+s.id+')">'+(pd==s.id?t("conf"):t("del"))+'</button></div></div>'}
@@ -1385,6 +1399,7 @@ function hwView(){
   var q="'"+w.id+"'";
   h+='<div class="card"><div class="nm">'+esc(w.title||t("hw"))+' <span class="pill">'+gn(w.grade)+'</span><span class="pill">'+esc(w.date)+'</span>'+(w.due?'<span class="pill due">'+dueTxt(w)+'</span>':'')+'</div>'+gal(w);
   h+='<div class="row" style="margin-top:8px">';
+  h+='<button class="btn" onclick="pmFromHw('+q+')">'+PMIC+' '+L2("رسالة","Message")+'</button>';
   h+='<button class="btn no" onclick="delHw('+q+')">'+(HWS["d"+w.id]===1?t("conf"):t("delhw"))+'</button></div>';
   if(false){
    h+='<div style="margin-top:10px">';
@@ -1481,7 +1496,7 @@ function lsView(){var d=dayK(),rt=S.lang=="ar",R=(window.cloudReps?cloudReps():[
    C.slice().reverse().concat([[0,L2("لم يردّوا","No reply"),"var(--bd)"]]).forEach(function(c){var m=ss.filter(function(s){return(by[s.id]||0)==c[0]});if(!m.length)return;h+='<div style="display:flex;align-items:center;gap:6px;margin-top:12px">'+dot(c[2])+'<b style="font-size:calc(14px*var(--fs,1))">'+c[1]+'</b><span class="mu">'+m.length+'</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+chip(m)+'</div>'});if(NN.length)h+='<div class="lbl" style="margin-top:14px">'+L2("ملاحظات الطلاب","Student notes")+'</div>'+NN.map(function(x){var st0=ids[x.sid],rv=by[x.sid],cc=rv?C.filter(function(c){return c[0]==rv})[0][2]:'var(--bd)';return'<div class="v3n"><div style="display:flex;align-items:center;gap:6px">'+dot(cc)+'<b style="font-size:calc(14px*var(--fs,1))">'+AV(st0)+esc(st0.name)+'</b></div><div class="rnb">'+esc(x.text)+'</div></div>'}).join("")}
   h+='</div>'});
  return h}
-function ntCard(n,showG,del){var w=n.kind=="w";return '<div class="card" style="border-inline-start:6px solid '+(w?'var(--no)':'var(--pr)')+'"><div class="nm">'+(w?icoH('warn','bare')+' '+t("ntwarn"):icoH('info','bare')+' '+L2("رسالة","Message"))+' <span class="pill">'+(n.sid!=null?L2("رسالة خاصة","Private message"):L2("رسالة عامة","Public message"))+'</span>'+(showG?' <span class="pill">'+gn(n.grade)+'</span>':'')+(showG&&n.sid!=null?'<span class="pill">'+esc(((S.students||[]).filter(function(x){return String(x.id)==String(n.sid)})[0]||{}).name||"")+'</span>':'')+(n.grp?'<span class="pill">'+t("grp")+' '+n.grp+'</span>':'')+'<span class="pill"><bdi>'+ld(new Date(n.at))+'</bdi></span></div><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div>'+(del?'<div class="row" style="margin-top:8px"><button class="btn no" style="min-height:36px" onclick="delNt(\''+n.id+'\')">'+(HWS["n"+n.id]===1?t("conf"):t("del"))+'</button></div>':'')+'</div>'}
+function ntCard(n,showG,del){var w=n.kind=="w";return '<div class="card" style="border-inline-start:6px solid '+(w?'var(--no)':'var(--pr)')+'"><div class="nm">'+(w?icoH('warn','bare')+' '+t("ntwarn"):icoH('info','bare')+' '+L2("رسالة","Message"))+' <span class="pill">'+(n.sid!=null?L2("رسالة خاصة","Private message"):L2("رسالة عامة","Public message"))+'</span>'+(showG?' <span class="pill">'+gn(n.grade)+'</span>':'')+(showG&&n.sid!=null?'<span class="pill">'+esc(((S.students||[]).filter(function(x){return String(x.id)==String(n.sid)})[0]||{}).name||"")+'</span>':'')+(n.grp?'<span class="pill">'+t("grp")+' '+n.grp+'</span>':'')+'<span class="pill"><bdi>'+ld(new Date(n.at))+'</bdi></span></div>'+(n.ref?pmRefH(n.ref):'')+'<div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div>'+(del?'<div class="row" style="margin-top:8px"><button class="btn no" style="min-height:36px" onclick="delNt(\''+n.id+'\')">'+(HWS["n"+n.id]===1?t("conf"):t("del"))+'</button></div>':'')+'</div>'}
 function ntView(){var h='<div class="card"><div class="nm">'+t("ntnew")+'</div>'
 +'<span class="lbl">'+t("tgr")+'</span><select onchange="ntAdd(this.value)"><option value=""></option>'+GR.filter(function(g){return NF.gs.indexOf(g)<0}).map(function(g){return '<option value="'+g+'">'+gn(g)+'</option>'}).join("")+'</select>'
 +(NF.gs.length?'<div class="dl" style="margin:10px 0 0">'+NF.gs.map(function(g){return '<span onclick="ntTg(\''+g+'\')" style="cursor:pointer">'+gn(g)+' ✕</span>'}).join("")+'</div>':'')
@@ -1684,7 +1699,7 @@ function repView(){return (rtab=="lb"?tlView():rtab=="sum"?sum():rtab=="ls"?lsVi
 function homeView(){var td=ld(new Date()),a=0,b=0,n=0,owe=0,O=[];
 S.students.forEach(function(s){var r=rc(s.id,td);if(r.a===1)a++;else if(r.a===0)b++;else n++;var x=st(s);owe+=x.o||0;if(x.o>0)O.push({s:s,o:x.o})});
 O.sort(function(p,q){return q.o-p.o});
-var h='<div class="card" style="position:relative"><button type="button" class="calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button><button type="button" class="demob" onclick="demoMenu(event)" aria-haspopup="true" aria-label="'+L2("حساب تجريبي للطالب","Student demo account")+'">'+(window.DEMO_ICO||"")+'</button><button type="button" class="aig" onclick="aiCardOpen()" aria-label="'+L2("المساعد","Assistant")+'">'+(window.AIICO||"")+'</button><button type="button" class="pmg" onclick="go(\'msg\')" aria-label="'+L2("الرسائل","Messages")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg></button><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div>';
+var h='<div class="card" style="position:relative"><button type="button" class="calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button><button type="button" class="demob" onclick="demoMenu(event)" aria-haspopup="true" aria-label="'+L2("حساب تجريبي للطالب","Student demo account")+'">'+(window.DEMO_ICO||"")+'</button><button type="button" class="aig" onclick="aiCardOpen()" aria-label="'+L2("المساعد","Assistant")+'">'+(window.AIICO||"")+'</button><button type="button" class="pmg" onclick="PM.from=null;PM.ref=null;go(\'msg\')" aria-label="'+L2("الرسائل","Messages")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg></button><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div>';
 if(!S.students.length)return h+'<div class="row"><button class="btn ok" onclick="go(\'stu\')">'+t("add")+'</button></div>';
 
 return h}
@@ -6732,8 +6747,8 @@ function gameCard(){return gmBar("t")+gmBar("k")}
 
 /* ===== لوحة المتصدرين: المدرس + الطالب ===== */
 var TL={open:"",anim:"",tc:"",busy:0,g:"",bd:{}};
-function lbRowH(r,rk,me,nm,gr,hb){return '<div class="gbr'+(me?' me':'')+'"><span class="rk">'+(rk<4?icoH('medal','bare m'+rk):rk)+'</span><b>'+esc(nm)+(me?' ('+L2("أنت","you")+')':'')+(gr?' <small style="direction:rtl">'+esc(gn(gr))+'</small>':'')+(r.both&&!hb?' <small class="gbo">✓✓</small>':'')+'</b>'+(r.w?'<small>✕'+r.w+'</small>':'')+'<span>'+gmSec(r.ms)+'</span></div>'}
-function tlRows(F,lim,gr){return F.slice(0,lim).map(function(r,i){return lbRowH(r,i+1,false,r.name,gr?r.grade:"")}).join("")}
+function lbRowH(r,rk,me,nm,gr,hb,ex){return '<div class="gbr'+(me?' me':'')+'"><span class="rk">'+(rk<4?icoH('medal','bare m'+rk):rk)+'</span><b>'+esc(nm)+(me?' ('+L2("أنت","you")+')':'')+(gr?' <small style="direction:rtl">'+esc(gn(gr))+'</small>':'')+(r.both&&!hb?' <small class="gbo">✓✓</small>':'')+'</b>'+(r.w?'<small>✕'+r.w+'</small>':'')+'<span>'+gmSec(r.ms)+'</span>'+(ex||'')+'</div>'}
+function tlRows(F,lim,gr){return F.slice(0,lim).map(function(r,i){return lbRowH(r,i+1,false,r.name,gr?r.grade:"",0,pmLbBtn(r,i+1))}).join("")}
 function tlBoardH(c){var R=TL.bd[c];if(!R)return '<div class="mu" style="text-align:center">\u2026</div>';
  var em='<div class="mu" style="text-align:center">'+L2("\u0644\u0633\u0647 \u0645\u062d\u062f\u0634 \u062e\u0644\u0651\u0635 \u0627\u0644\u062a\u062d\u062f\u0651\u064a.","No one has finished yet.")+'</div>';
  if(!R.length)return em;
@@ -10307,7 +10322,7 @@ window.frBtn=function(s){var h=typeof _fb=="function"?_fb(s):"";
   return _go3.apply(this,arguments)};
  var _gb3=window.goBack;
  window.goBack=function(){
-  if(window.AU&&AU.user&&tab=="msg"){go("home");return}
+  if(window.AU&&AU.user&&tab=="msg"){pmBack();return}
   if(window.AU&&AU.user&&(tab=="tasks"||(tab=="rep"&&rtab!="sum"))){
    var d=0;try{d=window.backStep&&window.backStep()}catch(e){}
    if(!d)go("home");return}
