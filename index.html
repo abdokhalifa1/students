@@ -10350,34 +10350,50 @@ window.rsRun=function(id){var s=(S.students||[]).filter(function(x){return x.id=
   p.moves.forEach(function(m){var k=m.from+"|"+s.id;snap.push({from:m.from,to:m.to,o:S.rec[k]});delete S.rec[k]});
   snap.forEach(function(m){S.rec[m.to+"|"+s.id]=m.o});
   UNDO={id:s.id,snap:snap};save();draw()})};
+window.rsAuto=function(id){var s=(S.students||[]).filter(function(x){return x.id==id})[0];if(!s)return 0;
+ var p=plan(s);if(!p.moves||!p.moves.length)return 0;var snap=[];
+ p.moves.forEach(function(m){var k=m.from+"|"+s.id;snap.push({from:m.from,to:m.to,o:S.rec[k]});delete S.rec[k]});
+ snap.forEach(function(m){S.rec[m.to+"|"+s.id]=m.o});UNDO={id:s.id,snap:snap};return p.moves.length};
 window.rsUndo=function(id){if(!UNDO||UNDO.id!=id)return;
  keep(function(){UNDO.snap.forEach(function(m){delete S.rec[m.to+"|"+id]});UNDO.snap.forEach(function(m){S.rec[m.from+"|"+id]=m.o});UNDO=null;save();draw()})};
 })();</script>
 <script>(function(){
 /* فتح مجموعة الحصة الحالية تلقائياً من الجدول: من قبل بدايتها بـ 10 دقايق، وبتفضل لحد ما تبدأ اللي بعدها */
-var BEFORE=10,AFTER=150,done=0,hiddenAt=0;
+var BEFORE=10,AFTER=60,done=0,hiddenAt=0;
 function fmt(t){var h=+t.slice(0,2),m=t.slice(3);return((h+11)%12+1)+":"+m+" "+(h>=12?"م":"ص")}
-function pick(now){var T=window.TD||{},sc=T.sched||{},cx=T.cancel||{},today=ld(now),nm=now.getHours()*60+now.getMinutes(),best=null;
- for(var k in sc){var o=sc[k];if(!o||!o.days||o.days.indexOf(now.getDay())<0||!/^\d\d:\d\d$/.test(o.time||""))continue;
-  if(T.gdel&&T.gdel[k])continue;var c=cx[k];if(c&&typeof c=="object"&&c[today])continue;
+function cands(d){var T=window.TD||{},sc=T.sched||{},cx=T.cancel||{},key=ld(d),out=[];
+ for(var k in sc){var o=sc[k];if(!o||!o.days||o.days.indexOf(d.getDay())<0||!/^\d\d:\d\d$/.test(o.time||""))continue;
+  if(T.gdel&&T.gdel[k])continue;var c=cx[k];if(c&&typeof c=="object"&&c[key])continue;
   var i=k.lastIndexOf("|"),g=k.slice(0,i),n=k.slice(i+1);
   if(!S.students.some(function(x){return x.grade==g&&String(x.group)==n}))continue;
-  var st=+o.time.slice(0,2)*60+ +o.time.slice(3);
-  if(nm<st-BEFORE||nm>st+AFTER)continue;
-  var gi=GR.indexOf(g);if(!best||st>best.st||(st==best.st&&gi<best.gi))best={g:g,n:n,st:st,gi:gi,time:o.time}}
- return best}
+  out.push({g:g,n:n,gi:GR.indexOf(g),st:+o.time.slice(0,2)*60+ +o.time.slice(3),time:o.time})}
+ return out}
+function top(a,late){return a.slice().sort(function(x,y){return(late?y.st-x.st:x.st-y.st)||x.gi-y.gi})[0]||null}
+/* 1) حصة شغالة دلوقتي أو هتبدأ خلال 10 دقايق  2) آخر حصة بدأت النهارده  3) أول حصة جاية النهارده  4) آخر حصة في أقرب يوم فات */
+function pick(now){var nm=now.getHours()*60+now.getMinutes(),A=cands(now);
+ var w=A.filter(function(c){return nm>=c.st-BEFORE&&nm<=c.st+AFTER});if(w.length)return top(w,true);
+ var p=A.filter(function(c){return c.st<=nm});if(p.length)return top(p,true);
+ var u=A.filter(function(c){return c.st>nm});if(u.length)return top(u,false);
+ for(var i=1;i<=14;i++){var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i),B=cands(d);if(B.length)return top(B,true)}
+ return null}
 function toast(m){var e=document.getElementById("agtoast");if(!e){e=document.createElement("div");e.id="agtoast";e.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 86px);z-index:9500;max-width:90vw;padding:10px 16px;border-radius:16px;background:var(--pr);color:var(--on);font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:opacity .4s;pointer-events:none;direction:rtl;text-align:center";document.body.appendChild(e)}
  e.textContent=m;e.style.opacity="1";clearTimeout(e._t);e._t=setTimeout(function(){e.style.opacity="0"},3500)}
 function ready(){try{return !!(window.AU&&AU.ready&&AU.user&&!(window.ST&&ST.data)&&S.students&&S.students.length&&window.TD&&TD.sched&&Object.keys(TD.sched).length)}catch(e){return false}}
 function apply(quiet){var b=pick(new Date());if(!b)return false;
  tab="att";fg=b.g;fgr=b.n;fdate=ld(new Date());fmon=fdate.slice(0,7);edit=null;dt=null;cd=null;draw();
  if(!quiet)toast("فتحنا "+gd(b.n)+" — "+gn(b.g)+" · "+fmt(b.time));return true}
-window.autoGroup=function(){return apply()};
+window.autoGroup=function(){return apply()};window.agToast=toast;
 var tries=0,iv=setInterval(function(){tries++;if(done||tries>80){clearInterval(iv);return}
  if(!ready())return;done=1;clearInterval(iv);apply()},500);
 document.addEventListener("visibilitychange",function(){
  if(document.hidden){hiddenAt=Date.now();return}
  if(hiddenAt&&Date.now()-hiddenAt>5*60*1000&&ready()&&tab=="att"&&!edit)apply();hiddenAt=0});
+})();</script>
+<script>(function(){
+/* لما الطالب يدفع: التواريخ بتتظبط تلقائياً على أيام جدول مجموعته */
+function fix(id){var n=0;try{n=window.rsAuto?rsAuto(id):0}catch(e){}if(n&&window.agToast)setTimeout(function(){agToast("اتظبطت تواريخ "+n+" حصة على أيام الجدول")},50)}
+var _se=window.settle;if(typeof _se=="function")window.settle=function(id){fix(id);return _se.apply(this,arguments)};
+var _sc=window.setCnt;if(typeof _sc=="function")window.setCnt=function(id,k){if(k=="u")fix(id);return _sc.apply(this,arguments)};
 })();</script>
 </body>
 </html>
