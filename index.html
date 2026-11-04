@@ -8649,7 +8649,7 @@ function similar(name,C,k){var q=nz(name).split(" ")[0];if(!q)return [];return C
 
 /* ---------- تحليل جملة ---------- */
 function toks(text){var raw=dg(text),n=nz(raw).split(" ").filter(Boolean);return {raw:raw,n:n}}
-function extractPhones(raw){var re=/(\d[\d\s]{8,}\d)/g,m,P=[],clean="",last=0;while((m=re.exec(raw))){var d=m[1].replace(/\s/g,""),ix=d.search(/01[0125]\d{8}/),p=null;if(ix>=0)p=d.substr(ix,11);else if(/^1[0125]\d{8}$/.test(d))p=d;else if(/^201[0125]\d{8}$/.test(d))p=d.slice(2);if(!p)continue;var pre=nz(raw.slice(Math.max(0,m.index-25),m.index));P.push({d:p,par:/ولي|والد|ماما|بابا|امه|ابوه/.test(pre)});clean+=raw.slice(last,m.index)+" ";last=m.index+m[0].length}clean+=raw.slice(last);return {P:P,clean:clean}}
+function extractPhones(raw){var re=/(\d[\d\s]{8,}\d)/g,m,P=[],clean="",last=0;while((m=re.exec(raw))){var d=m[1].replace(/\s/g,""),ix=d.search(/01[0125]\d{8}/),p=null;if(ix>=0)p=d.substr(ix,11);else if(/^1[0125]\d{8}$/.test(d))p=d;else if(/^201[0125]\d{8}$/.test(d))p=d.slice(2);if(!p)continue;var pre=nz(raw.slice(Math.max(0,m.index-25),m.index));if(m.index>25)pre=pre.replace(/^\S*\s/,"");P.push({d:p,par:/(^|\s)(?:[لب]?ولي|[لب]?والد(?:ه|ته|ها)?|ماما|بابا|امه|امها|ابوه|ابوها)(?=\s|$)/.test(pre)});clean+=raw.slice(last,m.index)+" ";last=m.index+m[0].length}clean+=raw.slice(last);return {P:P,clean:clean}}
 
 /* ---------- الأوامر (intents) لكل جملة ---------- */
 var RX={
@@ -8823,9 +8823,9 @@ function parseNewStudent(text,C){
     if(pv==null&&(n[i]=="جنيه"||n[i]=="ج")&&i>0&&isNum(n[i-1])){pv=n[i-1];pj=i-1}
     if(pv!=null){r.price=pv;U[pj]=true;break}}
   for(i=0;i<N;i++){if(U[i]||!isNum(n[i]))continue;var x=+n[i];if(!r.price&&x>=5&&x<=500){r.price=String(x);U[i]=true}else if(!r.group&&x>=1&&x<=5){r.group=String(x);U[i]=true}}
-  var best=[],cur=[],mk=-1;
+  var best=[],cur=[],mk=-1,rawW=T2.raw.replace(/[،,؛;!؟?()"«»:]/g," ").split(/\s+/).filter(Boolean);
   for(i=0;i<N;i++){if(/^(اسمه|اسمها|الاسم|اسم)$/.test(n[i])){mk=i;break}}
-  if(mk>=0){for(i=mk+1;i<N&&!U[i]&&!isNum(n[i])&&cur.length<5;i++)cur.push(T2.raw.split(/\s+/)[i]||n[i]);best=cur;cur=[]}
+  if(mk>=0){for(i=mk+1;i<N&&!U[i]&&!isNum(n[i])&&cur.length<5;i++)cur.push(rawW[i]||n[i]);best=cur;cur=[]}
   var rawW=T2.raw.replace(/[،,؛;!؟?()"«»:]/g," ").split(/\s+/).filter(Boolean);
   if(!best.length){for(i=0;i<=N;i++){if(i<N&&!U[i]&&!isNum(n[i])&&!ORD[n[i].replace(/^ال/,"")]){cur.push(rawW[i]||n[i])}else{if(cur.length>best.length)best=cur;cur=[]}}}
   r.name=best.slice(0,5).join(" ").trim();
