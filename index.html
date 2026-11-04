@@ -1721,8 +1721,8 @@ Object.assign(D.ar,{pday:"اليوم السابق",nday:"اليوم التالي
 Object.assign(D.ar,{});Object.assign(D.en,{});
 Object.assign(D.ar,{anno:"لم يحضر",anna:"لم يغب",ansd:"مسدّد",anall:"من البداية",anmon:"شهر معيّن",anowed:"إجمالي المبالغ المتبقية على كل الطلبة",anunp:"حصة لم تُدفع",anpres:"حضور",anabs:"غياب",antot:"الإجمالي",anof:"طالب من",anday:"يوم",anstu:"طلاب",anpct:"النسبة",anshow:"أسماء الطلاب",anhide:"إخفاء"});
 Object.assign(D.en,{anno:"Did not attend",anna:"Not absent",ansd:"Settled",anall:"All time",anmon:"Specific month",anowed:"Total owed by all students",anunp:"unpaid classes",anpres:"Present",anabs:"Absent",antot:"Total",anof:"students of",anday:"days",anstu:"Students",anpct:"Rate",anshow:"Student names",anhide:"Hide"});
-Object.assign(D.ar,{hh:"آخر موعد لتسليم الواجب (اتركه فاضي لو مفيش موعد)",hwpast:"الموعد لازم يكون في المستقبل",hwclr:"إلغاء الموعد",ntneed:"اختار الصف واكتب الرسالة الأول.",hwend:"انتهى وقت التسليم",nt:"التنبيهات",ntnew:"إرسال إخطار جديد",ntkind:"النوع",ntnorm:"إخطار",ntwarn:"تنبيه",ntmsg:"الرسالة",ntsend:"إرسال للمرحلة كلها",ntnone:"لا توجد إخطارات.",ntsent:"تم الإرسال للمرحلة كلها",ntlist:"الإخطارات المرسلة"});
-Object.assign(D.en,{hh:"Submission deadline (leave empty for none)",hwpast:"The deadline must be in the future",hwclr:"Clear deadline",ntneed:"Choose the grade and write the message first.",hwend:"Submission time is over",nt:"Notices",ntnew:"Send a new notice",ntkind:"Type",ntnorm:"Notice",ntwarn:"Alert",ntmsg:"Message",ntsend:"Send to the whole grade",ntnone:"No notices.",ntsent:"Sent to the whole grade",ntlist:"Sent notices"});
+Object.assign(D.ar,{hh:"آخر موعد لتسليم الواجب (اتركه فاضي لو مفيش موعد)",hwpast:"الموعد لازم يكون في المستقبل",hwclr:"إلغاء الموعد",ntneed:"اختار الصف واكتب الرسالة الأول.",hwend:"انتهى وقت التسليم",nt:"الرسائل",ntnew:"إرسال إخطار جديد",ntkind:"النوع",ntnorm:"إخطار",ntwarn:"تنبيه",ntmsg:"الرسالة",ntsend:"إرسال للمرحلة كلها",ntnone:"لا توجد رسائل.",ntsent:"تم الإرسال للمرحلة كلها",ntlist:"الرسائل المرسلة"});
+Object.assign(D.en,{hh:"Submission deadline (leave empty for none)",hwpast:"The deadline must be in the future",hwclr:"Clear deadline",ntneed:"Choose the grade and write the message first.",hwend:"Submission time is over",nt:"Messages",ntnew:"Send a new notice",ntkind:"Type",ntnorm:"Notice",ntwarn:"Alert",ntmsg:"Message",ntsend:"Send to the whole grade",ntnone:"No messages.",ntsent:"Sent to the whole grade",ntlist:"Sent notices"});
 (function(){
 
 /* ===== AUTO TODAY: jump to the real date when app opens, is revisited, or midnight passes ===== */
@@ -8170,7 +8170,7 @@ function chkS(){
       ST.hw=ev.L;
     }else if(ev.k=="n"){
       var L=ev.L.filter(function(n){return (!n.grp||n.grp==ST.data.group)&&(n.sid==null||String(n.sid)==String(ST.data.sid))});
-      L.forEach(function(n){if(!known.n[n.id]){known.n[n.id]=1;show(n.kind=="w"?L2("تنبيه من المدرس ⚠️","Alert from teacher ⚠️"):L2("إخطار من المدرس ℹ️","Notice from teacher ℹ️"),n.text,"nt"+n.id)}});
+      L.forEach(function(n){if(!known.n[n.id]){known.n[n.id]=1;show(n.kind=="w"?L2("تنبيه من المدرس ⚠️","Alert from teacher ⚠️"):L2("رسالة من المدرس ✉️","Message from teacher ✉️"),n.text,"nt"+n.id)}});
       ST.notes=L;ST.newN=hasNew();
     }else if(ev.k=="p"){
       var p=ev.d,cc=p.cx;
@@ -8184,7 +8184,7 @@ var BELL='<svg viewBox="0 0 24 24"><path pathLength="1" d="M6 16V11a6 6 0 0 1 12
 var _sn=window.studentNav;
 window.studentNav=function(){
   var h=_sn.apply(this,arguments),n=(ST.tab=="nt"&&!ST.set)?0:newNts().length;
-  return h+'<button class="'+(!ST.set&&ST.tab=="nt"?"on":"")+'" data-k="nt" onclick="stGo(\'nt\')"><i>'+BELL+bdg(n,false)+'</i><span>'+L2("الإخطارات","Notices")+'</span></button>';
+  return h+'<button class="'+(!ST.set&&ST.tab=="nt"?"on":"")+'" data-k="nt" onclick="stGo(\'nt\')"><i>'+BELL+bdg(n,false)+'</i><span>'+L2("الرسائل","Messages")+'</span></button>';
 };
 
 var _d=window.draw;
