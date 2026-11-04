@@ -6941,7 +6941,7 @@ function pRp(){var m=mon3(),h=selG()+'<div class="mu" style="margin:8px 4px">'+m
 function t3menu(){var B=[["ex",L2("الدرجات","Scores")],["gr",L2("تقييم الواجبات","Grade homework")],["rp",L2("تقارير ولي الأمر","Parent reports")]];
  return'<div class="card"><div class="nm">'+L2("أدوات الطالب","Student tools")+'</div><div class="row">'+B.map(function(b){return'<button class="btn" onclick="T3.v=\''+b[0]+'\';draw()">'+b[1]+'</button>'}).join("")+'</div></div>'}
 /* ===== لوحة الإشراف: لمحات سريعة في الشاشة الرئيسية ===== */
-var DH={ex:{},bd:{},t0:{},ld:{}};
+var DH=window.DH={ex:{},bd:{},t0:{},ld:{}};
 (function(){var s=document.createElement("style");s.textContent=[
 ".gmd.dsh{width:100%;max-width:none;max-height:none;margin-bottom:14px;box-shadow:var(--sh)}",
 ".dsh .gmb{padding:12px 14px 14px;overflow:visible}",
