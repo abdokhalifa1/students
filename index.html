@@ -1198,7 +1198,7 @@ function sdtKeep(f){var b=document.querySelector(".gmb"),y=b?b.scrollTop:0;f();v
 function sdtSettle(id){var e=document.getElementById("sn"+id),v=+(e&&e.value)||0;sdtKeep(function(){settle(id,v)})}
 function sdtDel(id){sdtKeep(function(){delS(id)})}
 Object.assign(D.ar,{msg:"الرسائل"});Object.assign(D.en,{msg:"Messages"});
-var PM={m:"p",g:"",r:"",sid:"",q:"",ok:0,ref:null},PMD={},PMK={},PMV=null;
+var PM={m:"c",g:"",r:"",sid:"",q:"",ok:0,ref:null},PMD={},PMK={},PMV=null;
 function pmNorm(x){return String(x||"").toLowerCase().replace(/[ً-ْـ]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").trim()}
 function pmKey(){return PM.m=="p"?"p"+PM.sid:"g"}
 function pmStu(){var ws=pmNorm(PM.q).split(/\s+/).filter(Boolean);
@@ -1236,20 +1236,32 @@ function pmSend(){var k=pmKey(),el=document.getElementById("pmt"),m=((el?el.valu
  if(PM.ref)n.ref=PM.ref;
  S.notices=S.notices||[];S.notices.push(n);if(window.cloudSendNt)cloudSendNt(n);
  PMD[k]="";PM.ref=null;PM.ok=1;draw()}
+function chSeenKey(sid){return "chs_"+((window.AU&&AU.user&&AU.user.email)||"")+"_"+sid}
+function chSeenGet(sid){try{return +localStorage.getItem(chSeenKey(sid))||0}catch(e){return 0}}
+function chSeenSet(sid,at){try{if(at>chSeenGet(sid))localStorage.setItem(chSeenKey(sid),String(at))}catch(e){}}
+function chEntries(sid){var E=[];(S.notices||[]).forEach(function(n){if(n.sid!=null&&String(n.sid)==String(sid))E.push({me:1,n:n})});(window.cloudMsgs?cloudMsgs():[]).forEach(function(m){if(String(m.sid)==String(sid))E.push({me:0,n:m})});E.sort(function(a,b){return a.n.at-b.n.at});return E}
+function chListH(){var R=[];(S.students||[]).forEach(function(s){var E=chEntries(s.id);if(E.length)R.push({s:s,E:E,last:E[E.length-1]})});
+ R.sort(function(a,b){return b.last.n.at-a.last.n.at});
+ if(!R.length)return '<div class="card mu">'+L2("لسه مفيش محادثات. ابدأ من «رسالة خاصة» واختار طالب.","No chats yet. Start from “Private”, pick a student.")+'</div>';
+ return R.map(function(r){var s=r.s,sn=chSeenGet(s.id),nw=r.E.filter(function(x){return !x.me&&x.n.at>sn}).length,l=r.last;
+  return '<div class="card" style="cursor:pointer;display:flex;align-items:center;gap:10px" onclick="chOpen(\''+s.id+'\',null,1)">'+(typeof AV=="function"?AV(s):"")
+  +'<div style="flex:1;min-width:0"><div class="nm" style="margin:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span>'+esc(s.name)+'</span><span class="pill">'+esc(gn(s.grade))+'</span></div>'
+  +'<div class="mu" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(13px*var(--fs,1))">'+(l.me?L2("أنت: ","You: "):"")+esc(String(l.n.text||"").replace(/\s+/g," ").slice(0,70))+'</div></div>'
+  +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><small class="mu"><bdi>'+chTm(l.n.at)+'</bdi></small>'+(nw?'<span class="pill ok">'+nw+' '+L2("جديد","new")+'</span>':'')+'</div></div>'}).join("")}
 function pmView(){if(PM.chat&&PM.sid)return chatView();if(!gHas(PM.r,PM.g))PM.r="";
- var pv=PM.m=="p",sm=PM.m=="s",h='<div class="card"><div class="nm">'+L2("الرسائل","Messages")+'</div><div class="mu" style="font-size:calc(13px*var(--fs,1))">'+L2("رسالة خاصة لطالب، أو رسالة عامة لصف أو مجموعة","A private message to one student, or a public message to a grade or group")+'</div>'
- +'<div class="row" style="margin-top:10px"><button type="button" class="btn '+(pv?"pr":"")+'" onclick="PM.m=\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة خاصة","Private")+'</button><button type="button" class="btn '+(PM.m=="g"?"pr":"")+'" onclick="PM.m=\'g\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة عامة","Public")+'</button><button type="button" class="btn '+(sm?"pr":"")+'" onclick="PM.m=\'s\';PM.ok=0;PM.ref=null;draw()">'+L2("الرسائل المرسلة","Sent")+'</button></div>'
- +'<div class="mu" style="margin-top:8px;font-size:calc(13px*var(--fs,1))">'+(sm?L2("كل الرسائل اللي بعتّها للطلاب.","All the messages you sent to students."):pv?L2("خاصة: بتوصل لطالب واحد بس.","Private: reaches one student only."):L2("عامة: بتوصل لكل طلاب الصف أو المجموعة.","Public: reaches the whole grade or group."))+'</div>'
- +(sm?'':'<div class="row" style="margin-top:10px"><select onchange="PM.g=this.value;PM.r=\'\';PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+(pv?L2("كل الصفوف","All grades"):L2("اختار الصف","Choose grade"))+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==PM.g?" selected":"")+'>'+esc(gn(g))+'</option>'}).join("")+'</select>'
+ var pv=PM.m=="p",sm=PM.m=="s",cm=PM.m=="c",h='<div class="card"><div class="nm">'+L2("الرسائل","Messages")+'</div><div class="mu" style="font-size:calc(13px*var(--fs,1))">'+L2("رسالة خاصة لطالب، أو رسالة عامة لصف أو مجموعة","A private message to one student, or a public message to a grade or group")+'</div>'
+ +'<div class="row" style="margin-top:10px"><button type="button" class="btn '+(cm?"pr":"")+'" onclick="PM.m=\'c\';PM.ok=0;PM.ref=null;PM.sid=\'\';draw()">'+L2("المحادثات","Chats")+'</button><button type="button" class="btn '+(pv?"pr":"")+'" onclick="PM.m=\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة خاصة","Private")+'</button><button type="button" class="btn '+(PM.m=="g"?"pr":"")+'" onclick="PM.m=\'g\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة عامة","Public")+'</button><button type="button" class="btn '+(sm?"pr":"")+'" onclick="PM.m=\'s\';PM.ok=0;PM.ref=null;draw()">'+L2("الرسائل المرسلة","Sent")+'</button></div>'
+ +'<div class="mu" style="margin-top:8px;font-size:calc(13px*var(--fs,1))">'+(cm?L2("محادثاتك مع الطلاب. اضغط على أي محادثة وكمّل الكلام.","Your chats with students. Tap a chat to continue."):sm?L2("كل الرسائل اللي بعتّها للطلاب.","All the messages you sent to students."):pv?L2("خاصة: بتوصل لطالب واحد بس.","Private: reaches one student only."):L2("عامة: بتوصل لكل طلاب الصف أو المجموعة.","Public: reaches the whole grade or group."))+'</div>'
+ +(sm||cm?'':'<div class="row" style="margin-top:10px"><select onchange="PM.g=this.value;PM.r=\'\';PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+(pv?L2("كل الصفوف","All grades"):L2("اختار الصف","Choose grade"))+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==PM.g?" selected":"")+'>'+esc(gn(g))+'</option>'}).join("")+'</select>'
  +'<select onchange="PM.r=this.value;PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+L2("كل المجموعات","All groups")+'</option>'+gFlt(PM.r,PM.g)+'</select></div>');
  if(pv)h+='<div class="row" style="margin-top:10px;flex-wrap:nowrap"><input id="pmq" placeholder="'+t("search")+'" value="'+esc(PM.q)+'" oninput="PM.q=this.value;pmRefresh()"><button class="btn sq" id="pmmic" type="button" aria-label="'+L2("بحث بالصوت","Voice search")+'" onclick="pmVoice()">'+(typeof icoH=="function"?icoH('mic','bare'):"🎤")+'</button></div><div id="pml" style="margin-top:10px;max-height:260px;overflow:auto">'+pmRows()+'</div>';
- h+='</div>'+(sm?'':pmCompose());
+ h+='</div>'+(sm||cm?'':pmCompose());if(cm)h+=chListH();
  var L=(S.notices||[]).slice().sort(function(a,b){return b.at-a.at}).slice(0,40);
  if(sm){if(L.length)L.forEach(function(n){h+=ntCard(n,true,true)});else h+='<div class="card mu">'+L2("لسه مبعتّش رسائل.","No messages sent yet.")+'</div>'}
  return h}
 var PMIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg>';
 function pmOpen(o){PM.chat=0;PM.m=o.m;PM.g=o.g||"";PM.r=o.r||"";PM.sid=o.sid!=null?String(o.sid):"";PM.q="";PM.ok=0;PM.ref=o.ref||null;PM.from={tab:tab,rtab:rtab};var k=pmKey();PMD[k]=o.text||"";PMK[k]=o.kind||"n";go("msg")}
-function pmBack(){if(PM.chat&&PM.cl){PM.chat=0;PM.cl=0;PM.sid="";PM.ref=null;draw();return}PM.chat=0;PM.cl=0;PM.sid="";PM.ref=null;PM.ok=0;PM.q="";PM.m="p";PM.g="";PM.r="";var b=PM.from;PM.from=null;if(b&&b.tab=="rep")gOpenTab("rep",b.rtab);else if(b&&b.tab&&b.tab!="msg")go(b.tab);else go("home")}
+function pmBack(){if(PM.chat&&PM.cl){PM.chat=0;PM.cl=0;PM.sid="";PM.ref=null;PM.m="c";draw();return}PM.chat=0;PM.cl=0;PM.sid="";PM.ref=null;PM.ok=0;PM.q="";PM.m="c";PM.g="";PM.r="";var b=PM.from;PM.from=null;if(b&&b.tab=="rep")gOpenTab("rep",b.rtab);else if(b&&b.tab&&b.tab!="msg")go(b.tab);else go("home")}
 function pmLbBtn(r,rk,c,src){c=c||TL.open;return '<button type="button" class="lbm" onclick="event.stopPropagation();pmFromLb(\''+r.sid+'\','+rk+',\''+c+'\',\''+(src||'TL')+'\')" aria-label="'+L2("رسالة","Message")+'">'+PMIC+'</button>'}
 function pmFromLb(sid,rk,c,src){var B=(src=="DH"?DH.bd:TL.bd)||{},R=B[c]||[],r=R.filter(function(x){return String(x.sid)==String(sid)})[0],st=(S.students||[]).filter(function(x){return String(x.id)==String(sid)})[0];
  if(!r||!st)return;chOpen(sid,{t:"lb",c:c,rk:rk,nm:String(st.name||r.name).split(" ")[0],gr:r.grade,ms:r.ms||0,w:r.w||0,at:r.at||0})}
@@ -1268,15 +1280,13 @@ function pmFromLb(sid,rk,c,src){var B=(src=="DH"?DH.bd:TL.bd)||{},R=B[c]||[],r=R
 function chTm(at){var d=new Date(at);return ld(d)+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
 function chScroll(){var e=document.getElementById("chb");if(e)e.scrollTop=e.scrollHeight}
 function chOpen(sid,ref,fl){var s=(S.students||[]).filter(function(x){return String(x.id)==String(sid)})[0];if(!s)return;
- PM.m="p";PM.g=s.grade;PM.r="";PM.sid=String(sid);PM.q="";PM.ok=0;PM.ref=ref||null;PM.chat=1;PM.cl=fl?1:0;if(!fl||!PM.from)PM.from={tab:tab,rtab:rtab};
+ PM.m="p";PM.g=s.grade;PM.r="";PM.sid=String(sid);PM.q="";PM.ok=0;PM.ref=ref||null;PM.chat=1;PM.cl=1;if(tab!="msg"||!PM.from)PM.from={tab:tab,rtab:rtab};
  if(tab=="msg")draw();else go("msg")}
 function chSend(){pmSend();setTimeout(chScroll,60)}
 function chatView(){var s=(S.students||[]).filter(function(x){return String(x.id)==String(PM.sid)})[0];
  if(!s){PM.chat=0;PM.cl=0;return pmView()}
- var k=pmKey(),v=PMD[k]||"",E=[];
- (S.notices||[]).forEach(function(n){if(n.sid!=null&&String(n.sid)==String(s.id))E.push({me:1,n:n})});
- (window.cloudMsgs?cloudMsgs():[]).forEach(function(m){if(String(m.sid)==String(s.id))E.push({me:0,n:m})});
- E.sort(function(a,b){return a.n.at-b.n.at});
+ var k=pmKey(),v=PMD[k]||"",E=chEntries(s.id),mx=0;
+ E.forEach(function(x){if(!x.me&&x.n.at>mx)mx=x.n.at});chSeenSet(s.id,mx);
  var h='<div class="card"><div class="nm" style="margin:0;display:flex;align-items:center;gap:8px">'+(typeof AV=="function"?AV(s):"")+'<span style="flex:1">'+esc(s.name)+'</span><span class="pill">'+esc(gn(s.grade))+'</span><span class="pill">'+esc(gd(s.group))+'</span></div></div>'
  +'<div class="card"><div class="chb" id="chb">';
  if(!E.length)h+='<div class="mu" style="text-align:center">'+L2("ابدأ المحادثة مع الطالب","Start the conversation with the student")+'</div>';
@@ -1734,7 +1744,7 @@ function repView(){return (rtab=="lb"?tlView():rtab=="sum"?sum():rtab=="ls"?lsVi
 function homeView(){var td=ld(new Date()),a=0,b=0,n=0,owe=0,O=[];
 S.students.forEach(function(s){var r=rc(s.id,td);if(r.a===1)a++;else if(r.a===0)b++;else n++;var x=st(s);owe+=x.o||0;if(x.o>0)O.push({s:s,o:x.o})});
 O.sort(function(p,q){return q.o-p.o});
-var h='<div class="card" style="position:relative"><button type="button" class="calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button><button type="button" class="demob" onclick="demoMenu(event)" aria-haspopup="true" aria-label="'+L2("حساب تجريبي للطالب","Student demo account")+'">'+(window.DEMO_ICO||"")+'</button><button type="button" class="aig" onclick="aiCardOpen()" aria-label="'+L2("المساعد","Assistant")+'">'+(window.AIICO||"")+'</button><button type="button" class="pmg" onclick="PM.from=null;PM.ref=null;PM.chat=0;PM.cl=0;PM.sid=\'\';PM.ok=0;PM.q=\'\';PM.m=\'p\';PM.g=\'\';PM.r=\'\';go(\'msg\')" aria-label="'+L2("الرسائل","Messages")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg></button><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div>';
+var h='<div class="card" style="position:relative"><button type="button" class="calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button><button type="button" class="demob" onclick="demoMenu(event)" aria-haspopup="true" aria-label="'+L2("حساب تجريبي للطالب","Student demo account")+'">'+(window.DEMO_ICO||"")+'</button><button type="button" class="aig" onclick="aiCardOpen()" aria-label="'+L2("المساعد","Assistant")+'">'+(window.AIICO||"")+'</button><button type="button" class="pmg" onclick="PM.from=null;PM.ref=null;PM.chat=0;PM.cl=0;PM.sid=\'\';PM.ok=0;PM.q=\'\';PM.m=\'c\';PM.g=\'\';PM.r=\'\';go(\'msg\')" aria-label="'+L2("الرسائل","Messages")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg></button><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div>';
 if(!S.students.length)return h+'<div class="row"><button class="btn ok" onclick="go(\'stu\')">'+t("add")+'</button></div>';
 
 return h}
