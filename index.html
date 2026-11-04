@@ -7463,7 +7463,7 @@ setTimeout(function(){if(!AU.ready&&!ST.rs){AU.ready=true;if(!window.FB||!FB.log
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signInAnonymously,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,doc,collection,query,where,orderBy,limit,getDoc,getDocs,setDoc,updateDoc,deleteDoc,increment,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,doc,collection,query,where,orderBy,limit,getDoc,getDocs,setDoc,updateDoc,deleteDoc,increment,onSnapshot,deleteField,FieldPath} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyCar3idR0O-_ZeRGa66GWVAQd7YfJs9YU8",
@@ -7485,8 +7485,8 @@ async function portalOf(phone,code){
   return psnap.data();
 }
 
-let lastMain="",lastM={},lastHw={},lastPortal={},timer=null;
-let unsubMsgs=null,unsubReps=null,unsubSubs=null,unsubNotes=null,unsubAv=null,unsubSeen=null;
+let lastMain="",lastM={},lastR={},lastMainC="",lastHw={},lastPortal={},timer=null;
+let unsubMsgs=null,unsubReps=null,unsubSubs=null,unsubNotes=null,unsubAv=null,unsubSeen=null,unsubMonths=null,unsubMain=null;
 const AVS={};
 window.TSEEN=window.TSEEN||{};
 const seenOn={};let seenT=null;
@@ -7522,14 +7522,55 @@ const _draw=window.draw;
 window.draw=function(){applyAv();return _draw.apply(this,arguments)};
 
 function stopListeners(){
-  [unsubMsgs,unsubReps,unsubSubs,unsubNotes,unsubAv,unsubSeen].forEach(f=>{if(f)f()});
-  unsubMsgs=unsubReps=unsubSubs=unsubNotes=unsubAv=unsubSeen=null;window.TSEEN={};
+  [unsubMsgs,unsubReps,unsubSubs,unsubNotes,unsubAv,unsubSeen,unsubMonths,unsubMain].forEach(f=>{if(f)f()});
+  unsubMsgs=unsubReps=unsubSubs=unsubNotes=unsubAv=unsubSeen=unsubMonths=unsubMain=null;window.TSEEN={};
   TMSGS=[];TREPS=[];TSUBS=[];TNOTES=[];
   Object.keys(AVS).forEach(k=>delete AVS[k]);
 }
 window.__cleanOld=function(snap){snap.docs.forEach(function(d){var r=d.data(),s=(S.students||[]).find(function(x){return x.id==r.sid});if(s&&r.day&&r.day<stuKey(s)){deleteDoc(d.ref).catch(function(){})}})};
+// ---- live sync of the teacher's own data between devices (phone / tablet) ----
+function cj(x){if(x===undefined)return "u";if(x===null||typeof x!=="object")return JSON.stringify(x);if(Array.isArray(x))return "["+x.map(cj).join(",")+"]";return "{"+Object.keys(x).sort().filter(k=>x[k]!==undefined).map(k=>JSON.stringify(k)+":"+cj(x[k])).join(",")+"}"}
+function mainPick(d){return {students:d.students||[],price:d.price,lang:d.lang,cfg:d.cfg}}
+function mainOf(data){return {students:(data.students||[]).map(s=>{const o={...s};delete o.av;return o}),price:data.price,lang:data.lang,cfg:JSON.parse(JSON.stringify(cfgOut()))}}
+let _sdT=null;
+function softDraw(){clearTimeout(_sdT);let busy=false;try{const a=document.activeElement;busy=!!(a&&(/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable))||!!(typeof edit!=="undefined"&&edit)}catch(e){}
+  if(busy){_sdT=setTimeout(softDraw,1500);return}draw()}
+function applyRemoteMonth(m,r){
+  let ch=false;
+  for(const k in r){const rv=JSON.stringify(r[k]);if(lastR[k]===rv)continue;
+    const lv=(k in S.rec)?JSON.stringify(S.rec[k]):undefined;
+    if(lv===lastR[k]){S.rec[k]=JSON.parse(rv);lastR[k]=rv;ch=true}
+    else if(lv===rv){lastR[k]=rv}
+  }
+  for(const k of Object.keys(lastR)){
+    if(k.slice(0,7)!==m||(k in r))continue;
+    const lv=(k in S.rec)?JSON.stringify(S.rec[k]):undefined;
+    if(lv===lastR[k]){delete S.rec[k];delete lastR[k];ch=true}
+  }
+  return ch;
+}
+function startDataSync(uid){
+  unsubMonths=onSnapshot(collection(db,"teachers",uid,"months"),snap=>{
+    let ch=false;
+    snap.docChanges().forEach(c=>{const r=c.type==="removed"?{}:((c.doc.data().rec)||{});if(applyRemoteMonth(c.doc.id,r))ch=true});
+    if(ch)softDraw();
+  },e=>console.error(e));
+  unsubMain=onSnapshot(doc(db,"teachers",uid),snap=>{
+    if(!snap.exists()||snap.metadata.hasPendingWrites)return;
+    const d=snap.data(),rc=cj(mainPick(d));
+    if(rc===lastMainC)return;
+    if(cj(mainOf(JSON.parse(JSON.stringify(S))))!==lastMainC)return; // this device has unsaved edits: they win and get saved
+    const av={};(S.students||[]).forEach(s=>{if(s.av)av[s.id]=s.av});
+    S.students=(d.students||[]).map(s=>{const o={...s};if(av[o.id])o.av=av[o.id];return o});
+    if(d.price!=null)S.price=d.price;
+    cfgIn(d.cfg);
+    lastMainC=rc;lastMain=JSON.stringify(mainOf(JSON.parse(JSON.stringify(S))));
+    softDraw();
+  },e=>console.error(e));
+}
 function startListeners(uid){
   stopListeners();
+  startDataSync(uid);
   unsubMsgs=onSnapshot(query(collection(db,"messages"),where("uid","==",uid)),snap=>{
     const L=[];snap.forEach(d=>L.push(d.data()));TMSGS=L;draw();
   },e=>console.error(e));
@@ -7726,13 +7767,13 @@ async function loadFor(u){
   const snap=await getDocs(collection(db,"teachers",u.uid,"months"));
   const hs=await getDocs(collection(db,"teachers",u.uid,"hw"));
   const o={students:[],rec:{},price:50,lang:S.lang||"ar",hw:[]};
-  lastMain="";lastM={};lastHw={};lastPortal={};
+  lastMain="";lastM={};lastR={};lastMainC="";lastHw={};lastPortal={};
   cfgIn(null);
-  if(main.exists()){const d=main.data();o.students=d.students||[];if(d.price!=null)o.price=d.price;if(d.lang)o.lang=d.lang;
+  if(main.exists()){const d=main.data();lastMainC=cj(mainPick(d));o.students=d.students||[];if(d.price!=null)o.price=d.price;if(d.lang)o.lang=d.lang;
     cfgIn(d.cfg);
     o.students.forEach(s=>{if(!s.code)s.code=String(1000+Math.floor(Math.random()*9000))});
     lastMain=JSON.stringify({students:o.students,price:o.price,lang:o.lang,cfg:cfgOut()})}
-  snap.forEach(m=>{const r=(m.data().rec)||{};Object.assign(o.rec,r);lastM[m.id]=JSON.stringify(r)});
+  snap.forEach(m=>{const r=(m.data().rec)||{};Object.assign(o.rec,r);lastM[m.id]=JSON.stringify(r);for(const k in r)lastR[k]=JSON.stringify(r[k])});
   hs.forEach(h=>{const d=h.data();o.hw.push(d);lastHw[d.id]=1});
   o.notices=[];try{const ns=await getDocs(query(collection(db,"notices"),where("uid","==",u.uid)));ns.forEach(x=>o.notices.push(x.data()))}catch(e){console.error(e)}
   setData(o);
@@ -7880,11 +7921,12 @@ async function flush(){
   const main={students:studs,price:data.price,lang:data.lang,cfg};
   const mj=JSON.stringify(main),ps=[];
   try{
-    if(mj!==lastMain){lastMain=mj;ps.push(setDoc(doc(db,"teachers",u.uid),main))}
-    const by={};
-    for(const k in data.rec){const m=k.slice(0,7);(by[m]=by[m]||{})[k]=data.rec[k]}
-    for(const m in by){const j=JSON.stringify(by[m]);if(lastM[m]!==j){lastM[m]=j;ps.push(setDoc(doc(db,"teachers",u.uid,"months",m),{rec:by[m]}))}}
-    for(const m of Object.keys(lastM)){if(!by[m]){delete lastM[m];ps.push(deleteDoc(doc(db,"teachers",u.uid,"months",m)))}}
+    if(mj!==lastMain){lastMain=mj;lastMainC=cj(main);ps.push(setDoc(doc(db,"teachers",u.uid),main))}
+    // attendance: write only the records that changed (not the whole month), so another device's edits are never overwritten
+    const up={};
+    for(const k in data.rec){const j=JSON.stringify(data.rec[k]);if(lastR[k]!==j){lastR[k]=j;const m=k.slice(0,7);(up[m]=up[m]||{})[k]=data.rec[k]}}
+    for(const k of Object.keys(lastR)){if(!(k in data.rec)){delete lastR[k];const m=k.slice(0,7);(up[m]=up[m]||{})[k]=deleteField()}}
+    for(const m in up){const ks=Object.keys(up[m]);ps.push(setDoc(doc(db,"teachers",u.uid,"months",m),{rec:up[m]},{mergeFields:ks.map(k=>new FieldPath("rec",k))}))}
     // homework (teacher copy)
     for(const w of (data.hw||[])){if(!lastHw[w.id]){lastHw[w.id]=1;ps.push(setDoc(doc(db,"teachers",u.uid,"hw",w.id),w))}}
 
@@ -7925,7 +7967,7 @@ async function flush(){
     await Promise.all(ps);
     AU.sync="ok";
   }catch(e){
-    lastMain="";lastM={};lastHw={};lastPortal={};AU.sync="err";console.error(e);
+    lastMain="";lastMainC="";lastM={};lastR={};lastHw={};lastPortal={};AU.sync="err";console.error(e);
   }
   syncUI();
 }
@@ -10211,10 +10253,14 @@ var _kd=window.draw;if(typeof _kd=="function"){window.draw=draw=function(){var r
   R.code=groupsBy(L,function(s){return s.code?String(s.code):""});
   return R}
  function line(s){var x=window.st?st(s):{a:0,b:0};return '<div style="padding:6px 0;border-top:1px solid var(--bd)"><b>'+esc(s.name)+'</b> <span class="mu">'+esc(gn(s.grade))+' · '+esc(gd(s.group))+'</span><div class="mu" dir="ltr" style="text-align:start">'+esc(s.phone||"-")+' | '+esc(s.parentPhone||"-")+'</div><div class="mu">'+L2("حصص مسجّلة","Recorded classes")+': '+(x.a+x.b)+'</div><div class="row" style="margin-top:6px"><button class="btn pr" onclick="dupFile('+s.id+')">'+L2("ملف الطالب","Student file")+'</button><button class="btn" onclick="dupEdit('+s.id+')">'+t("edit")+'</button></div></div>'}
- function sec(title,note,G){var h='<div class="card"><div class="nm">'+title+' <span class="pill'+(G.length?'':' ok')+'">'+G.length+'</span></div>'+(note?'<div class="mu" style="margin-bottom:6px">'+note+'</div>':'');
-  if(!G.length)h+='<div class="mu">'+L2("لا يوجد","None found")+'</div>';
-  G.forEach(function(g,i){h+='<div style="margin-top:8px;padding:8px 10px;border-radius:14px;background:var(--soft)"><div class="mu" style="font-size:calc(12px*var(--fs,1))">'+L2("مجموعة","Group")+' '+(i+1)+' · '+g.length+'</div>'+g.map(line).join("")+'</div>'});
+ var DUPX={};
+ function sec(key,title,note,G,lab){var on=!!DUPX[key];
+  var h='<div class="gb2" style="margin-top:8px" onclick="dupSec(this,\''+key+'\')"><b>'+title+' <span class="pill'+(G.length?'':' ok')+'">'+G.length+'</span></b><span class="gchev'+(on?' up':'')+'">\u2304</span></div>';
+  h+='<div class="dupbody" style="'+(on?'':'display:none;')+'padding:4px 2px 2px">'+(note?'<div class="mu" style="margin:2px 6px 6px">'+note+'</div>':'');
+  if(!G.length)h+='<div class="mu" style="margin:2px 6px 6px">'+L2("لا يوجد","None found")+'</div>';
+  G.forEach(function(g,i){h+='<div style="margin:8px 0;padding:8px 10px;border-radius:14px;background:var(--soft)"><div class="mu" style="font-size:calc(12px*var(--fs,1))"><b>'+(i+1)+'</b> · '+(lab?'<span dir="ltr">'+esc(lab(g))+'</span> · ':'')+g.length+' '+L2("طلاب","students")+'</div>'+g.map(line).join("")+'</div>'});
   return h+'</div>'}
+ window.dupSec=function(el,k){DUPX[k]=!DUPX[k];var b=el.nextElementSibling;if(b)b.style.display=DUPX[k]?"":"none";var c=el.querySelector(".gchev");if(c)c.classList.toggle("up",DUPX[k])};
  function total(R){return R.sameName.length+R.nearName.length+R.phone.length+R.parent.length+R.cross.length+R.own.length+R.code.length}
  window.dupTog=function(){DUPO=!DUPO;draw()};
  function sById(id){return(S.students||[]).filter(function(x){return x.id==id})[0]}
@@ -10226,13 +10272,13 @@ var _kd=window.draw;if(typeof _kd=="function"){window.draw=draw=function(){var r
   var h='<div class="gb2" onclick="dupTog()"><span class="gsym"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3 2.7-5 6-5s6 2 6 5M16 5.5a3 3 0 010 5.5M18 15c2 .6 3 2.2 3 5"/></svg></span><b>'+L2("الطلاب المتشابهة","Similar students")+(n?' <span class="pill">'+n+'</span>':'')+'</b><span class="gchev'+(DUPO?' up':'')+'">\u2304</span></div>';
   if(!DUPO)return h;
   h+='<div class="gx">'
-   +sec(L2("نفس الاسم","Same name"),L2("الأسماء متطابقة بعد تجاهل الهمزات والتاء المربوطة والمسافات.","Identical after ignoring hamza, ta marbuta and spacing."),R.sameName)
-   +sec(L2("أسماء متقاربة","Similar names"),L2("ترتيب مختلف، أو اسم ناقص، أو فرق حرف في الكتابة.","Different order, shorter form, or a one-letter typo."),R.nearName)
-   +sec(L2("نفس رقم الطالب","Same student phone"),"",R.phone)
-   +sec(L2("نفس رقم ولي الأمر","Same parent phone"),L2("غالبًا إخوة، راجعهم.","Often siblings, review them."),R.parent)
-   +sec(L2("رقم طالب = رقم ولي أمر لطالب آخر","Student phone = another's parent phone"),"",R.cross)
-   +sec(L2("رقم الطالب = رقم ولي أمره","Student phone = own parent phone"),L2("غالبًا خطأ في إدخال الرقم.","Likely a data-entry mistake."),R.own)
-   +sec(L2("نفس كود الدخول","Same login code"),L2("المفروض كل طالب له كود مختلف.","Every student should have a unique code."),R.code)
+   +sec("n1",L2("تشابه الاسم","Same name"),L2("الأسماء متطابقة بعد تجاهل الهمزات والتاء المربوطة والمسافات.","Identical after ignoring hamza, ta marbuta and spacing."),R.sameName,function(g){return g[0].name})
+   +sec("n2",L2("أسماء متقاربة","Similar names"),L2("ترتيب مختلف، أو اسم ناقص، أو فرق حرف في الكتابة.","Different order, shorter form, or a one-letter typo."),R.nearName,function(g){return g.map(function(x){return x.name}).slice(0,2).join(" ~ ")})
+   +sec("p1",L2("تشابه رقم الطالب","Same student phone"),"",R.phone,function(g){return g[0].phone})
+   +sec("p2",L2("تشابه رقم ولي الأمر","Same parent phone"),L2("غالبًا إخوة، راجعهم.","Often siblings, review them."),R.parent,function(g){return g[0].parentPhone})
+   +sec("p3",L2("رقم طالب = رقم ولي أمر طالب آخر","Student phone = another's parent phone"),"",R.cross,function(g){return g[0].parentPhone})
+   +sec("p4",L2("رقم الطالب = رقم ولي أمره","Student phone = own parent phone"),L2("غالبًا خطأ في إدخال الرقم.","Likely a data-entry mistake."),R.own,function(g){return g[0].phone})
+   +sec("c1",L2("تشابه كود الدخول","Same login code"),L2("المفروض كل طالب له كود مختلف.","Every student should have a unique code."),R.code,function(g){return g[0].code})
    +'</div>';
   return h}
  var _s=window.stsView;
