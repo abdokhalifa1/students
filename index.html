@@ -959,7 +959,7 @@ h+='<div class="card cp '+(r.a===1?"st-p":r.a===0?"st-a":"")+'"><div class="nm c
 +'<button class="btn sq '+(r.a===0?"no":"")+'" aria-label="'+t("ab")+'" onclick="setRec('+s.id+',\'a\',0)">✕</button>'
 +'<button class="btn sq '+(r.p===0&&r.a!==0?"no":"")+'"'+(r.a===0?' disabled style="opacity:.35;pointer-events:none"':'')+' aria-label="'+t("np")+'" onclick="setRec('+s.id+',\'p\',0)">$</button></div></div>'+cx(s,fdate.slice(0,7))+'</div>'});
 if(!L.length)h+='<div class="card mu">'+t("none")+'</div>';return h}
-function detail(s,x){return '<div style="margin-top:10px;border-top:1px solid var(--bd);padding-top:10px;font-size:calc(14px*var(--fs,1))"><div>'+gn(s.grade)+', '+esc(gd(s.group))+'</div><div dir="ltr" style="text-align:start">'+esc(s.phone||"-")+' | '+esc(s.parentPhone||"-")+'</div><div class="stat"><div><b>'+x.a+'</b>'+t("pr")+'</div><div><b>'+x.b+'</b>'+t("ab")+'</div><div><b>'+x.p+'</b>'+t("pd")+'</div><div><b class="'+(x.u?"owe":"")+'">'+x.u+'</b>'+t("np")+'</div></div><div class="mu" style="margin-top:6px">'+t("owed")+': '+x.o+' '+t("cur")+' | '+L2("سعر الحصة","Price")+': '+sp(s)+'</div>'+parRep(s,x)+'<div class="row" style="margin-top:8px"><input id="sn'+s.id+'" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" placeholder="'+t("howm")+'" style="flex:1 1 40%"><button class="btn" onclick="settle('+s.id+',+document.getElementById(\'sn'+s.id+'\').value||0)">'+t("setn")+'</button></div><div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><button class="btn no" onclick="delS('+s.id+')">'+(pd==s.id?t("conf"):t("del"))+'</button></div></div>'}
+function detail(s,x){return '<div style="margin-top:10px;border-top:1px solid var(--bd);padding-top:10px;font-size:calc(14px*var(--fs,1))"><div>'+gn(s.grade)+', '+esc(gd(s.group))+'</div><div dir="ltr" style="text-align:start">'+esc(s.phone||"-")+' | '+esc(s.parentPhone||"-")+'</div><div class="stat"><div><b>'+x.a+'</b>'+t("pr")+'</div><div><b>'+x.b+'</b>'+t("ab")+'</div><div><b>'+x.p+'</b>'+t("pd")+'</div><div><b class="'+(x.u?"owe":"")+'">'+x.u+'</b>'+t("np")+'</div></div><div class="mu" style="margin-top:6px">'+t("owed")+': '+x.o+' '+t("cur")+' | '+L2("سعر الحصة","Price")+': '+sp(s)+'</div>'+parRep(s,x)+'<div class="row" style="margin-top:8px"><input id="sn'+s.id+'" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" placeholder="'+t("howm")+'" style="flex:1 1 40%"><button class="btn" onclick="settle('+s.id+',+document.getElementById(\'sn'+s.id+'\').value||0)">'+t("setn")+'</button></div>'+rsBtn(s)+'<div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><button class="btn no" onclick="delS('+s.id+')">'+(pd==s.id?t("conf"):t("del"))+'</button></div></div>'}
 function settle(id,n){Object.keys(S.rec).filter(function(k){var r=S.rec[k];return k.split("|")[1]==id&&r.a===1&&r.p===0}).sort().slice(0,n).forEach(function(k){S.rec[k].p=1});save();draw()}
 function hs(n){if(n==0)return "0 حصة";if(n==1)return "حصة واحدة";if(n==2)return "حصتين";if(n<=10)return n+" حصص";return n+" حصة"}
 function dl2(id,k,mon){return datesOf(id,k).filter(function(d){return !mon||d.slice(0,mon.length)==mon}).sort()}
@@ -1195,7 +1195,7 @@ function sdtSettle(id){var e=document.getElementById("sn"+id),v=+(e&&e.value)||0
 function sdtDel(id){sdtKeep(function(){delS(id)})}
 function sdtSend(s,x){var m=anaMsg(s,x),pw=wa(s.parentPhone,m),sw=wa(s.phone,m);function b(u,lb,no){return u?'<a class="btn pr" target="_blank" rel="noopener" href="'+u+'">'+lb+'</a>':'<span class="btn mu">'+no+'</span>'}
 return '<div class="row" style="margin-top:8px">'+b(pw,L2("إرسال التقرير لولي الأمر","Send report to parent"),t("nopp"))+b(sw,L2("إرسال التقرير للطالب","Send report to student"),L2("لا يوجد رقم الطالب","No student number"))+'</div>'}
-function sdtBody(s){var x=st(s);return '<div onclick="event.stopPropagation()" style="margin-top:10px;border-top:1px solid var(--bd);padding-top:10px;font-size:calc(14px*var(--fs,1))"><div>'+gn(s.grade)+', '+esc(gd(s.group))+'</div><div dir="ltr" style="text-align:start">'+esc(s.phone||"-")+' | '+esc(s.parentPhone||"-")+'</div><div class="stat"><div><b>'+x.a+'</b>'+t("pr")+'</div><div><b>'+x.b+'</b>'+t("ab")+'</div><div><b>'+x.p+'</b>'+t("pd")+'</div><div><b class="'+(x.u?"owe":"")+'">'+x.u+'</b>'+t("np")+'</div></div><div class="mu" style="margin-top:6px">'+t("owed")+': '+x.o+' '+t("cur")+' | '+L2("سعر الحصة","Price")+': '+sp(s)+'</div>'+sdtSend(s,x)+'<div class="row" style="margin-top:8px"><input id="sn'+s.id+'" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" placeholder="'+t("howm")+'" style="flex:1 1 40%"><button class="btn" onclick="sdtSettle('+s.id+')">'+t("setn")+'</button></div><div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><button class="btn no" onclick="sdtDel('+s.id+')">'+(pd==s.id?t("conf"):t("del"))+'</button></div></div>'}
+function sdtBody(s){var x=st(s);return '<div onclick="event.stopPropagation()" style="margin-top:10px;border-top:1px solid var(--bd);padding-top:10px;font-size:calc(14px*var(--fs,1))"><div>'+gn(s.grade)+', '+esc(gd(s.group))+'</div><div dir="ltr" style="text-align:start">'+esc(s.phone||"-")+' | '+esc(s.parentPhone||"-")+'</div><div class="stat"><div><b>'+x.a+'</b>'+t("pr")+'</div><div><b>'+x.b+'</b>'+t("ab")+'</div><div><b>'+x.p+'</b>'+t("pd")+'</div><div><b class="'+(x.u?"owe":"")+'">'+x.u+'</b>'+t("np")+'</div></div><div class="mu" style="margin-top:6px">'+t("owed")+': '+x.o+' '+t("cur")+' | '+L2("سعر الحصة","Price")+': '+sp(s)+'</div>'+sdtSend(s,x)+'<div class="row" style="margin-top:8px"><input id="sn'+s.id+'" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" placeholder="'+t("howm")+'" style="flex:1 1 40%"><button class="btn" onclick="sdtSettle('+s.id+')">'+t("setn")+'</button></div>'+rsBtn(s)+'<div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><button class="btn no" onclick="sdtDel('+s.id+')">'+(pd==s.id?t("conf"):t("del"))+'</button></div></div>'}
 function sdtModal(){if(!LG2.open)return '';var g=LG2.open,an=LG2.anim,L=sdtList();
  return '<div class="gmo'+(an?' '+an:'')+'" id="lgo" onclick="lgBg(event)"><div class="gmd"><div class="gmh"><span class="gmsym">'+sgSym(g)+'</span><div class="gmt"><b>'+esc(gn(g))+'</b><small>'+L2("عدد الطلبة: ","Students: ")+L.length+'</small></div><button class="gmx" type="button" aria-label="Close" onclick="lgClose()">\u2715</button></div><div class="gmb">'+(L.length?L.map(function(x,i){var o=String(SDF.id)==String(x.id);return '<div class="card sdt-r'+(o?' on':'')+'" onclick="sdtPick('+i+')"><div class="sdt-h"><span class="sdt-n"><b>'+esc(x.name)+'</b>'+(x.group?' <span class="mu">'+esc(gd(x.group))+'</span>':'')+'</span><span class="gchev'+(o?' up':'')+'">\u2304</span></div>'+(o?sdtBody(x):'')+'</div>'}).join(''):'<div class="card mu">'+t("none")+'</div>')+'</div></div></div>'}
 function sdtView(){
@@ -10314,5 +10314,70 @@ var _kd=window.draw;if(typeof _kd=="function"){window.draw=draw=function(){var r
  if(typeof _s=="function")window.stsView=stsView=function(){return _s.apply(this,arguments)+block()};
 })();
 </script>
+<script>(function(){
+/* ترتيب حصص الطالب على أيام جدول مجموعته: الحضور والدفع زي ما هم، والتواريخ بس هي اللي بتتنقل */
+var UNDO=null;
+function sched(s){var T=window.TD||{},gk=s.grade+"|"+s.group,o=(T.sched||{})[gk],c=(T.cancel||{})[gk];return{days:o&&o.days&&o.days.length?o.days:null,cc:c&&typeof c=="object"?c:null}}
+function dnames(days){var N=["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];return days.slice().sort(function(a,b){return((a+1)%7)-((b+1)%7)}).map(function(d){return N[d]}).join(" و ")}
+function plan(s){var sc=sched(s);if(!sc.days)return{err:"nosched"};
+ var id=String(s.id),recs=[],occ={};
+ for(var k in S.rec){var i=k.indexOf("|");if(k.slice(i+1)!==id)continue;var d=k.slice(0,i);occ[d]=1;recs.push(d)}
+ function bad(d){var wd=new Date(d+"T12:00:00").getDay();return sc.days.indexOf(wd)<0||!!(sc.cc&&sc.cc[d])}
+ var mis=recs.filter(bad).sort().reverse();
+ if(!mis.length)return{moves:[],days:sc.days};
+ mis.forEach(function(d){delete occ[d]});
+ var cur=new Date(mis[0]+"T12:00:00"),moves=[];
+ for(var j=0;j<mis.length;j++){
+  var own=new Date(mis[j]+"T12:00:00");if(own<cur)cur=own;
+  var g=0,ok=null;
+  while(g<1500){var dk=ld(cur);if(sc.days.indexOf(cur.getDay())>=0&&!(sc.cc&&sc.cc[dk])&&!occ[dk]){ok=dk;break}cur.setDate(cur.getDate()-1);g++}
+  if(!ok)return{err:"noslot"};
+  occ[ok]=1;moves.push({from:mis[j],to:ok});cur.setDate(cur.getDate()-1)}
+ return{moves:moves,days:sc.days}}
+window.rsBtn=function(s){var u=UNDO&&UNDO.id==s.id;
+ return '<div class="row" style="margin-top:8px;gap:6px"><button class="btn" style="flex:1" onclick="rsRun('+s.id+')">'+L2("ترتيب الحصص على أيام الجدول","Re-align classes to schedule")+'</button>'+(u?'<button class="btn" style="flex:0 0 auto" onclick="rsUndo('+s.id+')">'+L2("تراجع","Undo")+'</button>':'')+'</div>'};
+function keep(f){if(window.sdtKeep)sdtKeep(f);else f()}
+window.rsRun=function(id){var s=(S.students||[]).filter(function(x){return x.id==id})[0];if(!s)return;
+ var p=plan(s);
+ if(p.err=="nosched"){alert("مجموعة الطالب مالهاش أيام محددة في الجدول. حدد أيام المجموعة الأول وبعدين جرّب تاني.");return}
+ if(p.err=="noslot"){alert("ملقيتش أيام فاضية كفاية في الجدول.");return}
+ if(!p.moves.length){alert("كل حصص الطالب أصلاً على أيام الجدول ("+dnames(p.days)+").");return}
+ var ls=p.moves.slice().reverse().map(function(m){return dayName(m.from)+" "+m.from+"  ←  "+dayName(m.to)+" "+m.to});
+ var shown=ls.slice(0,25).join("\n")+(ls.length>25?"\n... و"+(ls.length-25)+" كمان":"");
+ if(!confirm("هنرتب "+p.moves.length+" حصة للطالب "+s.name+" على أيام الجدول ("+dnames(p.days)+"):\n\n"+shown+"\n\nالحضور والدفع بيفضلوا زي ما هم، والتواريخ بس هي اللي بتتغير. نكمل؟"))return;
+ keep(function(){
+  var snap=[];
+  p.moves.forEach(function(m){var k=m.from+"|"+s.id;snap.push({from:m.from,to:m.to,o:S.rec[k]});delete S.rec[k]});
+  snap.forEach(function(m){S.rec[m.to+"|"+s.id]=m.o});
+  UNDO={id:s.id,snap:snap};save();draw()})};
+window.rsUndo=function(id){if(!UNDO||UNDO.id!=id)return;
+ keep(function(){UNDO.snap.forEach(function(m){delete S.rec[m.to+"|"+id]});UNDO.snap.forEach(function(m){S.rec[m.from+"|"+id]=m.o});UNDO=null;save();draw()})};
+})();</script>
+<script>(function(){
+/* فتح مجموعة الحصة الحالية تلقائياً من الجدول: من قبل بدايتها بـ 10 دقايق، وبتفضل لحد ما تبدأ اللي بعدها */
+var BEFORE=10,AFTER=150,done=0,hiddenAt=0;
+function fmt(t){var h=+t.slice(0,2),m=t.slice(3);return((h+11)%12+1)+":"+m+" "+(h>=12?"م":"ص")}
+function pick(now){var T=window.TD||{},sc=T.sched||{},cx=T.cancel||{},today=ld(now),nm=now.getHours()*60+now.getMinutes(),best=null;
+ for(var k in sc){var o=sc[k];if(!o||!o.days||o.days.indexOf(now.getDay())<0||!/^\d\d:\d\d$/.test(o.time||""))continue;
+  if(T.gdel&&T.gdel[k])continue;var c=cx[k];if(c&&typeof c=="object"&&c[today])continue;
+  var i=k.lastIndexOf("|"),g=k.slice(0,i),n=k.slice(i+1);
+  if(!S.students.some(function(x){return x.grade==g&&String(x.group)==n}))continue;
+  var st=+o.time.slice(0,2)*60+ +o.time.slice(3);
+  if(nm<st-BEFORE||nm>st+AFTER)continue;
+  var gi=GR.indexOf(g);if(!best||st>best.st||(st==best.st&&gi<best.gi))best={g:g,n:n,st:st,gi:gi,time:o.time}}
+ return best}
+function toast(m){var e=document.getElementById("agtoast");if(!e){e=document.createElement("div");e.id="agtoast";e.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 86px);z-index:9500;max-width:90vw;padding:10px 16px;border-radius:16px;background:var(--pr);color:var(--on);font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);transition:opacity .4s;pointer-events:none;direction:rtl;text-align:center";document.body.appendChild(e)}
+ e.textContent=m;e.style.opacity="1";clearTimeout(e._t);e._t=setTimeout(function(){e.style.opacity="0"},3500)}
+function ready(){try{return !!(window.AU&&AU.ready&&AU.user&&!(window.ST&&ST.data)&&S.students&&S.students.length&&window.TD&&TD.sched&&Object.keys(TD.sched).length)}catch(e){return false}}
+function apply(quiet){var b=pick(new Date());if(!b)return false;
+ tab="att";fg=b.g;fgr=b.n;fdate=ld(new Date());fmon=fdate.slice(0,7);edit=null;dt=null;cd=null;draw();
+ if(!quiet)toast("فتحنا "+gd(b.n)+" — "+gn(b.g)+" · "+fmt(b.time));return true}
+window.autoGroup=function(){return apply()};
+var tries=0,iv=setInterval(function(){tries++;if(done||tries>80){clearInterval(iv);return}
+ if(!ready())return;done=1;clearInterval(iv);apply()},500);
+document.addEventListener("visibilitychange",function(){
+ if(document.hidden){hiddenAt=Date.now();return}
+ if(hiddenAt&&Date.now()-hiddenAt>5*60*1000&&ready()&&tab=="att"&&!edit)apply();hiddenAt=0});
+})();</script>
 </body>
 </html>
