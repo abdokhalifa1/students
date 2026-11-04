@@ -563,6 +563,7 @@ var last=null,n=0;setInterval(function(){var b=document.querySelector(".aig");if
 #avc .avc-r{display:flex;gap:8px;margin-top:12px}
 #avc .avc-r .btn{flex:1}
 </style>
+<style id="pm-css">.pmg{position:absolute;left:168px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:var(--soft);color:var(--pr);padding:0;line-height:1;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;touch-action:manipulation}.pmg svg{width:24px;height:24px}.pmg:active{transform:translateY(-50%) scale(.9)}</style>
 <style id="attrail-css">
 .attbox{position:relative;padding-right:40px}
 .attcol{position:absolute;right:0;top:0;bottom:0;width:30px}
@@ -1196,6 +1197,55 @@ function sdtPick(i){var x=sdtList()[i];if(!x)return;var b=document.querySelector
 function sdtKeep(f){var b=document.querySelector(".gmb"),y=b?b.scrollTop:0;f();var n=document.querySelector(".gmb");if(n)n.scrollTop=y}
 function sdtSettle(id){var e=document.getElementById("sn"+id),v=+(e&&e.value)||0;sdtKeep(function(){settle(id,v)})}
 function sdtDel(id){sdtKeep(function(){delS(id)})}
+Object.assign(D.ar,{msg:"الرسائل"});Object.assign(D.en,{msg:"Messages"});
+var PM={m:"p",g:"",r:"",sid:"",q:"",ok:0},PMD={},PMK={},PMV=null;
+function pmNorm(x){return String(x||"").toLowerCase().replace(/[ً-ْـ]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").trim()}
+function pmKey(){return PM.m=="p"?"p"+PM.sid:"g"}
+function pmStu(){var ws=pmNorm(PM.q).split(/\s+/).filter(Boolean);
+return (S.students||[]).filter(function(s){if(PM.g&&s.grade!=PM.g)return false;if(PM.r&&String(s.group)!=String(PM.r))return false;var n=pmNorm(s.name);return ws.every(function(w){return n.indexOf(w)>-1})}).sort(function(a,b){return String(a.name).localeCompare(String(b.name),"ar")})}
+function pmRows(){var L=pmStu();return L.length?L.map(function(s){var o=String(PM.sid)==String(s.id);return '<div class="card sdt-r'+(o?' on':'')+'" style="margin:0 0 8px;cursor:pointer" onclick="pmPick(\''+s.id+'\')"><b>'+esc(s.name)+'</b> <span class="mu">'+esc(gn(s.grade))+' · '+esc(gd(s.group))+'</span></div>'}).join(''):'<div class="mu">'+t("none")+'</div>'}
+function pmPick(id){PM.sid=String(PM.sid)==String(id)?"":String(id);PM.ok=0;draw()}
+function pmRefresh(){var e=document.getElementById("pml");if(e)e.innerHTML=pmRows()}
+function pmVoice(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){alert(L2("البحث بالصوت مش مدعوم في المتصفح ده. جرّب Chrome أو Safari.","Voice search isn't supported in this browser. Try Chrome or Safari."));return}
+ if(PMV){try{PMV.stop()}catch(e){}return}
+ var r=new SR();PMV=r;r.lang=S.lang=="en"?"en-US":"ar-EG";r.interimResults=true;r.maxAlternatives=1;
+ function mic(on){var m=document.getElementById("pmmic");if(m)m.classList.toggle("pr",on)}
+ r.onresult=function(e){var tx="";for(var i=0;i<e.results.length;i++)tx+=e.results[i][0].transcript;PM.q=tx;var inp=document.getElementById("pmq");if(inp)inp.value=tx;pmRefresh()};
+ r.onerror=function(e){if(e.error=="not-allowed"||e.error=="service-not-allowed")alert(L2("مفيش إذن للميكروفون. اسمح للمتصفح باستخدام الميكروفون، أو افتح التطبيق في المتصفح مباشرة.","Microphone permission is blocked. Allow it in the browser, or open the app directly in the browser."))};
+ r.onend=function(){PMV=null;mic(false)};
+ try{r.start();mic(true)}catch(e){PMV=null;mic(false)}}
+function pmCompose(){var k=pmKey(),v=PMD[k]||"",kd=PMK[k]||"n",tg;
+ if(PM.m=="p"){var s=(S.students||[]).filter(function(x){return String(x.id)==String(PM.sid)})[0];
+  if(!s)return '<div class="card mu">'+L2("اختار الطالب من القايمة الأول","Pick a student from the list first")+'</div>';
+  tg=L2("رسالة خاصة إلى: ","Private message to: ")+s.name}
+ else{if(!PM.g)return '<div class="card mu">'+L2("اختار الصف الأول","Choose a grade first")+'</div>';
+  tg=L2("رسالة عامة إلى: ","Public message to: ")+gn(PM.g)+" · "+(PM.r?gd(PM.r):L2("كل المجموعات","all groups"))}
+ return '<div class="card"><div class="nm">'+esc(tg)+'</div>'
+ +'<div class="row" style="margin-top:8px"><button type="button" class="btn '+(kd=="n"?"pr":"")+'" onclick="PMK[\''+k+'\']=\'n\';draw()">'+t("ntnorm")+'</button><button type="button" class="btn '+(kd=="w"?"pay":"")+'" onclick="PMK[\''+k+'\']=\'w\';draw()">'+t("ntwarn")+'</button></div>'
+ +'<textarea id="pmt" rows="4" maxlength="600" placeholder="'+L2("اكتب رسالتك هنا...","Type your message here...")+'" oninput="PMD[\''+k+'\']=this.value;PM.ok=0" style="width:100%;box-sizing:border-box;resize:vertical;min-height:90px;margin-top:8px;font:inherit;font-size:calc(15px*var(--fs,1));padding:10px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx)">'+esc(v)+'</textarea>'
+ +(PM.ok?'<div class="mu" style="margin-top:8px">✓ '+L2("الرسالة اتبعتت","Message sent")+'</div>':'')
+ +'<div class="row" style="margin-top:10px"><button type="button" class="btn pr" onclick="pmSend()">'+L2("إرسال الرسالة","Send message")+'</button></div></div>'}
+function pmSend(){var k=pmKey(),el=document.getElementById("pmt"),m=((el?el.value:PMD[k])||"").trim();
+ if(!m){alert(L2("اكتب الرسالة الأول","Write a message first"));return}
+ var now=Date.now(),n={id:String(now)+"_"+Math.floor(Math.random()*1e6),kind:PMK[k]||"n",text:m.slice(0,600),at:now};
+ if(PM.m=="p"){var s=(S.students||[]).filter(function(x){return String(x.id)==String(PM.sid)})[0];if(!s){alert(L2("اختار الطالب الأول","Pick a student first"));return}n.grade=s.grade;n.sid=s.id}
+ else{if(!PM.g){alert(L2("اختار الصف الأول","Choose a grade first"));return}
+  var has=(S.students||[]).some(function(x){return x.grade==PM.g&&(!PM.r||String(x.group)==String(PM.r))});if(!has){alert(t("nostud"));return}
+  n.grade=PM.g;if(PM.r)n.grp=/^\d+$/.test(PM.r)?+PM.r:PM.r}
+ S.notices=S.notices||[];S.notices.push(n);if(window.cloudSendNt)cloudSendNt(n);
+ PMD[k]="";PM.ok=1;draw()}
+function pmView(){if(!gHas(PM.r,PM.g))PM.r="";
+ var pv=PM.m=="p",h='<div class="card"><div class="nm">'+L2("الرسائل","Messages")+'</div><div class="mu" style="font-size:calc(13px*var(--fs,1))">'+L2("رسالة خاصة لطالب، أو رسالة عامة لصف أو مجموعة","A private message to one student, or a public message to a grade or group")+'</div>'
+ +'<div class="row" style="margin-top:10px"><button type="button" class="btn '+(pv?"pr":"")+'" onclick="PM.m=\'p\';PM.ok=0;draw()">'+L2("رسالة خاصة","Private")+'</button><button type="button" class="btn '+(!pv?"pr":"")+'" onclick="PM.m=\'g\';PM.ok=0;draw()">'+L2("رسالة عامة","Public")+'</button></div>'
+ +'<div class="mu" style="margin-top:8px;font-size:calc(13px*var(--fs,1))">'+(pv?L2("خاصة: بتوصل لطالب واحد بس.","Private: reaches one student only."):L2("عامة: بتوصل لكل طلاب الصف أو المجموعة.","Public: reaches the whole grade or group."))+'</div>'
+ +'<div class="row" style="margin-top:10px"><select onchange="PM.g=this.value;PM.r=\'\';PM.sid=\'\';PM.ok=0;draw()"><option value="">'+(pv?L2("كل الصفوف","All grades"):L2("اختار الصف","Choose grade"))+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==PM.g?" selected":"")+'>'+esc(gn(g))+'</option>'}).join("")+'</select>'
+ +'<select onchange="PM.r=this.value;PM.sid=\'\';PM.ok=0;draw()"><option value="">'+L2("كل المجموعات","All groups")+'</option>'+gFlt(PM.r,PM.g)+'</select></div>';
+ if(pv)h+='<div class="row" style="margin-top:10px;flex-wrap:nowrap"><input id="pmq" placeholder="'+t("search")+'" value="'+esc(PM.q)+'" oninput="PM.q=this.value;pmRefresh()"><button class="btn sq" id="pmmic" type="button" aria-label="'+L2("بحث بالصوت","Voice search")+'" onclick="pmVoice()">'+(typeof icoH=="function"?icoH('mic','bare'):"🎤")+'</button></div><div id="pml" style="margin-top:10px;max-height:260px;overflow:auto">'+pmRows()+'</div>';
+ h+='</div>'+pmCompose();
+ var L=(S.notices||[]).slice().sort(function(a,b){return b.at-a.at}).slice(0,40);
+ if(L.length){h+='<div class="mu" style="margin:10px 4px 4px">'+L2("الرسائل المرسلة","Sent messages")+'</div>';L.forEach(function(n){h+=ntCard(n,true,true)})}
+ return h}
 function sdtSend(s,x){var m=anaMsg(s,x),pw=wa(s.parentPhone,m),sw=wa(s.phone,m);function b(u,lb,no){return u?'<a class="btn pr" target="_blank" rel="noopener" href="'+u+'">'+lb+'</a>':'<span class="btn mu">'+no+'</span>'}
 return '<div class="row" style="margin-top:8px">'+b(pw,L2("إرسال التقرير لولي الأمر","Send report to parent"),t("nopp"))+b(sw,L2("إرسال التقرير للطالب","Send report to student"),L2("لا يوجد رقم الطالب","No student number"))+'</div>'}
 function sdtBody(s){var x=st(s);return '<div onclick="event.stopPropagation()" style="margin-top:10px;border-top:1px solid var(--bd);padding-top:10px;font-size:calc(14px*var(--fs,1))"><div>'+gn(s.grade)+', '+esc(gd(s.group))+'</div><div dir="ltr" style="text-align:start">'+esc(s.phone||"-")+' | '+esc(s.parentPhone||"-")+'</div><div class="stat"><div><b>'+x.a+'</b>'+t("pr")+'</div><div><b>'+x.b+'</b>'+t("ab")+'</div><div><b>'+x.p+'</b>'+t("pd")+'</div><div><b class="'+(x.u?"owe":"")+'">'+x.u+'</b>'+t("np")+'</div></div><div class="mu" style="margin-top:6px">'+t("owed")+': '+x.o+' '+t("cur")+' | '+L2("سعر الحصة","Price")+': '+sp(s)+'</div>'+sdtSend(s,x)+'<div class="row" style="margin-top:8px"><input id="sn'+s.id+'" type="text" dir="ltr" lang="en" inputmode="numeric" autocomplete="off" oninput="ndg(this)" placeholder="'+t("howm")+'" style="flex:1 1 40%"><button class="btn" onclick="sdtSettle('+s.id+')">'+t("setn")+'</button></div>'+rsBtn(s)+frBtn(s)+'<div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--bd)"><button class="btn no" onclick="sdtDel('+s.id+')">'+(pd==s.id?t("conf"):t("del"))+'</button></div></div>'}
@@ -1431,7 +1481,7 @@ function lsView(){var d=dayK(),rt=S.lang=="ar",R=(window.cloudReps?cloudReps():[
    C.slice().reverse().concat([[0,L2("لم يردّوا","No reply"),"var(--bd)"]]).forEach(function(c){var m=ss.filter(function(s){return(by[s.id]||0)==c[0]});if(!m.length)return;h+='<div style="display:flex;align-items:center;gap:6px;margin-top:12px">'+dot(c[2])+'<b style="font-size:calc(14px*var(--fs,1))">'+c[1]+'</b><span class="mu">'+m.length+'</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+chip(m)+'</div>'});if(NN.length)h+='<div class="lbl" style="margin-top:14px">'+L2("ملاحظات الطلاب","Student notes")+'</div>'+NN.map(function(x){var st0=ids[x.sid],rv=by[x.sid],cc=rv?C.filter(function(c){return c[0]==rv})[0][2]:'var(--bd)';return'<div class="v3n"><div style="display:flex;align-items:center;gap:6px">'+dot(cc)+'<b style="font-size:calc(14px*var(--fs,1))">'+AV(st0)+esc(st0.name)+'</b></div><div class="rnb">'+esc(x.text)+'</div></div>'}).join("")}
   h+='</div>'});
  return h}
-function ntCard(n,showG,del){var w=n.kind=="w";return '<div class="card" style="border-inline-start:6px solid '+(w?'var(--no)':'var(--pr)')+'"><div class="nm">'+(w?icoH('warn','bare')+' '+t("ntwarn"):icoH('info','bare')+' '+t("ntnorm"))+(showG?' <span class="pill">'+gn(n.grade)+'</span>':'')+(n.grp?'<span class="pill">'+t("grp")+' '+n.grp+'</span>':'')+'<span class="pill"><bdi>'+ld(new Date(n.at))+'</bdi></span></div><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div>'+(del?'<div class="row" style="margin-top:8px"><button class="btn no" style="min-height:36px" onclick="delNt(\''+n.id+'\')">'+(HWS["n"+n.id]===1?t("conf"):t("del"))+'</button></div>':'')+'</div>'}
+function ntCard(n,showG,del){var w=n.kind=="w";return '<div class="card" style="border-inline-start:6px solid '+(w?'var(--no)':'var(--pr)')+'"><div class="nm">'+(w?icoH('warn','bare')+' '+t("ntwarn"):icoH('info','bare')+' '+t("ntnorm"))+' <span class="pill">'+(n.sid!=null?L2("رسالة خاصة","Private message"):L2("رسالة عامة","Public message"))+'</span>'+(showG?' <span class="pill">'+gn(n.grade)+'</span>':'')+(showG&&n.sid!=null?'<span class="pill">'+esc(((S.students||[]).filter(function(x){return String(x.id)==String(n.sid)})[0]||{}).name||"")+'</span>':'')+(n.grp?'<span class="pill">'+t("grp")+' '+n.grp+'</span>':'')+'<span class="pill"><bdi>'+ld(new Date(n.at))+'</bdi></span></div><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div>'+(del?'<div class="row" style="margin-top:8px"><button class="btn no" style="min-height:36px" onclick="delNt(\''+n.id+'\')">'+(HWS["n"+n.id]===1?t("conf"):t("del"))+'</button></div>':'')+'</div>'}
 function ntView(){var h='<div class="card"><div class="nm">'+t("ntnew")+'</div>'
 +'<span class="lbl">'+t("tgr")+'</span><select onchange="ntAdd(this.value)"><option value=""></option>'+GR.filter(function(g){return NF.gs.indexOf(g)<0}).map(function(g){return '<option value="'+g+'">'+gn(g)+'</option>'}).join("")+'</select>'
 +(NF.gs.length?'<div class="dl" style="margin:10px 0 0">'+NF.gs.map(function(g){return '<span onclick="ntTg(\''+g+'\')" style="cursor:pointer">'+gn(g)+' ✕</span>'}).join("")+'</div>':'')
@@ -1634,7 +1684,7 @@ function repView(){return (rtab=="lb"?tlView():rtab=="sum"?sum():rtab=="ls"?lsVi
 function homeView(){var td=ld(new Date()),a=0,b=0,n=0,owe=0,O=[];
 S.students.forEach(function(s){var r=rc(s.id,td);if(r.a===1)a++;else if(r.a===0)b++;else n++;var x=st(s);owe+=x.o||0;if(x.o>0)O.push({s:s,o:x.o})});
 O.sort(function(p,q){return q.o-p.o});
-var h='<div class="card" style="position:relative"><button type="button" class="calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button><button type="button" class="demob" onclick="demoMenu(event)" aria-haspopup="true" aria-label="'+L2("حساب تجريبي للطالب","Student demo account")+'">'+(window.DEMO_ICO||"")+'</button><button type="button" class="aig" onclick="aiCardOpen()" aria-label="'+L2("المساعد","Assistant")+'">'+(window.AIICO||"")+'</button><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div>';
+var h='<div class="card" style="position:relative"><button type="button" class="calcg" onclick="fcalcT()" aria-label="'+L2("الآلة الحاسبة","Calculator")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="3"/><rect x="7.5" y="5.5" width="9" height="3.5" rx="1"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01"/></svg></button><button type="button" class="demob" onclick="demoMenu(event)" aria-haspopup="true" aria-label="'+L2("حساب تجريبي للطالب","Student demo account")+'">'+(window.DEMO_ICO||"")+'</button><button type="button" class="aig" onclick="aiCardOpen()" aria-label="'+L2("المساعد","Assistant")+'">'+(window.AIICO||"")+'</button><button type="button" class="pmg" onclick="go(\'msg\')" aria-label="'+L2("الرسائل","Messages")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg></button><div class="nm">'+L2("أهلاً بيك 👋","Welcome 👋")+'</div><div class="mu">'+dayName(td)+" "+td+'</div></div>';
 if(!S.students.length)return h+'<div class="row"><button class="btn ok" onclick="go(\'stu\')">'+t("add")+'</button></div>';
 
 return h}
@@ -1653,15 +1703,15 @@ var hdh=((sv||on)?logoHtml():'<div class="hn" role="button" tabindex="0" style="
 hdh+=(window.calcBtn?calcBtn(sv&&!on):""); if(sv&&!on&&ST.data&&ST.data.av)hdh+='<img class="hav" src="'+ST.data.av+'" alt="" onclick="avTap()">';
 var hdE=document.getElementById("hd");if(hdE)hdE.classList.toggle("hasav",!!(sv&&!on&&ST.data&&ST.data.av));
 if(hdh!==window._hdh){window._hdh=hdh;document.getElementById("hd").innerHTML=hdh}
-var htE=document.getElementById("htt");if(htE){var htT=on&&{home:1,att:1,stu:1,tasks:1,rep:1,set:1}[tab]?((tab=="set"&&window.setTitle&&setTitle())||(tab=="rep"&&rtab=="ls"?L2("الحصص","Lessons"):tab=="rep"&&rtab=="lb"?L2("المتصدرين","Leaders"):t(tab))):sv?(ST.set?(APR?t("theme"):ST.sp=="lang"?t("lang"):t("set")):({home:t("home"),me:t("me"),rp:L2("الحصة","Lesson"),hw:t("mine"),nt:t("nt")})[ST.tab]||t("title")):t("title");if(htE.textContent!==htT){var htF=htE.textContent!=="";htE.textContent=htT;if(htF&&htE.animate)htE.animate([{opacity:0,transform:"translateY(-6px)"},{opacity:1,transform:"none"}],{duration:280,easing:"cubic-bezier(.2,.8,.2,1)"})}}
+var htE=document.getElementById("htt");if(htE){var htT=on&&{home:1,att:1,stu:1,tasks:1,rep:1,set:1,msg:1}[tab]?((tab=="set"&&window.setTitle&&setTitle())||(tab=="rep"&&rtab=="ls"?L2("الحصص","Lessons"):tab=="rep"&&rtab=="lb"?L2("المتصدرين","Leaders"):t(tab))):sv?(ST.set?(APR?t("theme"):ST.sp=="lang"?t("lang"):t("set")):({home:t("home"),me:t("me"),rp:L2("الحصة","Lesson"),hw:t("mine"),nt:t("nt")})[ST.tab]||t("title")):t("title");if(htE.textContent!==htT){var htF=htE.textContent!=="";htE.textContent=htT;if(htF&&htE.animate)htE.animate([{opacity:0,transform:"translateY(-6px)"},{opacity:1,transform:"none"}],{duration:280,easing:"cubic-bezier(.2,.8,.2,1)"})}}
 var navH=on?["home","att","stu","rep"].map(function(k){return '<button class="'+(tab==k?"on":"")+'" data-k="'+k+'" onclick="'+(k=="rep"?"rtab=\'sum\';":"")+'go(\''+k+'\')"><i>'+(IC[k]||IC.hw)+(k=="tasks"?bdgT(newSubs()):"")+'</i><span>'+t(k)+'</span></button>'}).join(""):(sv?studentNav():"");
 var navE=document.getElementById("nav");if(sv&&!on){if(window._navh!==navH){window._navh=navH;navE.innerHTML=navH}}else{window._navh=null;navE.innerHTML=navH}
 var body;
 if(!AU.ready||ST.rs)body='<div class="card mu">'+t("ldg")+'</div>';
-else if(on)body=tab=="home"?homeView():tab=="att"?att():tab=="stu"?stu():tab=="tasks"?tasksView():tab=="rep"?repView():setv();
+else if(on)body=tab=="home"?homeView():tab=="att"?att():tab=="stu"?stu():tab=="tasks"?tasksView():tab=="msg"?pmView():tab=="rep"?repView():setv();
 else if(sv)body=studentView();
 else body=(ST.mode=="s"?studentLoginView():loginView())+gateLink();
-var bk=((on&&(tab=="set"||tab=="sch"||tab=="tasks"||(tab=="rep"&&rtab!="sum")||(tab=="stu"&&edit&&edit.id)))||(sv&&ST.set))?'<div class="row" style="margin-bottom:12px"><button class="btn" style="flex:0 0 auto;padding:8px 22px" onclick="goBack()">'+(l=="ar"?"→ رجوع":"← Back")+'</button></div>':'';
+var bk=((on&&(tab=="set"||tab=="sch"||tab=="tasks"||tab=="msg"||(tab=="rep"&&rtab!="sum")||(tab=="stu"&&edit&&edit.id)))||(sv&&ST.set))?'<div class="row" style="margin-bottom:12px"><button class="btn" style="flex:0 0 auto;padding:8px 22px" onclick="goBack()">'+(l=="ar"?"→ رجوع":"← Back")+'</button></div>':'';
 var appE=document.getElementById("app"),appH=bk+body;if(sv&&!on){if(window._apph!==appH){window._apph=appH;appE.innerHTML=appH}}else{window._apph=null;appE.innerHTML=appH}
 syncUI();if(adj)setTimeout(rlInit,0)}
 draw();
@@ -7651,7 +7701,7 @@ window.FB={
     const ss=await getDocs(collection(db,"portal",pid,"sol"));
     ss.forEach(x=>{sol[x.id]=x.data()});
     let notes=[];
-    try{const ns=await getDocs(query(collection(db,"notices"),where("uid","==",d.uid),where("grade","==",d.grade)));ns.forEach(x=>{const n=x.data();if(!n.grp||n.grp==d.group)notes.push(n)})}catch(e){console.error(e)}
+    try{const ns=await getDocs(query(collection(db,"notices"),where("uid","==",d.uid),where("grade","==",d.grade)));ns.forEach(x=>{const n=x.data();if((!n.grp||n.grp==d.group)&&(n.sid==null||String(n.sid)==String(d.sid)))notes.push(n)})}catch(e){console.error(e)}
     let msgs=[];
     try{const ms=await getDocs(query(collection(db,"messages"),where("uid","==",d.uid),where("sid","==",d.sid)));ms.forEach(x=>msgs.push(x.data()))}catch(e){console.error(e)}
     let reps=[];
@@ -8119,7 +8169,7 @@ function chkS(){
       ev.L.forEach(function(w){if(!known.h[w.id]){known.h[w.id]=1;show(L2("واجب جديد 📚","New homework 📚"),w.title||"","hw"+w.id)}});
       ST.hw=ev.L;
     }else if(ev.k=="n"){
-      var L=ev.L.filter(function(n){return !n.grp||n.grp==ST.data.group});
+      var L=ev.L.filter(function(n){return (!n.grp||n.grp==ST.data.group)&&(n.sid==null||String(n.sid)==String(ST.data.sid))});
       L.forEach(function(n){if(!known.n[n.id]){known.n[n.id]=1;show(n.kind=="w"?L2("تنبيه من المدرس ⚠️","Alert from teacher ⚠️"):L2("إخطار من المدرس ℹ️","Notice from teacher ℹ️"),n.text,"nt"+n.id)}});
       ST.notes=L;ST.newN=hasNew();
     }else if(ev.k=="p"){
@@ -9581,7 +9631,7 @@ function recOf(sch,cx){var rec=[],days=(sch&&sch.days)||[],a=0,b=0,u=0,n,d,key,r
 function demoSync(){var D=ST.demo,d=ST.data;if(!D||!d)return;
  var g=d.grade;
  ST.hw=(S.hw||[]).filter(function(w){return w.grade===g}).map(function(w){return Object.assign({},w,{uid:"demo"})}).sort(function(x,y){return String(y.id).localeCompare(String(x.id))});
- ST.notes=(S.notices||[]).filter(function(n){return n.grade==g&&(!n.grp||String(n.grp)==GRP)});
+ ST.notes=(S.notices||[]).filter(function(n){return n.grade==g&&n.sid==null&&(!n.grp||String(n.grp)==GRP)});
  d.sch=(T().sched||{})[g+"|"+GRP]||null;d.cx=cxOf(g);d.price=+S.price||50;d.gt=gtOf();d.pz=(typeof pzAll=="function")?JSON.parse(JSON.stringify(pzAll())):{}}
 function build(i){
  var g=GR[i],sch=(T().sched||{})[g+"|"+GRP]||null,cx=cxOf(g),R=recOf(sch,cx);
@@ -10257,6 +10307,7 @@ window.frBtn=function(s){var h=typeof _fb=="function"?_fb(s):"";
   return _go3.apply(this,arguments)};
  var _gb3=window.goBack;
  window.goBack=function(){
+  if(window.AU&&AU.user&&tab=="msg"){go("home");return}
   if(window.AU&&AU.user&&(tab=="tasks"||(tab=="rep"&&rtab!="sum"))){
    var d=0;try{d=window.backStep&&window.backStep()}catch(e){}
    if(!d)go("home");return}
