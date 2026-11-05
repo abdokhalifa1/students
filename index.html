@@ -1218,7 +1218,7 @@ function pmNorm(x){return String(x||"").toLowerCase().replace(/[ً-ْـ]/g,"").r
 function pmKey(){return PM.m=="p"?"p"+PM.sid:"g"}
 function pmStu(){var ws=pmNorm(PM.q).split(/\s+/).filter(Boolean);
 return (S.students||[]).filter(function(s){if(PM.g&&s.grade!=PM.g)return false;if(PM.r&&String(s.group)!=String(PM.r))return false;var n=pmNorm(s.name);return ws.every(function(w){return n.indexOf(w)>-1})}).sort(function(a,b){return String(a.name).localeCompare(String(b.name),"ar")})}
-function pmRows(){var L=pmStu();return L.length?L.map(function(s){var o=String(PM.sid)==String(s.id);return '<div class="card sdt-r'+(o?' on':'')+'" style="margin:0 0 8px;cursor:pointer" onclick="pmPick(\''+s.id+'\')"><b>'+esc(s.name)+'</b> <span class="mu">'+esc(gn(s.grade))+' · '+esc(gd(s.group))+'</span></div>'}).join(''):'<div class="mu">'+t("none")+'</div>'}
+function pmRows(){var L=pmStu();return L.length?L.map(function(s){var o=String(PM.sid)==String(s.id);return '<div class="card sdt-r'+(o?' on':'')+'" style="margin:0 0 8px;cursor:pointer" onclick="pmPick(\''+s.id+'\')"><b>'+esc(s.name)+'</b>'+(window.ndMsgDot?ndMsgDot(s.id):'')+' <span class="mu">'+esc(gn(s.grade))+' · '+esc(gd(s.group))+'</span></div>'}).join(''):'<div class="mu">'+t("none")+'</div>'}
 function pmPick(id){chOpen(id,null,1)}
 function pmRefresh(){var e=document.getElementById("pml");if(e)e.innerHTML=pmRows()}
 function pmVoice(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -1265,7 +1265,7 @@ function chListH(){var R=[];(S.students||[]).forEach(function(s){var E=chEntries
   +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><small class="mu"><bdi>'+chTm(l.n.at)+'</bdi></small>'+(nw?'<span class="pill ok">'+nw+' '+L2("جديد","new")+'</span>':'')+'</div></div>'}).join("")}
 function pmView(){if(PM.chat&&PM.sid)return chatView();if(!gHas(PM.r,PM.g))PM.r="";
  var pv=PM.m=="p",sm=0,cm=PM.m=="c"||PM.m=="s",h='<div class="card"><div class="nm">'+L2("الرسائل","Messages")+'</div>'
- +'<div class="row" style="margin-top:10px"><button type="button" class="btn '+(cm?"pr":"")+'" onclick="PM.m=\'c\';PM.ok=0;PM.ref=null;PM.sid=\'\';draw()">'+L2("المحادثات","Chats")+'</button><button type="button" class="btn '+((pv||PM.m=="g")?"pr":"")+'" onclick="PM.m=PM.lm||\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة جديدة","New message")+'</button></div>'+((pv||PM.m=="g")&&(PM.lm=PM.m)?'':'')+((pv||PM.m=="g")?'<div class="row" style="margin-top:8px"><button type="button" class="btn '+(pv?"pr":"")+'" style="min-height:38px;font-size:calc(14px*var(--fs,1))" onclick="PM.m=\'p\';PM.lm=\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("لطالب (خاصة)","To a student")+'</button><button type="button" class="btn '+(PM.m=="g"?"pr":"")+'" style="min-height:38px;font-size:calc(14px*var(--fs,1))" onclick="PM.m=\'g\';PM.lm=\'g\';PM.ok=0;PM.ref=null;draw()">'+L2("لصف أو مجموعة (عامة)","To a grade or group")+'</button></div>':'')
+ +'<div class="row" style="margin-top:10px"><button type="button" class="btn '+(cm?"pr":"")+'" onclick="PM.m=\'c\';PM.ok=0;PM.ref=null;PM.sid=\'\';draw()">'+L2("المحادثات","Chats")+(!cm&&window.ndMsgAny&&ndMsgAny()?'<span class="ndot"></span>':'')+'</button><button type="button" class="btn '+((pv||PM.m=="g")?"pr":"")+'" onclick="PM.m=PM.lm||\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة جديدة","New message")+'</button></div>'+((pv||PM.m=="g")&&(PM.lm=PM.m)?'':'')+((pv||PM.m=="g")?'<div class="row" style="margin-top:8px"><button type="button" class="btn '+(pv?"pr":"")+'" style="min-height:38px;font-size:calc(14px*var(--fs,1))" onclick="PM.m=\'p\';PM.lm=\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("لطالب (خاصة)","To a student")+'</button><button type="button" class="btn '+(PM.m=="g"?"pr":"")+'" style="min-height:38px;font-size:calc(14px*var(--fs,1))" onclick="PM.m=\'g\';PM.lm=\'g\';PM.ok=0;PM.ref=null;draw()">'+L2("لصف أو مجموعة (عامة)","To a grade or group")+'</button></div>':'')
  +'<div class="mu" style="margin-top:8px;font-size:calc(13px*var(--fs,1))">'+(cm?L2("محادثاتك مع الطلاب والرسائل اللي بعتّها. اضغط على أي محادثة وكمّل الكلام.","Your chats with students and the messages you sent. Tap a chat to continue."):sm?L2("كل الرسائل اللي بعتّها للطلاب.","All the messages you sent to students."):pv?L2("خاصة: بتوصل لطالب واحد بس.","Private: reaches one student only."):L2("عامة: بتوصل لكل طلاب الصف أو المجموعة.","Public: reaches the whole grade or group."))+'</div>'
  +(sm||cm?'':'<div class="mu" style="margin-top:12px;font-weight:700;font-size:calc(13px*var(--fs,1))">'+(pv?L2("١) اختار الصف والمجموعة (اختياري)","1) Pick grade and group (optional)"):L2("١) اختار الصف والمجموعة","1) Pick grade and group"))+'</div><div class="row" style="margin-top:6px"><select onchange="PM.g=this.value;PM.r=\'\';PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+(pv?L2("كل الصفوف","All grades"):L2("اختار الصف","Choose grade"))+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==PM.g?" selected":"")+'>'+esc(gn(g))+'</option>'}).join("")+'</select>'
  +'<select onchange="PM.r=this.value;PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+L2("كل المجموعات","All groups")+'</option>'+gFlt(PM.r,PM.g)+'</select></div>');
@@ -10541,6 +10541,7 @@ window.ndLsG=function(g){var m=lsMap(),n=0;(S.students||[]).forEach(function(s){
 window.ndLbG=function(c,g){return T("lb",c+"|"+g,0)};
 window.ndLb=function(c){var o=ld("lb"),n=0;Object.keys(o.t).forEach(function(k){if(k.indexOf(c+"|")==0&&isNew("lb",k))n++});return G(n)};
 /* رسائل: نقطة على المحادثة لحد ما تفتحها (والرسايل القديمة مش بتتحسب جديدة) */
+window.ndLsMapPub=lsMap;window.ndIsNewPub=isNew;window.ndLbPub=function(c){var o=ld("lb"),n=0;Object.keys(o.t).forEach(function(k){if(k.indexOf(c+"|")==0&&isNew("lb",k))n++});return n};
 window.ndChBase=function(){var e=(window.AU&&AU.user&&AU.user.email)||"",k="chsb_"+e,v=rd(k),p;
  if(v===null){p=rd("pmn_"+e);v=p!==null?(+p||0):Date.now();try{localStorage.setItem(k,String(v))}catch(x){}}
  return +v||0};
@@ -10563,6 +10564,47 @@ document.addEventListener("click",function(e){
   if(d.parentNode)d.parentNode.removeChild(d)});
  if(document.querySelector(".ndot[data-agg]"))setTimeout(function(){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;if(window.draw)draw()},120)
 },true);
+})();
+</script>
+<script id="nd-open-js">
+/* ===== فتح الحاجات الجديدة تلقائيًا عشان النقط الخضرا تبان على كل عنصر جديد ===== */
+(function(){
+if(window.__ndo)return;window.__ndo=1;
+var AO={k:"",ls:{},lb:{}};
+function tchr(){try{return !!(window.AU&&AU.user&&!(window.ST&&ST.demo))}catch(e){return false}}
+function lsNewByGrade(){var out={};try{
+ var m=window.ndLsMapPub?ndLsMapPub():null;if(!m)return out;
+ (S.students||[]).forEach(function(s){if(m[s.id]&&ndIsNewPub("ls",s.id,m[s.id]))out[s.grade]=1})}catch(e){}return out}
+function run(){
+ if(!tchr())return;
+ var key=(window.tab||"")+"|"+(window.rtab||"");
+ if(key!=AO.k){AO.k=key;AO.ls={};AO.lb={}}
+ if(window.tab=="rep"&&window.rtab=="ls"&&window.RP&&RP.o){
+  var g=lsNewByGrade(),ch=false;
+  Object.keys(g).forEach(function(k){if(!AO.ls[k]){AO.ls[k]=1;if(!RP.o[k]){RP.o[k]=true;ch=true}}});
+  if(ch)setTimeout(function(){if(window.draw)draw()},0)}
+ if(window.tab=="rep"&&window.rtab=="lb"&&window.TL&&!TL.busy&&!TL.open&&window.ndLbPub){
+  var c=["t","k"].filter(function(c){return ndLbPub(c)>0&&!AO.lb[c]})[0];
+  if(c){AO.lb[c]=1;setTimeout(function(){if(window.tlTog&&!TL.open)tlTog(c)},0)}}
+}
+var _d=window.draw;
+window.draw=function(){var r=_d.apply(this,arguments);try{run()}catch(e){}return r};
+})();
+</script>
+<script id="nd-msg-js">
+/* ===== نقط خضرا في الرسائل + صفحة الحسابات ===== */
+(function(){
+if(window.__ndm)return;window.__ndm=1;
+function unread(sid){try{var sn=chSeenGet(sid);return chEntries(sid).filter(function(x){return !x.me&&x.n.at>sn}).length}catch(e){return 0}}
+window.ndMsgDot=function(sid){return unread(sid)>0?'<span class="ndot"></span>':''};
+window.ndMsgAny=function(){try{return (S.students||[]).some(function(s){return unread(s.id)>0})}catch(e){return false}};
+function rows(){try{
+ [].forEach.call(document.querySelectorAll(".mi"),function(r){
+  var has=!!r.querySelector(".mva .bdg"),b=r.querySelector(".mtx > b"),d=r.querySelector(".mtx > b > .ndot.nds");
+  if(has&&b&&!d){var e=document.createElement("span");e.className="ndot nds";b.appendChild(e)}
+  else if(!has&&d)d.remove()})}catch(e){}}
+var _d=window.draw;
+window.draw=function(){var r=_d.apply(this,arguments);rows();return r};
 })();
 </script>
 </body>
