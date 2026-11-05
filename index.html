@@ -1368,7 +1368,7 @@ function settingsMenu(){
   +mRow("cal",L2("\u0627\u0644\u062c\u062f\u0648\u0644","Schedule"),"gOpenSch()","")
   +((window.xlHtml||window.xaHtml)?mRow("xl",L2("\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0645\u0646 Excel","Excel import"),"SP='xl';draw()",""):"")
   +mRow("tr",L2("\u0627\u0644\u062a\u062d\u062f\u064a\u0627\u062a","Challenges"),"CHG=true;draw()",chgPill()));
-h+=mGrp(L2("المهام والحصص","Tasks and lessons"),mRow("hw",L2("الواجبات والاختبارات","Homework and exams"),"gOpenTab('tasks')",window.gearCnt?gearCnt("hw"):"")+mRow("ls",L2("الحصص","Lessons"),"gOpenTab('rep','ls')",window.gearCnt?gearCnt("ls"):"")+mRow("lb",L2("المتصدرين","Leaders"),"gOpenTab('rep','lb')",window.gearCnt?gearCnt("lb"):""));
+h+=mGrp(L2("المهام والحصص","Tasks and lessons"),mRow("hw",L2("الواجبات والاختبارات","Homework and exams"),"gOpenTab('tasks')",window.gearCnt?gearCnt("hw"):"",{sub:window.gearSub?gearSub("hw"):""})+mRow("ls",L2("الحصص","Lessons"),"gOpenTab('rep','ls')",window.gearCnt?gearCnt("ls"):"",{sub:window.gearSub?gearSub("ls"):""})+mRow("lb",L2("المتصدرين","Leaders"),"gOpenTab('rep','lb')",window.gearCnt?gearCnt("lb"):"",{sub:window.gearSub?gearSub("lb"):""}));
  h+=mGrp(L2("\u0627\u0644\u062a\u062e\u0635\u064a\u0635","Personalize"),
    mRow("th",t("theme"),"APR=true;draw()","")
   +mRow("gl",t("lang"),"SP='lang';draw()",S.lang=="en"?"English":"\u0627\u0644\u0639\u0631\u0628\u064a\u0629"));
@@ -1563,7 +1563,7 @@ function lsView(){var d=dayK(),rt=S.lang=="ar",R=(window.cloudReps?cloudReps():[
    C.slice().reverse().concat([[0,L2("لم يردّوا","No reply"),"var(--bd)"]]).forEach(function(c){var m=ss.filter(function(s){return(by[s.id]||0)==c[0]});if(!m.length)return;h+='<div style="display:flex;align-items:center;gap:6px;margin-top:12px">'+dot(c[2])+'<b style="font-size:calc(14px*var(--fs,1))">'+c[1]+'</b><span class="mu">'+m.length+'</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+chip(m)+'</div>'});if(NN.length)h+='<div class="lbl" style="margin-top:14px">'+L2("ملاحظات الطلاب","Student notes")+'</div>'+NN.map(function(x){var st0=ids[x.sid],rv=by[x.sid],cc=rv?C.filter(function(c){return c[0]==rv})[0][2]:'var(--bd)';return'<div class="v3n"><div style="display:flex;align-items:center;gap:6px">'+dot(cc)+'<b style="font-size:calc(14px*var(--fs,1))">'+AV(st0)+esc(st0.name)+'</b>'+(window.ndLsS?ndLsS(x.sid):'')+'</div><div class="rnb">'+esc(x.text)+'</div></div>'}).join("")}
   h+='</div>'});
  return h}
-function ntCard(n,showG,del){var w=n.kind=="w";return '<div class="card" style="border-inline-start:6px solid '+(w?'var(--no)':'var(--pr)')+'"><div class="nm">'+(w?icoH('warn','bare')+' '+t("ntwarn"):icoH('info','bare')+' '+L2("رسالة","Message"))+' <span class="pill">'+(n.sid!=null?L2("رسالة خاصة","Private message"):L2("رسالة عامة","Public message"))+'</span>'+(showG?' <span class="pill">'+gn(n.grade)+'</span>':'')+(showG&&n.sid!=null?'<span class="pill">'+esc(((S.students||[]).filter(function(x){return String(x.id)==String(n.sid)})[0]||{}).name||"")+'</span>':'')+(n.grp?'<span class="pill">'+t("grp")+' '+n.grp+'</span>':'')+'<span class="pill"><bdi>'+ld(new Date(n.at))+'</bdi></span></div>'+(n.ref?pmRefH(n.ref):'')+'<div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div>'+(del?'<div class="row" style="margin-top:8px"><button class="btn no" style="min-height:36px" onclick="delNt(\''+n.id+'\')">'+(HWS["n"+n.id]===1?t("conf"):t("del"))+'</button></div>':'')+'</div>'}
+function ntCard(n,showG,del){var w=n.kind=="w";return '<div class="card" style="border-inline-start:6px solid '+(w?'var(--no)':'var(--pr)')+'"><div class="nm">'+(w?icoH('warn','bare')+' '+t("ntwarn"):icoH('info','bare')+' '+L2("رسالة","Message"))+' <span class="pill">'+(n.sid!=null?L2("رسالة خاصة","Private message"):L2("رسالة عامة","Public message"))+'</span>'+(showG?' <span class="pill">'+gn(n.grade)+'</span>':'')+(showG&&n.sid!=null?'<span class="pill">'+esc(((S.students||[]).filter(function(x){return String(x.id)==String(n.sid)})[0]||{}).name||"")+'</span>':'')+(n.grp?'<span class="pill">'+t("grp")+' '+n.grp+'</span>':'')+'<span class="pill"><bdi>'+ld(new Date(n.at))+'</bdi></span>'+(window.ndStNt?ndStNt(n):'')+'</div>'+(n.ref?pmRefH(n.ref):'')+'<div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(n.text)+'</div>'+(del?'<div class="row" style="margin-top:8px"><button class="btn no" style="min-height:36px" onclick="delNt(\''+n.id+'\')">'+(HWS["n"+n.id]===1?t("conf"):t("del"))+'</button></div>':'')+'</div>'}
 function ntView(){var h='<div class="card"><div class="nm">'+t("ntnew")+'</div>'
 +'<span class="lbl">'+t("tgr")+'</span><select onchange="ntAdd(this.value)"><option value=""></option>'+GR.filter(function(g){return NF.gs.indexOf(g)<0}).map(function(g){return '<option value="'+g+'">'+gn(g)+'</option>'}).join("")+'</select>'
 +(NF.gs.length?'<div class="dl" style="margin:10px 0 0">'+NF.gs.map(function(g){return '<span onclick="ntTg(\''+g+'\')" style="cursor:pointer">'+gn(g)+' ✕</span>'}).join("")+'</div>':'')
@@ -1687,7 +1687,7 @@ function stChatH(){stRcPing(true);var A=ST.notes||[],RT=stRcTeacher(),P=A.filter
  if(!E.length)h+='<div class="mu" style="text-align:center">'+L2("ابدأ المحادثة مع المدرس","Start the conversation with the teacher")+'</div>';
  E.forEach(function(x){var n=x.n,q='',tp=!x.me;
   if(x.me&&n.ref){var nt=A.filter(function(y){return y.id==n.ref})[0];q='<div class="chq">↩ '+(nt?esc(String(nt.text).slice(0,60)):L2("رسالة محذوفة","deleted message"))+'</div>'}
-  h+='<div class="chm '+(x.me?'me':'th')+'"'+(tp?' style="cursor:pointer" onclick="ST.rp=\''+n.id+'\';draw()"':'')+'>'+q+(tp&&n.ref&&typeof n.ref=="object"?'<div class="chr">'+pmRefH(n.ref)+'</div>':'')+(tp&&n.kind=="w"?'⚠ ':'')+esc(n.text)+'<small><bdi>'+chTm(n.at)+'</bdi>'+(x.me?rcTick(rcStat(n.at,RT)):'')+'</small></div>'});
+  h+='<div class="chm '+(x.me?'me':'th')+'"'+(tp?' style="cursor:pointer" onclick="ST.rp=\''+n.id+'\';draw()"':'')+'>'+q+(tp&&n.ref&&typeof n.ref=="object"?'<div class="chr">'+pmRefH(n.ref)+'</div>':'')+(tp&&window.ndStNt?ndStNt(n):'')+(tp&&n.kind=="w"?'⚠ ':'')+esc(n.text)+'<small><bdi>'+chTm(n.at)+'</bdi>'+(x.me?rcTick(rcStat(n.at,RT)):'')+'</small></div>'});
  h+='</div></div><div class="card">';
  if(ST.rp){var rn=A.filter(function(y){return y.id==ST.rp})[0];h+='<div style="margin-bottom:8px"><div class="chq" style="padding-inline-start:8px;border-inline-start:3px solid var(--pr)">↩ '+(rn?esc(String(rn.text).slice(0,60)):'')+'</div><button type="button" class="btn" style="min-height:34px;margin-top:6px" onclick="ST.rp=null;draw()">\u2715 '+L2("إلغاء الرد","Cancel reply")+'</button></div>'}
  else if(E.some(function(x){return !x.me}))h+='<div class="mu" style="margin-bottom:8px;font-size:calc(13px*var(--fs,1))">'+L2("اضغط على رسالة المدرس علشان ترد عليها","Tap a teacher message to reply to it")+'</div>';
@@ -8295,16 +8295,16 @@ function teacherBadges(){
   if(mc>0){
     if(tab=="home"){var mg=document.querySelector(".pmg");if(mg&&!mg.querySelector(".bdg"))mg.insertAdjacentHTML("beforeend",bdgT(mc))}
     if(tab=="msg"&&!(window.PM&&PM.chat)){var hn=[].filter.call(document.querySelectorAll(".card > .nm"),function(e){return e.textContent.trim()==L2("الرسائل","Messages")})[0];if(hn&&!hn.querySelector(".bdg"))hn.insertAdjacentHTML("beforeend",bdg(mc,false))}}
-  var a=lsNew(),b=lbNew(),i=document.querySelector('nav button[data-k="rep"] i');
-  if(i&&!i.querySelector(".bdg")&&a+b>0)i.insertAdjacentHTML("beforeend",bdgT(a+b));
-  if(tab=="rep"){var B=document.querySelectorAll(".tabs2.cmp button");
-    if(a&&B[1]&&!B[1].querySelector(".bdg"))B[1].insertAdjacentHTML("beforeend",bdg(a,false));
-    if(b&&B[2]&&!B[2].querySelector(".bdg"))B[2].insertAdjacentHTML("beforeend",bdg(b,false));}
+  /* عدادات الحصص والمتصدرين مكانها الترس (نقطة على الترس + رقم على الصف) مش على زر الحسابات */
 }
 
 /* عدادات الترس: واجبات + حصص + متصدرين */
 window.gearCnt=function(k){var n=k=="hw"?(window.newSubs?newSubs():0):k=="ls"?lsNew():k=="lb"?lbNew():0;return n>0?bdgT(n):""};
 window.gearNew=function(){return (window.newSubs?newSubs():0)+lsNew()+lbNew()};
+window.gearSub=function(k){var n=k=="hw"?(window.newSubs?newSubs():0):k=="ls"?lsNew():k=="lb"?lbNew():0;if(!(n>0))return "";
+  return k=="hw"?L2(n+" \u062a\u0633\u0644\u064a\u0645 \u0648\u0627\u062c\u0628 \u062c\u062f\u064a\u062f",n+" new homework submission"+(n>1?"s":"")):
+         k=="ls"?L2(n+" \u0637\u0627\u0644\u0628 \u0628\u0639\u062a \u062a\u0642\u0631\u064a\u0631 \u0623\u0648 \u0645\u0644\u0627\u062d\u0638\u0629",n+" student"+(n>1?"s":"")+" sent a report or note"):
+         L2(n+" \u062a\u063a\u064a\u064a\u0631 \u0641\u064a \u0627\u0644\u0645\u062a\u0635\u062f\u0631\u064a\u0646",n+" leaderboard change"+(n>1?"s":""))};
 /* ---- الطالب: واجبات / إخطارات / حصة ملغية ---- */
 function stopS(){if(W){try{W()}catch(e){}}W=null;WK="";known=null}
 function chkS(){
@@ -10471,7 +10471,7 @@ window.frBtn=function(s){var h=typeof _fb=="function"?_fb(s):"";
   if(btn&&btn._t)clearTimeout(btn._t);
   var ch=0;flt().forEach(function(s){var k=fdate+"|"+s.id,o=S.rec[k]||{};if(o.a!==1&&o.a!==0){o.a=1;S.rec[k]=o;ch++}});if(ch){save();draw()}};
 
- window.gOpenTab=function(k,r){window.PT=prevTab;if(r)rtab=r;window._gk=true;go(k)};
+ window.gOpenTab=function(k,r){window.PT=prevTab;if(r)rtab=r;if(k=="tasks"&&window.newSubs&&newSubs()>0){try{TK="hw";TP.hw="rcv"}catch(e){}}window._gk=true;go(k)};
  var _go3=window.go;
  window.go=function(x){
   var gk=window._gk;window._gk=false;if(x=="rep"&&!gk)rtab="sum";
@@ -10511,6 +10511,7 @@ function seed(c){var now=Date.now(),o={b:now,d:{},t:{}},v,e;
   if(c=="hw"){v=rd("tsn_"+e);if(v!==null)o.b=+v||0}
   else if(c=="ls"){v=rd("trn_"+e);if(v!==null)o.b=+v||0}
   else if(c=="shw"){v=rd(shKey());o.b=v===null?0:(+v||0)}
+  else if(c=="snt"){v=rd(seenKey());o.b=v===null?0:(+v||0)}
   else if(c=="lb"){o.b=now-1;var s=JSON.parse(rd("lbn_"+e)||"{}");Object.keys(s||{}).forEach(function(k){o.t[k]=now})}
  }catch(x){}
  return o}
@@ -10545,7 +10546,8 @@ window.ndChBase=function(){var e=(window.AU&&AU.user&&AU.user.email)||"",k="chsb
  return +v||0};
 /* الطالب: نقطة على كل واجب جديد */
 window.ndStHw=function(w){return T("shw",w.id,+w.id||0)};
-function init(){var r=role();if(r=="t"){ld("hw");ld("ls");ld("lb")}else if(r=="s"){ld("shw")}}
+window.ndStNt=function(n){if(role()!="s")return '';return T("snt",n.id,+n.at||0)};
+function init(){var r=role();if(r=="t"){ld("hw");ld("ls");ld("lb")}else if(r=="s"){ld("shw");ld("snt")}}
 var _d=window.draw;
 window.draw=function(){try{init()}catch(e){}return _d.apply(this,arguments)};
 /* دوس على العنصر الجديد = النقطة تتشال */
