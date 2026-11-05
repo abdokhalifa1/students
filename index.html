@@ -703,7 +703,19 @@ en:{title:"Student Tracker",grp:"Group",gender:"Gender",boy:"Boy",girl:"Girl",bo
 Object.assign(D.ar,{an:"تحليل",days:"المجموعة",grp:"مجموعة",allgr:"كل الصفوف",allsx:"ولاد وبنات",boys:"ولاد",girls:"بنات",boy:"ولد",girl:"بنت",sex:"النوع",search:"ابحث بالاسم",det:"تفاصيل الطالب",ana:"تفصيل تحليلي",settle:"سدّد كل الحصص",howm:"عدد الحصص",setn:"سدّد",np:"لم يدفع",total:"الطلبة",unrec:"لم يُسجَّل",sm:function(n,a,b,u,o){return "السلام عليكم، الطالب "+n+": حضر "+a+" حصة، غاب "+b+" حصة، لم يدفع "+u+" حصة، وعليه مبلغ "+o+" جنيه."}});
 Object.assign(D.en,{an:"Analysis",days:"Group",grp:"Group",allgr:"All grades",allsx:"Boys & girls",boys:"Boys",girls:"Girls",boy:"Boy",girl:"Girl",sex:"Gender",search:"Search by name",det:"Student details",ana:"Analytical detail",settle:"Settle all classes",howm:"Classes",setn:"Settle",np:"Not paid",total:"Students",unrec:"Not recorded",sm:function(n,a,b,u,o){return "Hello, student "+n+": attended "+a+" classes, absent "+b+", not paid "+u+" classes, and owes "+o+" EGP."}});
 function ld(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
-function shiftDay(n){var p=fdate.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]+n);fdate=ld(d);draw()}
+function attSnap(){try{return localStorage.getItem("att_snap")==="1"}catch(e){return false}}
+function attSnapTog(){try{localStorage.setItem("att_snap",attSnap()?"0":"1")}catch(e){}draw()}
+function attDays(){var T=window.TD||{},sc=T.sched||{},gd=T.gdel||{},u={};
+ function add(k){var o=sc[k];if(!o||!o.days||gd[k])return;o.days.forEach(function(d){u[d]=1})}
+ if(fgr!==""&&fgr!=null)add(fg+"|"+fgr);else Object.keys(sc).forEach(function(k){if(k.split("|")[0]===String(fg))add(k)});
+ return Object.keys(u).map(Number)}
+function attSnapH(){var on=attSnap();
+ return '<div onclick="attSnapTog()" role="switch" aria-checked="'+on+'" style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:8px;cursor:pointer;-webkit-tap-highlight-color:transparent"><span class="mu" style="font-size:calc(13px*var(--fs,1))">'+L2("التنقل بين أيام المجموعة بس","Jump between group days only")+'</span><span style="direction:ltr;display:flex;align-items:center;width:44px;height:26px;border-radius:13px;padding:3px;box-sizing:border-box;background:'+(on?'var(--pr)':'var(--soft)')+';justify-content:'+(on?'flex-end':'flex-start')+';transition:background .2s"><span style="width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35)"></span></span></div>'}
+function shiftDay(n){var p=fdate.split("-"),step=n<0?-1:1,d;
+ var dys=attSnap()?attDays():[];
+ if(dys.length){d=new Date(+p[0],+p[1]-1,+p[2]);for(var i=0;i<400;i++){d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+step);if(dys.indexOf(d.getDay())>=0)break}}
+ else d=new Date(+p[0],+p[1]-1,+p[2]+n);
+ fdate=ld(d);draw()}
 function dayName(x){var p=x.split("-"),d=new Date(+p[0],+p[1]-1,+p[2]);return (S.lang=="en"?DE:DAYS)[(d.getDay()+1)%7]}
 function daySum(){var a=0,b=0,u=0,n=0;S.students.forEach(function(s){var r=rc(s.id,fdate);if(r.a===1){a++;if(r.p===0)u++}else if(r.a===0)b++;else n++});return '<div class="cnt" style="margin:10px 0 0"><span>'+t("pr")+' <b>'+a+'</b></span><span>'+t("ab")+' <b'+(b?' class="owe"':'')+'>'+b+'</b></span><span>'+t("np")+' <b'+(u?' class="owe"':'')+'>'+u+'</b></span></div>'}
 var KEY="mathTeacherApp1_demo",S={students:[],rec:{},price:50,lang:"ar"},tab="att",fg="",fgr="",fdate=ld(new Date()),fmon=fdate.slice(0,7),edit=null,pd=null,fgen="",sg="",sgr="",sgen="";
@@ -951,7 +963,7 @@ if(!gs.length)return '';
 if(gs.indexOf(fg)<0)fg=gs[0];
 if(!gHas(fgr,fg))fgr="";
 var td=ld(new Date()),rt=S.lang=="ar",cv=function(l){return'<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="'+(l?'M15 6l-6 6 6 6':'M9 6l6 6-6 6')+'"/></svg>'};
-h+='<div class="card"><div style="display:flex;align-items:center;gap:6px"><button class="btn sq" aria-label="'+t("pday")+'" onclick="shiftDay(-1)">'+cv(!rt)+'</button><div class="dpb" role="button" tabindex="0" onclick="dpOpen(\'att\')" style="position:relative;flex:1;text-align:center;line-height:1.3;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:2px 0"><b>'+dayName(fdate)+' <bdi>'+fdate+'</bdi></b>'+'</div><button class="btn sq" aria-label="'+t("nday")+'" onclick="shiftDay(1)">'+cv(rt)+'</button></div>'+(fdate==td?'':'<div style="display:flex;justify-content:center;margin-top:4px"><button class="btn" style="min-height:32px;padding:2px 14px;flex:none;font-size:calc(12px*var(--fs,1))" onclick="fdate=ld(new Date());draw()">'+t("tdy")+'</button></div>')+'</div>';
+h+='<div class="card"><div style="display:flex;align-items:center;gap:6px"><button class="btn sq" aria-label="'+t("pday")+'" onclick="shiftDay(-1)">'+cv(!rt)+'</button><div class="dpb" role="button" tabindex="0" onclick="dpOpen(\'att\')" style="position:relative;flex:1;text-align:center;line-height:1.3;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:2px 0"><b>'+dayName(fdate)+' <bdi>'+fdate+'</bdi></b>'+'</div><button class="btn sq" aria-label="'+t("nday")+'" onclick="shiftDay(1)">'+cv(rt)+'</button></div>'+attSnapH()+(fdate==td?'':'<div style="display:flex;justify-content:center;margin-top:4px"><button class="btn" style="min-height:32px;padding:2px 14px;flex:none;font-size:calc(12px*var(--fs,1))" onclick="fdate=ld(new Date());draw()">'+t("tdy")+'</button></div>')+'</div>';
 h+='<div class="card"><div class="row"><select onchange="fg=this.value;draw()">'+gs.map(function(g){return '<option value="'+g+'"'+(g==fg?" selected":"")+'>'+gn(g)+'</option>'}).join("")+'</select>';
 h+='<select onchange="fgr=this.value;draw()"><option value="">'+t("allg")+'</option>'+gFlt(fgr,fg)+'</select>'+sxSel()+'</div>';
 h+='</div>';
