@@ -1231,17 +1231,28 @@ function pmVoice(){var SR=window.SpeechRecognition||window.webkitSpeechRecogniti
  r.onerror=function(e){if(e.error=="not-allowed"||e.error=="service-not-allowed")alert(L2("مفيش إذن للميكروفون. اسمح للمتصفح باستخدام الميكروفون، أو افتح التطبيق في المتصفح مباشرة.","Microphone permission is blocked. Allow it in the browser, or open the app directly in the browser."))};
  r.onend=function(){PMV=null;mic(false)};
  try{r.start();mic(true)}catch(e){PMV=null;mic(false)}}
+var TRASHI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+function pmDelAsk(sid){PM.del=String(sid);draw()}
+function pmDelNo(){PM.del="";draw()}
+function pmDelDo(sid){var id=String(sid);
+ var N=(S.notices||[]).filter(function(n){return n.sid!=null&&String(n.sid)==id});
+ S.notices=(S.notices||[]).filter(function(n){return !(n.sid!=null&&String(n.sid)==id)});
+ N.forEach(function(n){if(window.cloudDelNt)cloudDelNt(n.id)});
+ (window.TMSGS||[]).filter(function(m){return m&&m.sid!=null&&String(m.sid)==id}).forEach(function(m){if(window.cloudDelMsg)cloudDelMsg(m.id)});
+ PM.del="";PM.chat=0;PM.cl=0;PM.sid="";PM.ref=null;PM.m="c";draw()}
+function pmDelBox(s){if(String(PM.del)!=String(s.id))return "";
+ return '<div class="row" style="margin-top:10px;align-items:center"><span class="mu" style="flex:1 1 100%;font-size:calc(13px*var(--fs,1))">'+L2("هتتمسح المحادثة عندك وعند الطالب. متأكد؟","This deletes the chat for you and for the student. Sure?")+'</span><button type="button" class="btn no" onclick="event.stopPropagation();pmDelDo(\''+s.id+'\')">'+L2("امسح","Delete")+'</button><button type="button" class="btn" onclick="event.stopPropagation();pmDelNo()">'+L2("إلغاء","Cancel")+'</button></div>'}
 function pmCompose(){var k=pmKey(),v=PMD[k]||"",kd=PMK[k]||"n",tg;
  if(PM.m=="p"){var s=(S.students||[]).filter(function(x){return String(x.id)==String(PM.sid)})[0];
   if(!s)return '<div class="card mu">'+L2("اختار الطالب من القايمة الأول","Pick a student from the list first")+'</div>';
   tg=L2("رسالة خاصة إلى: ","Private message to: ")+s.name}
- else{if(!PM.g)return '<div class="card mu">'+L2("اختار الصف الأول","Choose a grade first")+'</div>';
+ else{if(!PM.g)return '<div class="card mu">'+L2("اختار الصف الأول وهتظهر خانة الرسالة","Choose a grade first and the message box will appear")+'</div>';
   tg=L2("رسالة عامة إلى: ","Public message to: ")+gn(PM.g)+" · "+(PM.r?gd(PM.r):L2("كل المجموعات","all groups"))}
- return '<div class="card"><div class="nm">'+esc(tg)+'</div>'+(PM.ref?'<div style="margin-top:8px">'+pmRefH(PM.ref)+'<button type="button" class="btn" style="min-height:34px" onclick="PM.ref=null;draw()">\u2715 '+L2("إزالة المرفق","Remove attachment")+'</button></div>':'')
+ return '<div class="card chcard"><div class="nm">'+esc(tg)+'</div>'+(PM.ref?'<div style="margin-top:8px">'+pmRefH(PM.ref)+'<button type="button" class="btn" style="min-height:34px" onclick="PM.ref=null;draw()">\u2715 '+L2("إزالة المرفق","Remove attachment")+'</button></div>':'')
  +'<div class="row" style="margin-top:8px"><button type="button" class="btn '+(kd=="n"?"pr":"")+'" onclick="PMK[\''+k+'\']=\'n\';draw()">'+L2("رسالة","Message")+'</button><button type="button" class="btn no" style="'+(kd=="w"?"box-shadow:0 0 0 3px color-mix(in srgb,var(--no) 35%,transparent)":"opacity:.55")+'" onclick="PMK[\''+k+'\']=\'w\';draw()">'+t("ntwarn")+'</button></div>'
- +'<textarea id="pmt" rows="4" maxlength="600" placeholder="'+L2("اكتب رسالتك هنا...","Type your message here...")+'" oninput="PMD[\''+k+'\']=this.value;PM.ok=0" style="width:100%;box-sizing:border-box;resize:vertical;min-height:90px;margin-top:8px;font:inherit;font-size:calc(15px*var(--fs,1));padding:10px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx)">'+esc(v)+'</textarea>'
- +(PM.ok?'<div class="mu" style="margin-top:8px">✓ '+L2("الرسالة اتبعتت","Message sent")+'</div>':'')
- +'<div class="row" style="margin-top:10px"><button type="button" class="btn pr" onclick="pmSend()">'+L2("إرسال الرسالة","Send message")+'</button></div></div>'}
+ +'<div class="chi" style="margin-top:10px"><textarea id="pmt" rows="3" dir="auto" maxlength="600" placeholder="'+L2("اكتب رسالتك هنا...","Type your message here...")+'" oninput="PMD[\''+k+'\']=this.value;PM.ok=0;chGrow(this)">'+esc(v)+'</textarea>'
+ +'<button type="button" class="chs" onclick="pmSend()" aria-label="'+L2("إرسال","Send")+'">'+CHSEND+'</button></div>'
+ +(PM.ok?'<div class="mu" style="margin-top:8px">✓ '+L2("الرسالة اتبعتت","Message sent")+'</div>':'')+'</div>'}
 function pmSend(){var k=pmKey(),el=document.getElementById("pmt"),m=((el?el.value:PMD[k])||"").trim();
  if(!m){alert(L2("اكتب الرسالة الأول","Write a message first"));return}
  var now=Date.now(),n={id:String(now)+"_"+Math.floor(Math.random()*1e6),kind:PMK[k]||"n",text:m.slice(0,600),at:now};
@@ -1259,22 +1270,33 @@ function chUniq(E){var seen={},o=[];E.forEach(function(x){var id=x.n&&x.n.id!=nu
 function chEntries(sid){var E=[];(S.notices||[]).forEach(function(n){if(n.sid!=null&&String(n.sid)==String(sid))E.push({me:1,n:n})});(window.cloudMsgs?cloudMsgs():[]).forEach(function(m){if(String(m.sid)==String(sid))E.push({me:0,n:m})});E.sort(function(a,b){return a.n.at-b.n.at});return chUniq(E)}
 function chListH(){var R=[];(S.students||[]).forEach(function(s){var E=chEntries(s.id);if(E.length)R.push({s:s,E:E,last:E[E.length-1]})});
  R.sort(function(a,b){return b.last.n.at-a.last.n.at});
- if(!R.length)return '<div class="card mu">'+L2("لسه مفيش محادثات. ابدأ من «رسالة خاصة» واختار طالب.","No chats yet. Start from “Private”, pick a student.")+'</div>';
+ if(!R.length)return '<div class="card mu">'+L2("لسه مفيش محادثات. اضغط «رسالة جديدة» واختار «رسالة خاصة».","No chats yet. Tap “New message” and pick “Private”.")+'</div>';
  return R.map(function(r){var s=r.s,sn=chSeenGet(s.id),nw=r.E.filter(function(x){return !x.me&&x.n.at>sn}).length,l=r.last;
-  return '<div class="card" style="cursor:pointer;display:flex;align-items:center;gap:10px" onclick="chOpen(\''+s.id+'\',null,1)">'+(typeof AV=="function"?AV(s):"")
+  return '<div class="card"><div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="chOpen(\''+s.id+'\',null,1)">'+(typeof AV=="function"?AV(s):"")
   +'<div style="flex:1;min-width:0"><div class="nm" style="margin:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span>'+esc(s.name)+'</span>'+(nw?'<span class="ndot"></span>':'')+'<span class="pill">'+esc(gn(s.grade))+'</span></div>'
   +'<div class="mu" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(13px*var(--fs,1))">'+(l.me?L2("أنت: ","You: "):"")+esc(String(l.n.text||"").replace(/\s+/g," ").slice(0,70))+'</div></div>'
-  +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><small class="mu"><bdi>'+chTm(l.n.at)+'</bdi></small>'+(nw?'<span class="pill ok">'+nw+' '+L2("جديد","new")+'</span>':'')+'</div></div>'}).join("")}
+  +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><small class="mu"><bdi>'+chTm(l.n.at)+'</bdi></small>'+(nw?'<span class="pill ok">'+nw+' '+L2("جديد","new")+'</span>':'')+'</div>'
+  +'<button type="button" class="lbm" style="width:32px;height:32px;flex:none" onclick="event.stopPropagation();pmDelAsk(\''+s.id+'\')" aria-label="'+L2("مسح المحادثة","Delete chat")+'">'+TRASHI+'</button></div>'+pmDelBox(s)+'</div>'}).join("")}
+function pmBigCard(on,ic,ti,su){return '<div class="gb2" role="button" tabindex="0" onclick="'+on+'"><span class="gsym"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">'+ic+'</svg></span><span style="flex:1;min-width:0"><b style="display:block">'+ti+'</b><small class="mu">'+su+'</small></span><span class="gchev">'+L2("\u2039","\u203a")+'</span></div>'}
+function pmSel(opt){var pv=PM.m=="p";return '<div class="row" style="margin-top:6px"><select onchange="PM.g=this.value;PM.r=\'\';PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+(pv?L2("كل الصفوف","All grades"):L2("اختار الصف","Choose grade"))+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==PM.g?" selected":"")+'>'+esc(gn(g))+'</option>'}).join("")+'</select>'
+ +'<select onchange="PM.r=this.value;PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+L2("كل المجموعات","All groups")+'</option>'+gFlt(PM.r,PM.g)+'</select></div>'}
 function pmView(){if(PM.chat&&PM.sid)return chatView();if(!gHas(PM.r,PM.g))PM.r="";
- var pv=PM.m=="p",sm=0,cm=PM.m=="c"||PM.m=="s",h='<div class="card"><div class="nm">'+L2("الرسائل","Messages")+'</div>'
- +'<div class="row" style="margin-top:10px"><button type="button" class="btn '+(cm?"pr":"")+'" onclick="PM.m=\'c\';PM.ok=0;PM.ref=null;PM.sid=\'\';draw()">'+L2("المحادثات","Chats")+(!cm&&window.ndMsgAny&&ndMsgAny()?'<span class="ndot"></span>':'')+'</button><button type="button" class="btn '+((pv||PM.m=="g")?"pr":"")+'" onclick="PM.m=PM.lm||\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("رسالة جديدة","New message")+'</button></div>'+((pv||PM.m=="g")&&(PM.lm=PM.m)?'':'')+((pv||PM.m=="g")?'<div class="row" style="margin-top:8px"><button type="button" class="btn '+(pv?"pr":"")+'" style="min-height:38px;font-size:calc(14px*var(--fs,1))" onclick="PM.m=\'p\';PM.lm=\'p\';PM.ok=0;PM.ref=null;draw()">'+L2("لطالب (خاصة)","To a student")+'</button><button type="button" class="btn '+(PM.m=="g"?"pr":"")+'" style="min-height:38px;font-size:calc(14px*var(--fs,1))" onclick="PM.m=\'g\';PM.lm=\'g\';PM.ok=0;PM.ref=null;draw()">'+L2("لصف أو مجموعة (عامة)","To a grade or group")+'</button></div>':'')
- +'<div class="mu" style="margin-top:8px;font-size:calc(13px*var(--fs,1))">'+(cm?L2("محادثاتك مع الطلاب والرسائل اللي بعتّها. اضغط على أي محادثة وكمّل الكلام.","Your chats with students and the messages you sent. Tap a chat to continue."):sm?L2("كل الرسائل اللي بعتّها للطلاب.","All the messages you sent to students."):pv?L2("خاصة: بتوصل لطالب واحد بس.","Private: reaches one student only."):L2("عامة: بتوصل لكل طلاب الصف أو المجموعة.","Public: reaches the whole grade or group."))+'</div>'
- +(sm||cm?'':'<div class="mu" style="margin-top:12px;font-weight:700;font-size:calc(13px*var(--fs,1))">'+(pv?L2("١) اختار الصف والمجموعة (اختياري)","1) Pick grade and group (optional)"):L2("١) اختار الصف والمجموعة","1) Pick grade and group"))+'</div><div class="row" style="margin-top:6px"><select onchange="PM.g=this.value;PM.r=\'\';PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+(pv?L2("كل الصفوف","All grades"):L2("اختار الصف","Choose grade"))+'</option>'+GR.map(function(g){return '<option value="'+g+'"'+(g==PM.g?" selected":"")+'>'+esc(gn(g))+'</option>'}).join("")+'</select>'
- +'<select onchange="PM.r=this.value;PM.sid=\'\';PM.ok=0;PM.ref=null;draw()"><option value="">'+L2("كل المجموعات","All groups")+'</option>'+gFlt(PM.r,PM.g)+'</select></div>');
- if(pv)h+='<div class="mu" style="margin-top:12px;font-weight:700;font-size:calc(13px*var(--fs,1))">'+L2("٢) اختار الطالب","2) Pick the student")+'</div><div class="row" style="margin-top:6px;flex-wrap:nowrap"><input id="pmq" placeholder="'+t("search")+'" value="'+esc(PM.q)+'" oninput="PM.q=this.value;pmRefresh()"><button class="btn sq" id="pmmic" type="button" aria-label="'+L2("بحث بالصوت","Voice search")+'" onclick="pmVoice()">'+(typeof icoH=="function"?icoH('mic','bare'):"🎤")+'</button></div><div id="pml" style="margin-top:10px;max-height:260px;overflow:auto">'+pmRows()+'</div>';
- h+='</div>'+(sm||cm?'':pmCompose());if(cm)h+=chListH();
- var L=(S.notices||[]).slice().sort(function(a,b){return b.at-a.at}).slice(0,40);
- if(cm&&L.length){h+='<div class="card" style="cursor:pointer" onclick="PM.so=!PM.so;draw()"><div class="nm" style="margin:0;display:flex;align-items:center;gap:6px"><span style="flex:1">'+L2("الرسائل المرسلة","Sent messages")+'</span><span class="pill">'+L.length+'</span><span class="mu">'+(PM.so?"▴":"▾")+'</span></div></div>';if(PM.so)L.forEach(function(n){h+=ntCard(n,true,true)})}
+ var m=PM.m,pv=m=="p",gv=m=="g",nw=m=="n"||pv||gv,cm=!nw,lb='font-weight:700;font-size:calc(13px*var(--fs,1))',h;
+ h='<div class="card"><div class="nm">'+L2("الرسائل","Messages")+'</div><div class="row" style="margin-top:10px">'
+ +'<button type="button" class="btn '+(cm?"pr":"")+'" onclick="PM.m=\'c\';PM.ok=0;PM.ref=null;PM.sid=\'\';PM.del=\'\';draw()">'+L2("المحادثات","Chats")+(!cm&&window.ndMsgAny&&ndMsgAny()?'<span class="ndot"></span>':'')+'</button>'
+ +'<button type="button" class="btn '+(nw?"pr":"")+'" onclick="PM.m=\'n\';PM.ok=0;PM.ref=null;PM.sid=\'\';PM.del=\'\';draw()">'+L2("رسالة جديدة","New message")+'</button></div>'
+ +'<div class="mu" style="margin-top:8px;font-size:calc(13px*var(--fs,1))">'+(cm?L2("محادثاتك مع الطلاب. اضغط على أي محادثة وكمّل الكلام، أو امسحها من عندك وعند الطالب.","Your chats with students. Tap a chat to continue, or delete it for both of you."):m=="n"?L2("اختار نوع الرسالة.","Choose the message type."):pv?L2("خاصة: بتوصل لطالب واحد بس.","Private: reaches one student only."):L2("عامة: بتوصل لكل طلاب الصف أو المجموعة.","Public: reaches the whole grade or group."))+'</div></div>';
+ if(m=="n"){
+  h+=pmBigCard("PM.m=\'p\';PM.lm=\'p\';PM.ok=0;PM.ref=null;draw()",'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/>',L2("رسالة خاصة","Private message"),L2("لطالب واحد (محادثة)","To one student (chat)"))
+  +pmBigCard("PM.m=\'g\';PM.lm=\'g\';PM.ok=0;PM.ref=null;draw()",'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',L2("رسالة عامة","Public message"),L2("لصف أو مجموعة","To a grade or group"))}
+ else if(pv){
+  h+='<div class="card"><div class="nm">'+L2("رسالة خاصة","Private message")+'</div><div class="mu" style="margin-top:8px;'+lb+'">'+L2("١) اختار الصف والمجموعة (اختياري)","1) Pick grade and group (optional)")+'</div>'+pmSel()
+  +'<div class="mu" style="margin-top:12px;'+lb+'">'+L2("٢) اختار الطالب","2) Pick the student")+'</div><div class="row" style="margin-top:6px;flex-wrap:nowrap"><input id="pmq" placeholder="'+t("search")+'" value="'+esc(PM.q)+'" oninput="PM.q=this.value;pmRefresh()"><button class="btn sq" id="pmmic" type="button" aria-label="'+L2("بحث بالصوت","Voice search")+'" onclick="pmVoice()">'+(typeof icoH=="function"?icoH('mic','bare'):"🎤")+'</button></div><div id="pml" style="margin-top:10px;max-height:260px;overflow:auto">'+pmRows()+'</div></div>'}
+ else if(gv){
+  h+='<div class="card"><div class="nm">'+L2("رسالة عامة","Public message")+'</div><div class="mu" style="margin-top:8px;'+lb+'">'+L2("١) اختار الصف والمجموعة","1) Pick grade and group")+'</div>'+pmSel()+'</div>'+pmCompose()}
+ if(cm){h+=chListH();
+  var L=(S.notices||[]).slice().sort(function(a,b){return b.at-a.at}).slice(0,40);
+  if(L.length){h+='<div class="card" style="cursor:pointer" onclick="PM.so=!PM.so;draw()"><div class="nm" style="margin:0;display:flex;align-items:center;gap:6px"><span style="flex:1">'+L2("الرسائل المرسلة","Sent messages")+'</span><span class="pill">'+L.length+'</span><span class="mu">'+(PM.so?"▴":"▾")+'</span></div></div>';if(PM.so)L.forEach(function(n){h+=ntCard(n,true,true)})}}
  return h}
 var PMIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 7.5l8.5 6 8.5-6"/></svg>';
 function pmOpen(o){PM.chat=0;PM.m=o.m;PM.g=o.g||"";PM.r=o.r||"";PM.sid=o.sid!=null?String(o.sid):"";PM.q="";PM.ok=0;PM.ref=o.ref||null;PM.from={tab:tab,rtab:rtab};var k=pmKey();PMD[k]=o.text||"";PMK[k]=o.kind||"n";go("msg")}
@@ -1304,7 +1326,10 @@ function pmFromNt(k){var o=PMNT[k];if(!o)return;var st=(S.students||[]).filter(f
 ].join("");document.head.appendChild(e)})();
 function chTm(at){var d=new Date(at);return ld(d)+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
 function rcStat(at,R){return R&&R.sn>=at?2:(R&&R.dl>=at?1:0)}
-function rcTick(st){var ti=st==2?L2("تمت المشاهدة","Seen"):st==1?L2("وصلت","Delivered"):L2("اتبعتت","Sent");return '<span class="rct'+(st==2?' sn':'')+'" role="img" aria-label="'+ti+'" title="'+ti+'"><svg viewBox="0 0 18 11" width="18" height="11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 6.2l3.3 3.3L11 1.8"/>'+(st?'<path d="M7.4 9.4l6.4-7.6"/>':'')+'</svg></span>'}
+var RCU={};
+function rcTick(st,id){var ti=st==2?L2("تمت المشاهدة","Seen"):st==1?L2("وصلت","Delivered"):L2("اتبعتت","Sent"),up="";
+ if(id!=null){var k=String(id);if(RCU[k]!==undefined&&st>RCU[k])up=" up";RCU[k]=st}
+ return '<span class="rct s'+st+up+'" role="img" aria-label="'+ti+'" title="'+ti+'"><svg viewBox="0 0 18 11" width="18" height="11" aria-hidden="true"><path pathLength="1" d="M1.5 6.2l3.3 3.3L11 1.8"/>'+(st?'<path class="c2" pathLength="1" d="M7.4 9.4l6.4-7.6"/>':'')+'</svg></span>'}
 var TCW={};
 function tcRcPing(sid,L){if(!L||!window.cloudRcSet||document.visibilityState!=="visible")return;var R=window.cloudRcMine?cloudRcMine(sid):null,k=String(sid);
  if(L<=((R&&R.sn)||0)||L<=(TCW[k]||0))return;TCW[k]=L;var n=Math.max(Date.now(),L);Promise.resolve(cloudRcSet(sid,{dl:n,sn:n})).then(function(ok){if(ok===false)TCW[k]=0})}
@@ -1313,21 +1338,26 @@ function chOpen(sid,ref,fl){var s=(S.students||[]).filter(function(x){return Str
  PM.m="p";PM.g=s.grade;PM.r="";PM.sid=String(sid);PM.q="";PM.ok=0;PM.ref=ref||null;PM.chat=1;PM.cl=1;if(tab!="msg"||!PM.from)PM.from={tab:tab,rtab:rtab};
  if(tab=="msg")draw();else go("msg")}
 function chSend(){pmSend();setTimeout(chScroll,60)}
+function chHm(at){var d=new Date(at);return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+function chDayL(at){var n=new Date(),t=ld(n),y=ld(new Date(n.getTime()-864e5)),d=ld(new Date(at));return d==t?L2("اليوم","Today"):d==y?L2("أمس","Yesterday"):d}
+function chSep(at,st){var k=ld(new Date(at));if(st.k==k)return "";st.k=k;return '<div class="chd"><span>'+chDayL(at)+'</span></div>'}
+var CHSEND='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 2.5L10.5 13.5"/><path d="M21.5 2.5l-6.8 19-4.2-8-8-4.2z"/></svg>';
+function chGrow(e){if(!e)return;e.style.height="auto";e.style.height=Math.min(e.scrollHeight+2,120)+"px"}
 function chatView(){var s=(S.students||[]).filter(function(x){return String(x.id)==String(PM.sid)})[0];
  if(!s){PM.chat=0;PM.cl=0;return pmView()}
- var k=pmKey(),v=PMD[k]||"",E=chEntries(s.id),mx=0;
+ var k=pmKey(),v=PMD[k]||"",E=chEntries(s.id),mx=0,sp={};
  E.forEach(function(x){if(!x.me&&x.n.at>mx)mx=x.n.at});chSeenSet(s.id,mx);tcRcPing(s.id,mx);var RC=window.cloudRcGet?cloudRcGet(s.id):null;
- var h='<div class="card"><div class="nm" style="margin:0;display:flex;align-items:center;gap:8px">'+(typeof AV=="function"?AV(s):"")+'<span style="flex:1">'+esc(s.name)+'</span><span class="pill">'+esc(gn(s.grade))+'</span><span class="pill">'+esc(gd(s.group))+'</span></div></div>'
- +'<div class="card"><div class="chb" id="chb">';
- if(!E.length)h+='<div class="mu" style="text-align:center">'+L2("ابدأ المحادثة مع الطالب","Start the conversation with the student")+'</div>';
+ var h='<div class="card"><div class="nm" style="margin:0;display:flex;align-items:center;gap:8px">'+(typeof AV=="function"?AV(s):"")+'<span style="flex:1;min-width:0"><span>'+esc(s.name)+'</span><br><small class="mu">'+esc(gn(s.grade))+' · '+esc(gd(s.group))+'</small></span><button type="button" class="lbm" style="width:32px;height:32px;flex:none" onclick="pmDelAsk(\''+s.id+'\')" aria-label="'+L2("مسح المحادثة","Delete chat")+'">'+TRASHI+'</button></div>'+pmDelBox(s)+'</div>'
+ +'<div class="card chcard"><div class="chb" id="chb">';
+ if(!E.length)h+='<div class="mu" style="text-align:center;margin:auto">'+L2("ابدأ المحادثة مع الطالب","Start the conversation with the student")+'</div>';
  E.forEach(function(x){var n=x.n,q="";
   if(!x.me&&n.ref){var nt=(S.notices||[]).filter(function(y){return y.id==n.ref})[0];q='<div class="chq">↩ '+(nt?esc(String(nt.text).slice(0,60)):L2("رسالة محذوفة","deleted message"))+'</div>'}
-  h+='<div class="chm '+(x.me?'me':'th')+'">'+q+(x.me&&n.ref?'<div class="chr">'+pmRefH(n.ref)+'</div>':'')+esc(n.text)+'<small><bdi>'+chTm(n.at)+'</bdi>'+(x.me?rcTick(rcStat(n.at,RC)):'')+'</small></div>'});
+  h+=chSep(n.at,sp)+'<div class="chm '+(x.me?'me':'th')+'">'+q+(x.me&&n.ref?'<div class="chr">'+pmRefH(n.ref)+'</div>':'')+'<div class="chx" dir="auto">'+esc(n.text)+'</div><small><bdi>'+chHm(n.at)+'</bdi>'+(x.me?rcTick(rcStat(n.at,RC),"t"+n.id):'')+'</small></div>'});
  h+='</div></div>'
- +'<div class="card">'+(PM.ref?'<div style="margin-bottom:8px">'+pmRefH(PM.ref)+'<button type="button" class="btn" style="min-height:34px" onclick="PM.ref=null;draw()">\u2715 '+L2("إزالة المرفق","Remove attachment")+'</button></div>':'')
- +'<textarea id="pmt" rows="3" maxlength="600" placeholder="'+L2("اكتب رسالتك هنا...","Type your message here...")+'" oninput="PMD[\''+k+'\']=this.value;PM.ok=0" style="width:100%;box-sizing:border-box;resize:vertical;min-height:70px;font:inherit;font-size:calc(15px*var(--fs,1));padding:10px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx)">'+esc(v)+'</textarea>'
- +'<div class="row" style="margin-top:10px"><button type="button" class="btn pr" onclick="chSend()">'+L2("إرسال","Send")+'</button></div></div>';
- setTimeout(chScroll,0);return h}
+ +'<div class="card chcard">'+(PM.ref?'<div style="margin-bottom:8px">'+pmRefH(PM.ref)+'<button type="button" class="btn" style="min-height:34px" onclick="PM.ref=null;draw()">\u2715 '+L2("إزالة المرفق","Remove attachment")+'</button></div>':'')
+ +'<div class="chi"><textarea id="pmt" rows="1" dir="auto" maxlength="600" placeholder="'+L2("اكتب رسالتك هنا...","Type your message here...")+'" oninput="PMD[\''+k+'\']=this.value;PM.ok=0;chGrow(this)">'+esc(v)+'</textarea>'
+ +'<button type="button" class="chs" onclick="chSend()" aria-label="'+L2("إرسال","Send")+'">'+CHSEND+'</button></div></div>';
+ return h}
 function pmFromHw(id){var w=(S.hw||[]).filter(function(x){return String(x.id)==String(id)})[0];if(!w)return;
  pmOpen({m:"g",g:w.grade,ref:{t:"hw",title:w.title||"",gr:w.grade,due:w.due||0}})}
 function pmRefH(r){if(!r)return '';var h;
@@ -1689,21 +1719,21 @@ function stRcPing(seen){if(!window.FB||!FB.rcSet||!ST.data||document.visibilityS
  if(seen&&L>(c.sn||0)&&L>STW.sn){f.dl=n;f.sn=n;STW.sn=L}
  if(!f.dl)return;
  FB.rcSet(ST.data.phone,ST.pc,f).then(function(r){ST.msgs=(ST.msgs||[]).filter(function(m){return !(m.rcpt&&m.who=="s")}).concat([Object.assign({},c,r)])}).catch(function(e){STW.dl=0;STW.sn=0;console.error("receipt",e)})}
-function stChatH(){stRcPing(true);var A=ST.notes||[],RT=stRcTeacher(),P=A.filter(function(n){return n.sid==null}).sort(function(a,b){return b.at-a.at}),E=[],h='';
+function stChatH(){stRcPing(true);var A=ST.notes||[],RT=stRcTeacher(),P=A.filter(function(n){return n.sid==null}).sort(function(a,b){return b.at-a.at}),E=[],h='',sp={};
  A.forEach(function(n){if(n.sid!=null)E.push({me:0,n:n})});(ST.msgs||[]).forEach(function(m){if(!m.rcpt)E.push({me:1,n:m})});
  E.sort(function(a,b){return a.n.at-b.n.at});E=chUniq(E);
  P.forEach(function(n){h+=ntCard(n,false,false)});
- h+='<div class="card"><div class="nm" style="margin:0 0 8px">'+icoH('mail','bare')+' '+L2("المحادثة مع المدرس","Chat with the teacher")+'</div><div class="chb" id="chb">';
- if(!E.length)h+='<div class="mu" style="text-align:center">'+L2("ابدأ المحادثة مع المدرس","Start the conversation with the teacher")+'</div>';
+ h+='<div class="card chcard"><div class="nm" style="margin:0 0 8px">'+icoH('mail','bare')+' '+L2("المحادثة مع المدرس","Chat with the teacher")+'</div><div class="chb" id="chb">';
+ if(!E.length)h+='<div class="mu" style="text-align:center;margin:auto">'+L2("ابدأ المحادثة مع المدرس","Start the conversation with the teacher")+'</div>';
  E.forEach(function(x){var n=x.n,q='',tp=!x.me;
   if(x.me&&n.ref){var nt=A.filter(function(y){return y.id==n.ref})[0];q='<div class="chq">↩ '+(nt?esc(String(nt.text).slice(0,60)):L2("رسالة محذوفة","deleted message"))+'</div>'}
-  h+='<div class="chm '+(x.me?'me':'th')+'"'+(tp?' style="cursor:pointer" onclick="ST.rp=\''+n.id+'\';draw()"':'')+'>'+q+(tp&&n.ref&&typeof n.ref=="object"?'<div class="chr">'+pmRefH(n.ref)+'</div>':'')+(tp&&window.ndStNt?ndStNt(n):'')+(tp&&n.kind=="w"?'⚠ ':'')+esc(n.text)+'<small><bdi>'+chTm(n.at)+'</bdi>'+(x.me?rcTick(rcStat(n.at,RT)):'')+'</small></div>'});
- h+='</div></div><div class="card">';
+  h+=chSep(n.at,sp)+'<div class="chm '+(x.me?'me':'th')+'"'+(tp?' style="cursor:pointer" onclick="ST.rp=\''+n.id+'\';draw()"':'')+'>'+q+(tp&&n.ref&&typeof n.ref=="object"?'<div class="chr">'+pmRefH(n.ref)+'</div>':'')+'<div class="chx" dir="auto">'+(tp&&n.kind=="w"?'⚠ ':'')+esc(n.text)+'</div><small><bdi>'+chHm(n.at)+'</bdi>'+(x.me?rcTick(rcStat(n.at,RT),"s"+n.id):'')+'</small></div>'});
+ h+='</div></div><div class="card chcard">';
  if(ST.rp){var rn=A.filter(function(y){return y.id==ST.rp})[0];h+='<div style="margin-bottom:8px"><div class="chq" style="padding-inline-start:8px;border-inline-start:3px solid var(--pr)">↩ '+(rn?esc(String(rn.text).slice(0,60)):'')+'</div><button type="button" class="btn" style="min-height:34px;margin-top:6px" onclick="ST.rp=null;draw()">\u2715 '+L2("إلغاء الرد","Cancel reply")+'</button></div>'}
  else if(E.some(function(x){return !x.me}))h+='<div class="mu" style="margin-bottom:8px;font-size:calc(13px*var(--fs,1))">'+L2("اضغط على رسالة المدرس علشان ترد عليها","Tap a teacher message to reply to it")+'</div>';
- h+='<textarea id="msgT" rows="3" maxlength="600" placeholder="'+L2("اكتب رسالتك هنا...","Type your message here...")+'" oninput="ST.mt=this.value" style="width:100%;box-sizing:border-box;resize:vertical;min-height:70px;font:inherit;font-size:calc(15px*var(--fs,1));padding:10px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx)">'+esc(ST.mt||"")+'</textarea>'
-  +'<div class="row" style="margin-top:10px"><button type="button" class="btn pr" onclick="stChSend()">'+L2("إرسال","Send")+'</button></div></div>';
- setTimeout(chScroll,0);return h}
+ h+='<div class="chi"><textarea id="msgT" rows="1" dir="auto" maxlength="600" placeholder="'+L2("اكتب رسالتك هنا...","Type your message here...")+'" oninput="ST.mt=this.value;chGrow(this)">'+esc(ST.mt||"")+'</textarea>'
+ +'<button type="button" class="chs" onclick="stChSend()" aria-label="'+L2("إرسال","Send")+'">'+CHSEND+'</button></div></div>';
+ return h}
 function stChSend(){var tx=String(ST.mt||"").trim();if(!tx||ST.cb||!window.FB||!ST.data)return;var ref=ST.rp||"";ST.cb=1;
  FB.sendMsg(ST.data.phone,ST.pc,ref,tx).then(function(m){ST.cb=0;ST.msgs=(ST.msgs||[]).filter(function(y){return y.id!==m.id}).concat([m]);ST.mt="";ST.rp=null;draw();setTimeout(chScroll,60)}).catch(function(x){ST.cb=0;alert(errMsg(x))})}
 function newHw(){var s=getSeenH();return (ST.hw||[]).filter(function(w){return +w.id>s}).length}
@@ -1735,7 +1765,7 @@ function studentView(){var d=ST.data;stRcPing(false);
    h+='<div class="card"><div class="nm">'+esc(w.title||t("hw"))+' <span class="pill">'+esc(w.date)+'</span>'+(w.due?'<span class="pill due'+(ended?'':' ok')+'">'+dueTxt(w)+'</span>':'')+(window.ndStHw?ndStHw(w):'')+'</div>'+gal(w)
    +'<span class="lbl">'+(has?t("mysol")+" ✓":ended?t("hwend"):t("upl"))+'</span>'+(so?gal(so):'')
    +(ended?'':(ST.up==w.id?'<div class="mu">'+t("busy")+'</div>':'<input type="file" accept="image/*,application/pdf" multiple onchange="pickSol(\''+w.id+'\',this)">'+(has?'<div class="row" style="margin-top:8px"><button class="btn no" onclick="clearSol(\''+w.id+'\')">'+t("sdel")+'</button></div>':'')))+'</div>'})}
- if(ST.tab=="nt"&&(ST.notes||[]).length)h+='<div class="row"><button class="btn" onclick="studentRefresh()">'+t("refresh")+'</button></div>';
+
  if(window._dt)clearTimeout(window._dt);
  var nx=0;(ST.hw||[]).forEach(function(w){var l=w.due-Date.now();if(w.due&&l>0&&(!nx||l<nx))nx=l});
  if(nx)window._dt=setTimeout(function(){if(ST.data&&!ST.up&&!ST.set)draw()},Math.min(nx,2147000000)+500);
@@ -7839,6 +7869,15 @@ window.FB={
     return {data:d,hw,sol,notes,msgs,reps};
   },
   async studentLogout(){try{await signOut(auth)}catch(e){}},
+  async pullChat(phone,code){
+    const p=await portalOf(phone,code);
+    const notes=[],msgs=[];
+    const ns=await getDocs(query(collection(db,"notices"),where("uid","==",p.uid),where("grade","==",p.grade)));
+    ns.forEach(x=>{const n=x.data();if((!n.grp||n.grp==p.group)&&(n.sid==null||String(n.sid)==String(p.sid)))notes.push(n)});
+    const ms=await getDocs(query(collection(db,"messages"),where("uid","==",p.uid),where("sid","==",p.sid)));
+    ms.forEach(x=>msgs.push(x.data()));
+    return {notes,msgs};
+  },
   async rcSet(phone,code,f){
     const p=await portalOf(phone,code);
     const id="rc_"+p.uid+"_"+p.sid+"_s";
@@ -10675,6 +10714,93 @@ function check(){
  fetch(URL_VER+"?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(d){
   if(d&&Number(d.versionCode)>CURRENT_VERSION&&d.apkUrl)show(d)}).catch(function(){})}
 setTimeout(check,3000);
+})();
+</script>
+
+<style id="chat-css2">
+/* ===== الشات: واجهة جديدة (فقاعات + خانة كتابة + علامات الصح) ===== */
+#app .chb{max-height:calc(100vh - 400px);max-height:calc(100dvh - 400px);min-height:180px;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:6px;padding:6px 4px;-webkit-overflow-scrolling:touch;scroll-behavior:auto;overflow-anchor:none}
+#app .chb::before{content:"";margin-top:auto}
+#app .chm{max-width:82%;padding:8px 12px 6px;border-radius:18px;line-height:1.55;box-shadow:none;animation:none}
+#app .chm.me{align-self:flex-start;background:var(--pr);color:#fff;border-end-start-radius:6px}
+#app .chm.th{align-self:flex-end;background:var(--soft);color:var(--tx);border:1px solid var(--bd);border-end-end-radius:6px}
+html[dir=ltr] #app .chm.me{align-self:flex-end}html[dir=ltr] #app .chm.th{align-self:flex-start}
+#app .chm .chx{white-space:pre-wrap;overflow-wrap:anywhere}
+#app .chm small{display:flex;align-items:center;justify-content:flex-end;gap:2px;margin-top:2px;font-size:calc(11px*var(--fs,1));line-height:1}
+#app .chm small bdi{opacity:.7}
+#app .chd{align-self:center;margin:8px 0 4px;padding:3px 12px;border-radius:12px;background:var(--soft);color:var(--mu);font-size:calc(11.5px*var(--fs,1))}
+#app .chcard{padding:10px}
+#app .chi{display:flex;align-items:flex-end;gap:8px}
+#app .chi textarea{flex:1;min-width:0;width:auto;min-height:44px;max-height:120px;resize:none;overflow-y:auto;padding:11px 16px;border-radius:22px;border:1px solid var(--bd);background:var(--soft);color:var(--tx);font:inherit;font-size:calc(15px*var(--fs,1));line-height:1.45;box-sizing:border-box;outline:none;transition:border-color .2s}
+#app .chi textarea:focus{border-color:var(--pr)}
+#app .chs{flex:none;width:44px;height:44px;border-radius:50%;border:0;padding:0;display:flex;align-items:center;justify-content:center;background:var(--pr);color:var(--on);box-shadow:var(--out);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s}
+#app .chs:active{transform:scale(.92)}
+#app .chs svg{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;overflow:visible;transition:transform .25s}
+#app .chs:active svg{transform:translate(2px,-2px)}
+html[dir=rtl] #app .chs svg{transform:scaleX(-1)}
+html[dir=rtl] #app .chs:active svg{transform:scaleX(-1) translate(2px,-2px)}
+/* علامات الصح: 1 اتبعتت / 2 رمادي وصلت / 2 أخضر اتشافت */
+#app .rct{display:inline-flex;align-items:center;margin-inline-start:4px;padding:2px 5px;border-radius:9px;background:rgba(0,0,0,.28);color:rgba(255,255,255,.85);line-height:0;direction:ltr;vertical-align:middle}
+#app .rct.s2{color:#4ADE80}
+#app .rct svg{display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+#app .rct svg path{stroke-dasharray:1;stroke-dashoffset:0}
+#app .rct.up path{animation:icdraw .9s ease-out}
+@media (prefers-reduced-motion:reduce){#app .rct.up path{animation:none}}
+</style>
+<script id="chat-fix-js">
+/* ===== الشات: تحديث بدون رعشة + تحديث تلقائي للطالب ===== */
+(function(){
+if(window.__chfx)return;window.__chfx=1;
+function ctx(){try{
+ if(!AU.ready||ST.rs)return null;
+ var on=AU.user&&!ST.demo,sv=!!ST.data;
+ if(on){if(tab=="msg"&&PM.chat&&PM.sid)return {m:"t",key:"t"+PM.sid};return null}
+ if(sv&&ST.tab=="nt"&&!ST.set)return {m:"s",key:"s"};
+}catch(e){}return null}
+function shellOf(root){var c=root.cloneNode(true),b=c.querySelector("#chb");if(b)b.innerHTML="";
+ [].forEach.call(c.querySelectorAll("textarea"),function(t){t.textContent="";t.removeAttribute("style")});
+ [].forEach.call(c.querySelectorAll(".row"),function(r){if(r.innerHTML.indexOf("goBack(")>-1)r.remove()});
+ return c.innerHTML}
+function grow(){[].forEach.call(document.querySelectorAll("#pmt,#msgT"),chGrow)}
+var _d=window.draw;
+window.draw=function(){
+ var c=ctx(),chb=document.getElementById("chb");
+ if(!c){window._chKey=null;var r0=_d.apply(this,arguments);grow();return r0}
+ var same=chb&&window._chKey===c.key,atB=0,top=0;
+ if(same){top=chb.scrollTop;atB=chb.scrollHeight-chb.scrollTop-chb.clientHeight<90}
+ if(same&&c.m=="t"){var save=Object.assign({},window.RCU),html=null;
+  try{html=c.m=="t"?pmView():studentView()}catch(e){html=null}
+  if(html!=null){
+   var tmp=document.createElement("div");tmp.innerHTML=html;var nb=tmp.querySelector("#chb");
+   if(nb&&shellOf(tmp)===shellOf(document.getElementById("app"))){
+    var oc=chb.querySelectorAll(".chm").length,nc=nb.querySelectorAll(".chm").length,lm=nb.querySelectorAll(".chm"),mine=lm.length&&lm[lm.length-1].classList.contains("me");
+    if(chb.innerHTML!==nb.innerHTML)chb.innerHTML=nb.innerHTML;
+    chb.scrollTop=(atB||(nc>oc&&mine))?chb.scrollHeight:top;
+    var ta=document.getElementById(c.m=="t"?"pmt":"msgT"),want=c.m=="t"?(PMD[pmKey()]||""):(ST.mt||"");
+    if(ta&&ta.value!==want){ta.value=want;chGrow(ta)}
+    window._apph=null;return}
+  }
+  window.RCU=save}
+ var r=_d.apply(this,arguments);
+ var nb2=document.getElementById("chb");
+ if(nb2){nb2.scrollTop=(same&&!atB)?top:nb2.scrollHeight;window._chKey=c.key}
+ grow();return r};
+/* الطالب: تحديث تلقائي (بدون زرار تحديث) */
+function stCtx(){return !!(window.AU&&AU.ready&&!AU.user&&window.ST&&ST.data&&window.FB&&FB.pullChat)}
+function sg(N,M){return N.map(function(n){return n.id}).sort().join(",")+"|"+M.map(function(m){return m.id+":"+(m.dl||0)+":"+(m.sn||0)}).sort().join(",")}
+var busy=0;
+window.stPull=function(){if(busy||!stCtx()||document.visibilityState!=="visible")return;busy=1;
+ FB.pullChat(ST.data.phone,ST.pc).then(function(r){busy=0;if(!stCtx())return;
+  if(sg(ST.notes||[],ST.msgs||[])===sg(r.notes,r.msgs))return;
+  ST.notes=r.notes;ST.msgs=r.msgs;ST.newN=hasNew();
+  var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.id!="msgT")return;
+  draw()}).catch(function(){busy=0})};
+var _s=window.stChSend;
+window.stChSend=function(){var r=_s.apply(this,arguments);setTimeout(stPull,1200);setTimeout(stPull,4500);return r};
+var slow=0;
+setInterval(function(){if(!stCtx())return;var chat=ST.tab=="nt"&&!ST.set;if(chat||++slow>=4){slow=0;stPull()}},5000);
+document.addEventListener("visibilitychange",function(){if(document.visibilityState!=="visible")return;
+ try{if(stCtx()){stPull();if(ST.tab=="nt"&&!ST.set)draw()}else if(ctx())draw()}catch(e){}});
 })();
 </script>
 </body>
